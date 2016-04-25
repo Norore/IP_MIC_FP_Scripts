@@ -72,7 +72,7 @@ Example:
 
 ## supernatants_samples.py
 
-Type `` to show help:
+Type `./supernatants_samples.py -h` to show help:
 
 ```
 usage: supernatants_samples.py [-h] -f FREEZER -l LABKEY -o OUTPUT
