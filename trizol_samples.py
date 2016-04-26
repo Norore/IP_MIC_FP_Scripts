@@ -165,14 +165,14 @@ truc_data["Box"] = values
 # time consuming!
 # initialize a new DataFrame from truculture sample file
 dic = truc_data.ix[0]
-dic["Sample Type"] = "Trizol"
+dic["Sample Type"] = "TC_Source_Tube"
 dic["Position"] = 1
 dic["StimulusID"] = 1
 df_trucult = pd.DataFrame(columns=dic.index)
 c = 0
 for l in range(0, len(truc_data)):
     dic = truc_data.ix[l]
-    dic["Sample Type"] = "Trizol"
+    dic["Sample Type"] = "TC_Source_Tube"
     # 'BoxPos' is even, tubes are positionned from position 41 to 80
     if int(dic["BoxPos"]) % 2 == 0:
         for p in range(42, 82):
@@ -380,7 +380,7 @@ merge_ftls["volume"] = (merge_ftls["volume"] -
                         (600*merge_ftls["NbExtraction"])).astype(int)
 # remove columns that will not be usefull in FreezerPro
 rm_columns = ["id", "type", "well", "auditTrail", "deleted",
-              "insertDate", "updateDate", "rackId", "aliquotId",
+              "insertDate", "updateDate", "aliquotId",
               "QubitDate", "QubitConcentration_ngul", "CaliperDate",
               "CaliperConcentration_ngul", "NanodropDate",
               "NanodropConcentration_ngul", "DilutionDate", "RNAvolume",
@@ -395,8 +395,11 @@ merge_ftls["BoxPos"] = merge_ftls["BoxPos"].astype(int)
 # rename columns
 merge_ftls.rename(columns={"volume": "Volume",
                            "Matrix_TubePosition.": "Matrix_TubePosition",
-                           "NbExtraction": "FreezeThaw"},
+                           "NbExtraction": "FreezeThaw",
+                           "rackId": "RackID"},
                  inplace=True)
 
 # save result dataframe in a new CSV file
 merge_ftls.to_csv(o_samples, index=False, header=True)
+
+print "\n".join([str(i) for i in merge_ftls['barcode'].unique()])
