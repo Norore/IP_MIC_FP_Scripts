@@ -37,6 +37,7 @@ Example:
 ./create_freezers_from_json.py -f ../DataToPrepare/freezers.json
  -o ../DataToImport/freezers.csv
 ```
+./create_freezers_from_json.py -f ../DataToPrepare/freezers.json -o ../DataToImport/freezers.csv
 
 ## get_duplicates.py
 
