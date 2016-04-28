@@ -102,6 +102,37 @@ Main script starts here
 # dataframe from excel can't be load as dtype object, conversion
 truc_data = df_dtypes_object(truc_data)
 
+# change info in samples moved at Fernbach building
+indexes = list(truc_data.loc[truc_data["Processed"].isnull() == False].index)
+df_fern = truc_data.loc[indexes]
+df_fern.reset_index(inplace=True)
+del df_fern["index"]
+df_fern["FreezerID ShelfID"] = df_fern['FreezerID ShelfID'].str.\
+    replace(r'[0-9]{4}', r'1538')
+truc_data.drop(indexes, inplace=True)
+truc_data.reset_index(inplace=True)
+del truc_data["index"]
+truc_data = pd.concat([truc_data, df_fern])
+del truc_data["Processed"]
+# remove samples with no box
+indexes = list(truc_data.loc[truc_data["DonorID"].str.contains("no box")].index)
+truc_data.drop(indexes, inplace=True)
+truc_data.reset_index(inplace=True)
+del truc_data["index"]
+indexes = list(truc_data.loc[truc_data["DonorID"].str.contains("No box")].index)
+truc_data.drop(indexes, inplace=True)
+truc_data.reset_index(inplace=True)
+del truc_data["index"]
+# remove samples with no donor
+indexes = list(truc_data.loc[truc_data["DonorID"].str.contains("No donor")].index)
+truc_data.drop(indexes, inplace=True)
+truc_data.reset_index(inplace=True)
+del truc_data["index"]
+indexes = list(truc_data.loc[truc_data["DonorID"].str.contains("No Donor")].index)
+truc_data.drop(indexes, inplace=True)
+truc_data.reset_index(inplace=True)
+del truc_data["index"]
+
 # rename column 'FreezerID ShelfID' to 'FreezerLoc'
 truc_data.rename(columns={"FreezerID ShelfID": "FreezerLoc"}, inplace=True)
 
@@ -123,30 +154,6 @@ truc_data["ShelfID"] = newcols["ShelfID"]
 truc_data["ShelfBarcode"] = "MIC Freezer" + newcols["FreezerID"] + " " + newcols["ShelfID"].str.replace(" ", "")
 # remove column 'FreezerLoc' which is not yet necessary
 del truc_data["FreezerLoc"]
-
-# remove samples moved at Fernbach building and reset index
-indexes = list(truc_data.loc[truc_data["Processed"].isnull() == False].index)
-truc_data.drop(indexes, inplace=True)
-truc_data.reset_index(inplace=True)
-del truc_data["index"], truc_data["Processed"]
-# remove samples with no box
-indexes = list(truc_data.loc[truc_data["DonorID"].str.contains("no box")].index)
-truc_data.drop(indexes, inplace=True)
-truc_data.reset_index(inplace=True)
-del truc_data["index"]
-indexes = list(truc_data.loc[truc_data["DonorID"].str.contains("No box")].index)
-truc_data.drop(indexes, inplace=True)
-truc_data.reset_index(inplace=True)
-del truc_data["index"]
-# remove samples with no donor
-indexes = list(truc_data.loc[truc_data["DonorID"].str.contains("No donor")].index)
-truc_data.drop(indexes, inplace=True)
-truc_data.reset_index(inplace=True)
-del truc_data["index"]
-indexes = list(truc_data.loc[truc_data["DonorID"].str.contains("No Donor")].index)
-truc_data.drop(indexes, inplace=True)
-truc_data.reset_index(inplace=True)
-del truc_data["index"]
 
 # calculate, for each donor and each BoxPos, the 'box number' to assign
 values = []
