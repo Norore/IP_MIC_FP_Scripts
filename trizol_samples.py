@@ -117,8 +117,10 @@ del newcols["MIC"]
 truc_data["RackID"] = truc_data["RackID"].str.replace('MIC-TruCRack_', 'Rack ')
 # create column 'FreezerID'
 truc_data["FreezerID"] = newcols["FreezerID"]
+truc_data["FreezerBarcode"] = "MIC_Freezer#_" + newcols["FreezerID"]
 # create column 'ShelfID'
 truc_data["ShelfID"] = newcols["ShelfID"]
+truc_data["ShelfBarcode"] = "MIC Freezer" + newcols["FreezerID"] + " " + newcols["ShelfID"].str.replace(" ", "")
 # remove column 'FreezerLoc' which is not yet necessary
 del truc_data["FreezerLoc"]
 
@@ -190,7 +192,7 @@ for l in range(0, len(truc_data)):
 
 # rename columns for merge the dataframes
 df_trucult.rename(columns={"FreezerID": "Freezer", "ShelfID": "Level1",
-                           "RackID": "Level3"}, inplace=True)
+                           "RackID": "Level2"}, inplace=True)
 # add column 'Name' that is necessary to create vial samples
 df_trucult["Name"] = df_trucult["DonorID"]
 
@@ -214,15 +216,14 @@ df_trucult['DonorID'] = df_trucult['DonorID'].str.\
                         .str.replace(r'^0+', '')
 
 # keep only TruCulture Trizol pellets data from Freezer CSV file
-trizol = df_freezer.loc[df_freezer["Level2"].str.contains('Trizol')]
+trizol = df_freezer.loc[df_freezer["Level2_Desc"].str.contains('Trizol')]
 
 # merge trizol and datatest
 merge_ft = pd.merge(trizol,
                     df_trucult,
-                    on=['Freezer', 'Level1', 'Level3', 'Box'],
+                    on=['Freezer', 'Level1', 'Level2', 'Box'],
                     how='inner')
 merge_ft = df_dtypes_object(merge_ft)
-merge_ft['StimulusID'] = merge_ft['StimulusID'].astype(int)
 
 # keep only TRUCULTURE type from LabKey CSV file
 truculture = df_labkey.loc[df_labkey['type'] == 'TRUCULTURE']
@@ -233,6 +234,12 @@ truculture.rename(columns={'donorId': 'DonorID', 'visitId': 'VisitID',
                   inplace=True)
 
 # merge merge_ft and truculture
+merge_ft['DonorID'] = merge_ft['DonorID'].astype(int)
+merge_ft['VisitID'] = merge_ft['VisitID'].astype(int)
+merge_ft['StimulusID'] = merge_ft['StimulusID'].astype(int)
+truculture['DonorID'] = truculture['DonorID'].astype(int)
+truculture['VisitID'] = truculture['VisitID'].astype(int)
+truculture['StimulusID'] = truculture['StimulusID'].astype(int)
 merge_ftl = pd.merge(merge_ft,
                      truculture,
                      on=['DonorID', 'VisitID', 'BatchID', 'StimulusID'],
@@ -401,5 +408,3 @@ merge_ftls.rename(columns={"volume": "Volume",
 
 # save result dataframe in a new CSV file
 merge_ftls.to_csv(o_samples, index=False, header=True)
-
-print "\n".join([str(i) for i in merge_ftls['barcode'].unique()])
