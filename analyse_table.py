@@ -55,7 +55,7 @@ def freezers(infile, outfile):
 
 if __name__ == "__main__":
     infile = pd.read_csv("/Volumes/LabExMI/Users/Nolwenn/FreezerPro/"
-                         "DataToImport/freezers.csv", dtype=object)
+                         "DataToImport/TC_Trizol_rack_samples.csv", dtype=object)
     outfile = open("/Volumes/LabExMI/Users/Nolwenn/FreezerPro/AnalyzedData/"
               "test.txt", "w")
     vtype = 'default'

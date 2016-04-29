@@ -229,7 +229,7 @@ trizol = df_freezer.loc[df_freezer["Level2_Desc"].str.contains('Trizol')]
 merge_ft = pd.merge(trizol,
                     df_trucult,
                     on=['Freezer', 'Level1', 'Level2', 'Box'],
-                    how='inner')
+                    how='outer')
 merge_ft = df_dtypes_object(merge_ft)
 
 # keep only TRUCULTURE type from LabKey CSV file
@@ -241,16 +241,23 @@ truculture.rename(columns={'donorId': 'DonorID', 'visitId': 'VisitID',
                   inplace=True)
 
 # merge merge_ft and truculture
-merge_ft['DonorID'] = merge_ft['DonorID'].astype(int)
-merge_ft['VisitID'] = merge_ft['VisitID'].astype(int)
-merge_ft['StimulusID'] = merge_ft['StimulusID'].astype(int)
-truculture['DonorID'] = truculture['DonorID'].astype(int)
-truculture['VisitID'] = truculture['VisitID'].astype(int)
-truculture['StimulusID'] = truculture['StimulusID'].astype(int)
+merge_ft['DonorID'] = merge_ft['DonorID']#.astype(int)
+merge_ft['VisitID'] = merge_ft['VisitID']#.astype(int)
+merge_ft['StimulusID'] = merge_ft['StimulusID']#.astype(int)
+truculture['DonorID'] = truculture['DonorID']#.astype(int)
+truculture['VisitID'] = truculture['VisitID']#.astype(int)
+truculture['StimulusID'] = truculture['StimulusID']#.astype(int)
 merge_ftl = pd.merge(merge_ft,
                      truculture,
                      on=['DonorID', 'VisitID', 'BatchID', 'StimulusID'],
                      how='left')
+merge_ftl["BoxType"] = trizol["BoxType"].unique()[0]
+# drop line if no DonorID
+indexes = list(merge_ftl.loc[merge_ftl["DonorID"].isnull() == True].index)
+merge_ftl.drop(indexes, inplace=True)
+merge_ftl.reset_index(inplace=True)
+del merge_ftl["index"]
+
 merge_ftl = df_dtypes_object(merge_ftl)
 
 '''
