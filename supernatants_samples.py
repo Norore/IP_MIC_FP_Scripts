@@ -29,53 +29,53 @@ except IOError:
     print "File '"+f_labkey+"' does not exist"
     exit()
 
-df_super = df_freezer.loc[df_freezer["Level2"].str.contains("Supernatants")]
+df_super = df_freezer.loc[df_freezer["Level2_Desc"].str.contains("Supernatants")]
 df_super.reset_index(inplace=True)
 del df_super["index"]
 
 # Create new colum to work in it to prepare merges
-df_super["DonorInfos"] = df_super["Level3"]
-df_super["donor_start"] = df_super["Level3"]
-df_super["donor_stop"] = df_super["Level3"]
+df_super["DonorInfos"] = df_super["Level2"]
+df_super["donor_start"] = df_super["Level2"]
+df_super["donor_stop"] = df_super["Level2"]
 # split lines Donors [0-9]{3}>>[0-9]{3} | Donors [0-9]{3}>>[0-9]{3}
 inc = 1
 lines = len(df_super)
 for i in range(lines):
-    if re.match(r'^Donors [0-9]{3}>>[0-9]{3}$', df_super.iloc[i]["Level3"]):
+    if re.match(r'^Donors [0-9]{3}>>[0-9]{3}$', df_super.iloc[i]["Level2"]):
         regex = re.compile(r'^Donors ([0-9]{3})>>([0-9]{3})$')
         df_super.loc[i, "donor_start"] = int(
-            regex.sub(r'\1', df_super.iloc[i]["Level3"]))
+            regex.sub(r'\1', df_super.iloc[i]["Level2"]))
         df_super.loc[i, "donor_stop"] = int(
-            regex.sub(r'\2', df_super.iloc[i]["Level3"]))
+            regex.sub(r'\2', df_super.iloc[i]["Level2"]))
 
     elif re.match(r'^Donors [0-9]{3}>>[0-9]{3} \| Donors '
-                  r'[0-9]{3}>>[0-9]{3}$', df_super.iloc[i]["Level3"]):
+                  r'[0-9]{3}>>[0-9]{3}$', df_super.iloc[i]["Level2"]):
         regex = re.compile(r'^(Donors ([0-9]{3})>>([0-9]{3})) \| (Donors ([0-9]{3})>>([0-9]{3}))$')
         df_super.loc[i, "DonorInfos"] = regex.sub(
-            r'\1', df_super.iloc[i]["Level3"])
+            r'\1', df_super.iloc[i]["Level2"])
         df_super.loc[i, "donor_start"] = int(
-            regex.sub(r'\2', df_super.iloc[i]["Level3"]))
+            regex.sub(r'\2', df_super.iloc[i]["Level2"]))
         df_super.loc[i, "donor_stop"] = int(
-            regex.sub(r'\3', df_super.iloc[i]["Level3"]))
+            regex.sub(r'\3', df_super.iloc[i]["Level2"]))
         df_super.loc[i+inc] = df_super.iloc[i]
         df_super.loc[i+inc, "DonorInfos"] = regex.sub(
-            r'\4', df_super.iloc[i]["Level3"])
+            r'\4', df_super.iloc[i]["Level2"])
         df_super.loc[i+inc, "donor_start"] = int(
-            regex.sub(r'\5', df_super.iloc[i]["Level3"]))
+            regex.sub(r'\5', df_super.iloc[i]["Level2"]))
         df_super.loc[i+inc, "donor_stop"] = int(
-            regex.sub(r'\6', df_super.iloc[i]["Level3"]))
+            regex.sub(r'\6', df_super.iloc[i]["Level2"]))
         inc += 1
 
     elif re.match(r'^Donors X[0-9]{2}>>X[0-9]{2}$',
-                  df_super.iloc[i]["Level3"]):
+                  df_super.iloc[i]["Level2"]):
         regex = re.compile(r'^Donors X([0-9]{2})>>X([0-9]{2})$')
         df_super.loc[i, "donor_start"] = int(
-            regex.sub(r'\1', df_super.iloc[i]["Level3"]))
+            regex.sub(r'\1', df_super.iloc[i]["Level2"]))
         df_super.loc[i, "donor_stop"] = int(
-            regex.sub(r'\2', df_super.iloc[i]["Level3"]))
+            regex.sub(r'\2', df_super.iloc[i]["Level2"]))
 
     else:
-        df_super.loc[i, "DonorInfos"] = df_super.iloc[i]["Level3"]
+        df_super.loc[i, "DonorInfos"] = df_super.iloc[i]["Level2"]
 
 l_donors = df_super["DonorInfos"].unique().tolist()
 dic = df_super[["DonorInfos", "donor_start", "donor_stop"]].ix[0]

@@ -36,12 +36,6 @@ except IOError:
     print "Directory '"+d_dir+"' does not exist"
     exit()
 
-'''
-print d_dir+"*.csv"
-print "\n".join([f for f in l_files])
-exit()
-'''
-
 # initialize list of dataframes
 list_df = []
 for f_stool in l_files:
