@@ -237,7 +237,7 @@ del df_trucult["index"]
 merge_ft = pd.merge(trizol,
                     df_trucult,
                     on=['Freezer', 'Level1', 'Level2', 'Box'],
-                    how='inner')
+                    how='outer')
 merge_ft = df_dtypes_object(merge_ft)
 
 # keep only TRUCULTURE type from LabKey CSV file
