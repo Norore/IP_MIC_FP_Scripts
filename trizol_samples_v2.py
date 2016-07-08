@@ -414,7 +414,9 @@ rm_columns = ["id", "type", "well", "auditTrail", "deleted",
               "CaliperConcentration_ngul", "NanodropDate",
               "NanodropConcentration_ngul", "DilutionDate", "RNAvolume",
               "NFwaterVolume", "CaliperRQS", "BioanalyzerRIN",
-              "Nanodrop260_280", "Nanodrop260_230"]
+              "Nanodrop260_280", "Nanodrop260_230", "TECAN_RackNumber",
+              "TECAN_RackPosition", "Matrix_RackBarcodeScanned",
+              "Matrix_TubeBarcodeScanned", "Matrix_TubePosition."]
 for col in rm_columns:
     del merge_ftls[col]
 
@@ -423,7 +425,6 @@ merge_ftls["BoxPos"] = merge_ftls["BoxPos"].astype(int)
 
 # rename columns
 merge_ftls.rename(columns={"volume": "Volume",
-                           "Matrix_TubePosition.": "Matrix_TubePosition",
                            "NbExtraction": "FreezeThaw",
                            "rackId": "RackID"},
                   inplace=True)

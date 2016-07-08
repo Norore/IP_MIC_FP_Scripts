@@ -428,4 +428,4 @@ merge_ftls.rename(columns={"volume": "Volume",
                  inplace=True)
 
 # save result dataframe in a new CSV file
-merge_ftls.to_csv(o_samples, index=False, header=True)
+merge_ftls.to_csv(o_samples, index=False, header=True, sep=";")
