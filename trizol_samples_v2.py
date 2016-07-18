@@ -158,7 +158,7 @@ newcols["ShelfID"] = newcols["ShelfID"].str.replace('Shelf', 'Shelf ')
 del newcols["MIC"]
 
 # replace 'MIC-TruCRack_' string by 'Rack ' for a good merge in next instructions
-truc_data["RackID"] = truc_data["RackID"].str.replace('MIC-TruCRack_', 'Rack ')
+#truc_data["RackID"] = truc_data["RackID"].str.replace('MIC-TruCRack_', 'Rack ')
 # create column 'FreezerID'
 truc_data["FreezerID"] = newcols["FreezerID"]
 truc_data["FreezerBarcode"] = "MIC_Freezer#_" + newcols["FreezerID"]
@@ -184,6 +184,7 @@ truc_data["Box"] = values
     For each donor, the script will add new lines with the tube
         position and the stimulus number.
 '''
+
 boxpos, position, stimulusid = [], [], []
 for nb_boxpos in range(1, 21):
     if nb_boxpos % 2 == 0:
@@ -199,6 +200,7 @@ for nb_boxpos in range(1, 21):
 
 boxes = pd.DataFrame({'BoxPos': boxpos, 'Position': position,
                       'StimulusID': stimulusid}, dtype=object)
+boxes["Sample Type"] = ["TC_Source_Tube"]*len(stimulusid)
 df_trucult = pd.merge(truc_data, boxes, on=["BoxPos"], how="inner")
 # rename columns for merge the dataframes
 df_trucult.rename(columns={"FreezerID": "Freezer", "ShelfID": "Level1",
@@ -407,6 +409,7 @@ merge_ftls["NbExtraction"] = merge_ftls["NbExtraction"].\
     replace(np.nan, r'0').astype(int)
 merge_ftls["volume"] = (merge_ftls["volume"] -
                         (600*merge_ftls["NbExtraction"])).astype(int)
+
 # remove columns that will not be usefull in FreezerPro
 rm_columns = ["id", "type", "well", "auditTrail", "deleted",
               "insertDate", "updateDate", "aliquotId",
