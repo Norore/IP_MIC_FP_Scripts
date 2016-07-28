@@ -51,6 +51,19 @@ n_stsheet = args['sheet2']
 # Output file export args
 o_samples = args['output']
 
+# Freezer file import args
+#f_freezer = "../DataToImport/freezers.csv"
+# Trizol file import args
+#f_trucult = "../DataToPrepare/1.LabExMI_TrucultureMapping_21Nov2014_FinalVersion.xlsx"
+#n_trsheet = "FinalMapping"
+# LabKey file import args
+#f_labkey = "../DataToPrepare/samples_table_labkey.csv"
+# Stimulation file import args
+#f_stimul = "../DataToPrepare/3.5000samples_WL_QCs_DL_02Jul2015.xls"
+#n_stsheet = "5000samples_WL_QCs_DL_02Jul2015"
+# Output file export args
+#o_samples = "../DataToImport/TC_Trizol_rack_samples.csv"
+
 # Read Freezer file
 try:
     df_freezer = pd.read_csv(f_freezer, dtype=object)
@@ -145,7 +158,7 @@ newcols["ShelfID"] = newcols["ShelfID"].str.replace('Shelf', 'Shelf ')
 del newcols["MIC"]
 
 # replace 'MIC-TruCRack_' string by 'Rack ' for a good merge in next instructions
-truc_data["RackID"] = truc_data["RackID"].str.replace('MIC-TruCRack_', 'Rack ')
+#truc_data["RackID"] = truc_data["RackID"].str.replace('MIC-TruCRack_', 'Rack ')
 # create column 'FreezerID'
 truc_data["FreezerID"] = newcols["FreezerID"]
 truc_data["FreezerBarcode"] = "MIC_Freezer#_" + newcols["FreezerID"]
@@ -171,35 +184,24 @@ truc_data["Box"] = values
     For each donor, the script will add new lines with the tube
         position and the stimulus number.
 '''
-# time consuming!
-# initialize a new DataFrame from truculture sample file
-dic = truc_data.ix[0]
-dic["Sample Type"] = "TC_Source_Tube"
-dic["Position"] = 1
-dic["StimulusID"] = 1
-df_trucult = pd.DataFrame(columns=dic.index)
-c = 0
-for l in range(0, len(truc_data)):
-    dic = truc_data.ix[l]
-    dic["Sample Type"] = "TC_Source_Tube"
-    # 'BoxPos' is even, tubes are positionned from position 41 to 80
-    if int(dic["BoxPos"]) % 2 == 0:
-        for p in range(42, 82):
-            dic["Position"] = int(p)
-            dic["StimulusID"] = int(p - 41)
-            df_trucult.loc[c] = dic.values
-            c += 1
-    else:
-        # 'BoxPos' is odd, tubes are positionned from position 1 to 40
-        for p in range(1, 41):
-            dic["Position"] = int(p)
-            dic["StimulusID"] = int(p)
-            df_trucult.loc[c] = dic.values
-            c += 1
-df_trucult["BoxPos"] = df_trucult["BoxPos"].astype(int)
-df_trucult["Position"] = df_trucult["Position"].astype(int)
-df_trucult["StimulusID"] = df_trucult["StimulusID"].astype(int)
 
+boxpos, position, stimulusid = [], [], []
+for nb_boxpos in range(1, 21):
+    if nb_boxpos % 2 == 0:
+        for pos in range(42, 82):
+            boxpos.append(nb_boxpos)
+            position.append(pos-1)
+            stimulusid.append(pos-41)
+    if nb_boxpos % 2 == 1:
+        for pos in range(1, 41):
+            boxpos.append(nb_boxpos)
+            position.append(pos)
+            stimulusid.append(pos)
+
+boxes = pd.DataFrame({'BoxPos': boxpos, 'Position': position,
+                      'StimulusID': stimulusid}, dtype=object)
+boxes["Sample Type"] = ["TC_Source_Tube"]*len(stimulusid)
+df_trucult = pd.merge(truc_data, boxes, on=["BoxPos"], how="inner")
 # rename columns for merge the dataframes
 df_trucult.rename(columns={"FreezerID": "Freezer", "ShelfID": "Level1",
                            "RackID": "Level2"}, inplace=True)
@@ -228,15 +230,16 @@ df_trucult['DonorID'] = df_trucult['DonorID'].str.\
 # keep only TruCulture Trizol pellets data from Freezer CSV file
 trizol = df_freezer.loc[df_freezer["Level2_Desc"].str.contains('Trizol')]
 # drop duplicates
-indexes = df_trucult[['DonorID', 'VisitID', 'BatchID', 'StimulusID']].drop_duplicates(keep=first).index
+indexes = df_trucult[['DonorID', 'VisitID', 'BatchID', 'StimulusID']].drop_duplicates(keep="first").index
 df_trucult = df_trucult.loc[indexes]
 df_trucult.reset_index(inplace=True)
 del df_trucult["index"]
+
 # merge trizol and datatest
 merge_ft = pd.merge(trizol,
                     df_trucult,
                     on=['Freezer', 'Level1', 'Level2', 'Box'],
-                    how='inner')
+                    how='outer')
 merge_ft = df_dtypes_object(merge_ft)
 
 # keep only TRUCULTURE type from LabKey CSV file
@@ -263,7 +266,7 @@ truculture['StimulusID'] = truculture['StimulusID'].astype(int)
 merge_ftl = pd.merge(merge_ft,
                      truculture,
                      on=['DonorID', 'VisitID', 'BatchID', 'StimulusID'],
-                     how='right')
+                     how='inner')
 merge_ftl["BoxType"] = trizol["BoxType"].unique()[0]
 merge_ftl = df_dtypes_object(merge_ftl)
 
@@ -329,8 +332,8 @@ df_stimul.drop(extract2index, inplace=True)
 df_stimul.reset_index(inplace=True)
 del df_stimul["index"]
 
-extract3index = df_stimul.loc[df_stimul["DonorIDscanned"].str.\
-                        match(r'[0-9]{6}[AB][0-9]{2}_E2_[0-9]{2}$')].index
+extract3index = df_stimul.loc[df_stimul["DonorIDscanned"].str. \
+    match(r'[0-9]{6}[AB][0-9]{2}_E2_[0-9]{2}$')].index
 extract3index = list(extract3index)
 # 51 extract3index expected
 extract3donors = df_stimul.loc[extract3index]["DonorIDscanned"].values
@@ -406,6 +409,7 @@ merge_ftls["NbExtraction"] = merge_ftls["NbExtraction"].\
     replace(np.nan, r'0').astype(int)
 merge_ftls["volume"] = (merge_ftls["volume"] -
                         (600*merge_ftls["NbExtraction"])).astype(int)
+
 # remove columns that will not be usefull in FreezerPro
 rm_columns = ["id", "type", "well", "auditTrail", "deleted",
               "insertDate", "updateDate", "aliquotId",
@@ -413,7 +417,9 @@ rm_columns = ["id", "type", "well", "auditTrail", "deleted",
               "CaliperConcentration_ngul", "NanodropDate",
               "NanodropConcentration_ngul", "DilutionDate", "RNAvolume",
               "NFwaterVolume", "CaliperRQS", "BioanalyzerRIN",
-              "Nanodrop260_280", "Nanodrop260_230"]
+              "Nanodrop260_280", "Nanodrop260_230", "TECAN_RackNumber",
+              "TECAN_RackPosition", "Matrix_RackBarcodeScanned",
+              "Matrix_TubeBarcodeScanned", "Matrix_TubePosition."]
 for col in rm_columns:
     del merge_ftls[col]
 
@@ -422,10 +428,9 @@ merge_ftls["BoxPos"] = merge_ftls["BoxPos"].astype(int)
 
 # rename columns
 merge_ftls.rename(columns={"volume": "Volume",
-                           "Matrix_TubePosition.": "Matrix_TubePosition",
                            "NbExtraction": "FreezeThaw",
                            "rackId": "RackID"},
-                 inplace=True)
+                  inplace=True)
 
 # save result dataframe in a new CSV file
-merge_ftls.to_csv(o_samples, index=False, header=True, sep=";")
+merge_ftls.to_csv(o_samples, index=False, header=True)
