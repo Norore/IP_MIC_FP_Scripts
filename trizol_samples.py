@@ -51,19 +51,6 @@ n_stsheet = args['sheet2']
 # Output file export args
 o_samples = args['output']
 
-# Freezer file import args
-#f_freezer = "../DataToImport/freezers.csv"
-# Trizol file import args
-#f_trucult = "../DataToPrepare/1.LabExMI_TrucultureMapping_21Nov2014_FinalVersion.xlsx"
-#n_trsheet = "FinalMapping"
-# LabKey file import args
-#f_labkey = "../DataToPrepare/samples_table_labkey.csv"
-# Stimulation file import args
-#f_stimul = "../DataToPrepare/3.5000samples_WL_QCs_DL_02Jul2015.xls"
-#n_stsheet = "5000samples_WL_QCs_DL_02Jul2015"
-# Output file export args
-#o_samples = "../DataToImport/TC_Trizol_rack_samples.csv"
-
 # Read Freezer file
 try:
     df_freezer = pd.read_csv(f_freezer, dtype=object)
