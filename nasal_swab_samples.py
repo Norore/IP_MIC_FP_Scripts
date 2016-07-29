@@ -102,11 +102,20 @@ except:
 '''
 Defined reusable functions
 '''
-
-
 def df_dtypes_object(dataframe):
     for col in dataframe.columns:
         dataframe[col] = dataframe[col].astype(object)
+    return dataframe
+
+def complete_column(dataframe, column):
+    above = ""
+    # change column value
+    for i in dataframe.index:
+        if str(dataframe.loc[i][column]) == "nan":
+            dataframe.loc[i][column] = above
+        else:
+            above = dataframe.loc[i][column]
+            dataframe.loc[i][column] = above
     return dataframe
 
 '''
@@ -118,13 +127,45 @@ df_nsidate = df_dtypes_object(df_nsidate)
 # work only with Nasal Swab boxes and data
 df_freezer = df_freezer.loc[df_freezer["BoxType"] == "Nasal_Box_9x9"]
 df_labkey = df_labkey.loc[df_labkey["type"] == "NASAL_SWABS"]
+del df_labkey["id"], df_labkey["auditTrail"], df_labkey["stimulusId"], df_labkey["type"]
+# redraw df_nasalsw with only columns:
+# RackID    BoxPosition BoxID   TubeScan
+df_nasalsw_rnos = pd.DataFrame({'RackID': df_nasalsw['RackID'],
+                                'BoxPosition': df_nasalsw['BoxPosition'],
+                                'BoxID': df_nasalsw['BoxID'],
+                                'TubeScan': df_nasalsw['TubeScan']})
+df_nasalsw_lnos = pd.DataFrame({'RackID': df_nasalsw['RackID.1'],
+                                'BoxPosition': df_nasalsw['BoxPosition.1'],
+                                'BoxID': df_nasalsw['BoxID.1'],
+                                'TubeScan': df_nasalsw['TubeScan.1']})
+df_nasalsw = pd.concat([df_nasalsw_rnos, df_nasalsw_lnos])
 # remove empty data in files read from Nasal Swab mapping
-empties = df_nasalsw.loc[df_nasalsw["TubeScan"].isnull()]
+empties = df_nasalsw.loc[df_nasalsw["TubeScan"].isnull()].index
 empties = empties.astype(object)
-df_nasalsw.drop(empties)
+df_nasalsw = df_nasalsw.drop(empties)
+df_nasalsw.reset_index(inplace=True)
+del df_nasalsw['index']
+# FreezerPro requires the full location for tubes, need to repeat RackID
+complete_column(df_nasalsw, "RackID")
+# FreezerPro requires the full location for tubes, need to repeat BoxID
+complete_column(df_nasalsw, "BoxID")
+# change columns for merge with df_freezer
+df_nasalsw["DonorIdscanned"] = df_nasalsw["TubeScan"]
+df_nasalsw["Level2"] = df_nasalsw["RackID"]
+df_nasalsw["Box"] = df_nasalsw["BoxID"]
+#mergedfs["Stimulus"] = mergedfs["StimulusName"].str.replace(r'^\w+\.?\w+ S', '')
+
 # remove empty data in files read from Nasal Swab data
-empties = df_nsidate.loc[df_nsidate["Global.Unique.Id"].isnull()]
+df_nsidate.rename(columns={ 'Box_ID': 'BoxID',
+                            'Global.Unique.Id': 'DonorIdscanned'},
+                 inplace = True)
+empties = df_nsidate.loc[df_nsidate["DonorIdscanned"].isnull()].index
 empties = empties.astype(object)
-df_nsidate.drop(empties)
+df_nsidate = df_nsidate.drop(empties)
+df_nsidate.reset_index(inplace=True)
+del df_nsidate['index']
+# FreezerPro requires the full location for tubes, need to repeat BoxID
+complete_column(df_nsidate, "BoxID")
+
 # save result dataframe in a new CSV file
 merge_ftls.to_csv(o_samples, index = False, header = True)
