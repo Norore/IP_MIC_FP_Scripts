@@ -9,62 +9,62 @@ import re
 Initialize arguments
 '''
 
-# parser = argparse.ArgumentParser(description="""Generate Nasal Swabs
-#                     samples for FreezerPro from our data Excel & CSV files""")
-# # Freezer file import
-# parser.add_argument('-f', '--freezer', required=True,
-#                     help="File with freezer data in CSV format for FreezerPro")
-# # Trizol pellet file import
-# parser.add_argument('-t', '--nasalm', required=True,
-#                     help="""File with Nasal Swab mapping data in XLSX format
-#                     for merge with freezer data""")
-# parser.add_argument('-s', '--nasalms', required=True,
-#                     help="""Name of sheet in Nasal Swab mapping data in XLSX
-#                     format to use for merge with freezer data""")
-# # LabKey sample file import
-# parser.add_argument('-l', '--labkey', required=True,
-#                     help="""File with all the samples stored in LabKey,
-#                     in CSV format, to use for merge with Nasal Swab data""")
-# # Stimulation sample file import
-# parser.add_argument('-i', '--drawdate', required=True,
-#                     help="""File with all the Nasal Swab creation date data in
-#                     XLSX format to use for merge with Nasal Swab data""")
-# parser.add_argument('-m', '--sheet', required=True,
-#                     help="""Name of sheet in Nasal Swab creation date data in
-#                     XLSX format to use for merge with freezer data""")
-# # Output file export
-# parser.add_argument('-o', '--output', required=True,
-#                     help="""Output file name that will be generate in
-#                     CSV format for FreezerPro""")
-# parser.add_argument('-v', '--verbose', help="If set, could print more infos.")
-# args = vars(parser.parse_args())
-
-# # Freezer file import args
-# f_freezer = args['freezer']
-# # Trizol file import args
-# f_nasalsw = args['nasalm']
-# n_nssheet = args['nasalms']
-# # LabKey file import args
-# f_labkey = args['labkey']
-# # Stimulation file import args
-# f_nsidate = args['drawdate']
-# n_nssdate = args['sheet']
-# # Output file export args
-# o_samples = args['output']
-verbose = args['verbose']
+parser = argparse.ArgumentParser(description="""Generate Nasal Swabs
+                    samples for FreezerPro from our data Excel & CSV files""")
+# Freezer file import
+parser.add_argument('-f', '--freezer', required=True,
+                    help="File with freezer data in CSV format for FreezerPro")
+# Trizol pellet file import
+parser.add_argument('-t', '--nasalm', required=True,
+                    help="""File with Nasal Swab mapping data in XLSX format
+                    for merge with freezer data""")
+parser.add_argument('-s', '--nasalms', required=True,
+                    help="""Name of sheet in Nasal Swab mapping data in XLSX
+                    format to use for merge with freezer data""")
+# LabKey sample file import
+parser.add_argument('-l', '--labkey', required=True,
+                    help="""File with all the samples stored in LabKey,
+                    in CSV format, to use for merge with Nasal Swab data""")
+# Stimulation sample file import
+parser.add_argument('-i', '--drawdate', required=True,
+                    help="""File with all the Nasal Swab creation date data in
+                    XLSX format to use for merge with Nasal Swab data""")
+parser.add_argument('-m', '--sheet', required=True,
+                    help="""Name of sheet in Nasal Swab creation date data in
+                    XLSX format to use for merge with freezer data""")
+# Output file export
+parser.add_argument('-o', '--output', required=True,
+                    help="""Output file name that will be generate in
+                    CSV format for FreezerPro""")
+parser.add_argument('-v', '--verbose', help="If set, could print more infos.")
+args = vars(parser.parse_args())
 
 # Freezer file import args
-f_freezer = "../DataToImport/freezers.csv"
+f_freezer = args['freezer']
 # Trizol file import args
-f_nasalsw = "../DataToPrepare/NasalSwab/20160509_NasalSwab_SrcBoxMapping.xlsx"
-n_nssheet = "Merging"
+f_nasalsw = args['nasalm']
+n_nssheet = args['nasalms']
 # LabKey file import args
-f_labkey = "../DataToPrepare/Common/samples_table_labkey.csv"
+f_labkey = args['labkey']
 # Stimulation file import args
-f_nsidate = "../DataToPrepare/NasalSwab/NasalSwab_DrawDates.xlsx"
-n_nssdate = "NasalSwab_DrawDates"
+f_nsidate = args['drawdate']
+n_nssdate = args['sheet']
 # Output file export args
-o_samples = "../DataToImport/Nasal_Swab_rack_samples.csv"
+o_samples = args['output']
+verbose = args['verbose']
+
+# # Freezer file import args
+# f_freezer = "../DataToImport/freezers.csv"
+# # Nasal Swab mapping file import args
+# f_nasalsw = "../DataToPrepare/NasalSwab/20160509_NasalSwab_SrcBoxMapping.xlsx"
+# n_nssheet = "Merging"
+# # LabKey file import args
+# f_labkey = "../DataToPrepare/Common/samples_table_labkey.csv"
+# # Stimulation file import args
+# f_nsidate = "../DataToPrepare/NasalSwab/NasalSwab_DrawDates.xlsx"
+# n_nssdate = "NasalSwab_DrawDates"
+# # Output file export args
+# o_samples = "../DataToImport/Nasal_Swab_rack_samples.csv"
 
 # Read Freezer file
 try:
@@ -151,25 +151,26 @@ del df_nasalsw['index'], empties
 complete_column(df_nasalsw, "RackID")
 # FreezerPro requires the full location for tubes, need to repeat BoxID
 complete_column(df_nasalsw, "BoxID")
-# change columns for merge with df_freezer
-df_nasalsw["DonorIdscanned"] = df_nasalsw["TubeScan"]
-df_nasalsw["Level2"] = df_nasalsw["RackID"].str.replace(r'MIC-NasalRack_(\d{2})', r'Rack \1')
-df_nasalsw["Level2"] = df_nasalsw["RackID"].str.replace(r'MIC-NasalRack_(\d{1})', r'Rack 0\1')
-df_nasalsw["Box"] = df_nasalsw["BoxID"].str.replace(r'MIC_NasalBox_(\d+)', r'box \1')
-
-# remove empty data in files read from Nasal Swab data
-df_nsidate.rename(columns={ 'Box_ID': 'BoxID',
-                            'Global.Unique.Id': 'DonorIdscanned'},
-                 inplace = True)
-empties = df_nsidate.loc[df_nsidate["DonorIdscanned"].isnull()].index
-empties = empties.astype(object)
-df_nsidate = df_nsidate.drop(empties)
-df_nsidate.reset_index(inplace=True)
-del df_nsidate['index']
-# FreezerPro requires the full location for tubes, need to repeat BoxID
-complete_column(df_nsidate, "BoxID")
-df_nsidate["Box"] = "box " + df_nsidate["BoxID"].astype(str).str.replace(r'.0', '')
-df_nsidate["visitId"] = df_nsidate["Visit"].str.replace(r'V', '')
+# # change columns for merge with df_freezer
+# df_nasalsw["DonorIdscanned"] = df_nasalsw["TubeScan"]
+# df_nasalsw["Level2"] = df_nasalsw["RackID"].str.replace(r'MIC-NasalRack_(\d{2})', r'Rack \1')
+# df_nasalsw["Level2"] = df_nasalsw["RackID"].str.replace(r'MIC-NasalRack_(\d{1})', r'Rack 0\1')
+# df_nasalsw["Box"] = df_nasalsw["BoxID"].str.replace(r'MIC_NasalBox_(\d+)', r'box \1')
+# df_nasalsw["barcodeId"] = df_nasalsw["DonorIdscanned"]
+#
+# # remove empty data in files read from Nasal Swab data
+# df_nsidate.rename(columns={ 'Box_ID': 'BoxID',
+#                             'Global.Unique.Id': 'DonorIdscanned'},
+#                  inplace = True)
+# empties = df_nsidate.loc[df_nsidate["DonorIdscanned"].isnull()].index
+# empties = empties.astype(object)
+# df_nsidate = df_nsidate.drop(empties)
+# df_nsidate.reset_index(inplace=True)
+# del df_nsidate['index']
+# # FreezerPro requires the full location for tubes, need to repeat BoxID
+# complete_column(df_nsidate, "BoxID")
+# df_nsidate["Box"] = "box " + df_nsidate["BoxID"].astype(str).str.replace(r'.0', '')
+# df_nsidate["visitId"] = df_nsidate["Visit"].str.replace(r'V', '')
 
 # df_nswnsd = pd.merge(df_nasalsw,
 #                      df_nsidate,
@@ -188,13 +189,17 @@ df_nswlab = pd.merge(df_labkey,
 missing_tubes = list(set(df_nasalsw["barcodeId"]) - set(df_labkey["barcodeId"]))
 if len(missing_tubes) > 0:
     print(len(missing_tubes), "tubes not found on LabKey data")
-    answer = raw_input("Print list of missing tubes?")
+    if verbose:
+        answer = raw_input("Print list of missing tubes?")
+    else:
+        answer = "No"
     if answer == "Yes" or answer == "yes" or answer == "Y" or answer == "y":
         print("\n".join([t for t in missing_tubes]))
 # len(missing_tubes) -> 24
 df_nswlabfre = pd.merge(df_nswlab,
                         df_freezer,
                         on=['Box', 'Level2'],
-                        how='inner')
+                        how='left')
+
 # save result dataframe in a new CSV file
-merge_ftls.to_csv(o_samples, index = False, header = True)
+df_nswlabfre.to_csv(o_samples, index = False, header = True)
