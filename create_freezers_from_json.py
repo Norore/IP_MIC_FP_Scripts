@@ -39,10 +39,10 @@ for freezer in freezers["freezers"]:
     # shelves
     for i, shelf in enumerate(freezer["shelves"]):
         # compartments
-        for compartment in freezer["main_compartments"][shelf]:
+        for c, compartment in enumerate(freezer["main_compartments"][shelf]):
             # Racks
             if "Supernatants" in compartment:
-                for rack in freezer["racks"][shelf]["simulations"]:
+                for rack in freezer["racks"][shelf][c]["simulations"]:
                     for box in rack["compartments"]:
                         for boxnum in range(box["first"], box["last"] + 1):
                             string = freezer["name"] + "," + shelf + ",," + rack['name'] + "," \
@@ -51,14 +51,14 @@ for freezer in freezers["freezers"]:
                             outfile.write(string + "\n")
 
             if "Aliquot L" in compartment or "Aliquot R" in compartment:
-                for a in freezer["racks"][shelf]["samples aliquot"]:
+                for a in freezer["racks"][shelf][c]["samples aliquot"]:
                     for aa in range(a["first"], a["last"] + 1):
                         string = freezer["name"] + "," + shelf + ",," + a['name'] + "," \
                                       + compartment + ",,,box " + str(aa) + "," + a["boxtype"]
                         outfile.write(string + "\n")
 
             if "Trizol" in compartment:
-                for t in freezer["racks"][shelf]["trizol"]:
+                for t in freezer["racks"][shelf][c]["trizol"]:
                     for tt in range(t["compartments"]["boxes"]):
                         tt = str(tt + 1)
                         string = freezer["name"] + "," + shelf + ",," + t['name'] + "," \
@@ -66,15 +66,15 @@ for freezer in freezers["freezers"]:
                         outfile.write(string + "\n")
 
             if "DNA" in compartment:
-                for d in freezer["racks"][shelf]["stools DNA"]:
+                for d in freezer["racks"][shelf][c]["stools DNA"]:
                     for dd in range(d["compartments"]["boxes"]):
                         dd = str(dd + 1)
                         string = freezer["name"] + "," + shelf + ",," + d['name'] + "," \
                                       + compartment + ",,,box " + dd + "," + d["compartments"]["boxtype"]
                         outfile.write(string + "\n")
 
-            if "Stool Samples source" in compartment:
-                for o in freezer["racks"][shelf]["stool source"]:
+            if "Stool Samples Source" in compartment:
+                for o in freezer["racks"][shelf][c]["stool source"]:
                     for oo in range(o["compartments"]["boxes"]):
                         oo = str(oo + 1)
                         string = freezer["name"] + "," + shelf + ",," + o['name'] + "," \
@@ -82,7 +82,7 @@ for freezer in freezers["freezers"]:
                         outfile.write(string + "\n")
 
             if "Nasal" in compartment:
-                for n in freezer["racks"][shelf]["nasal"]:
+                for n in freezer["racks"][shelf][c]["nasal"]:
                     for nn in range(n["compartments"]["boxes"]):
                         nn = str(nn + 1)
                         string = freezer["name"] + "," + shelf + ",," + n['name'] + "," \

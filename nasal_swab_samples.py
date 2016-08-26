@@ -151,36 +151,44 @@ del df_nasalsw['index'], empties
 complete_column(df_nasalsw, "RackID")
 # FreezerPro requires the full location for tubes, need to repeat BoxID
 complete_column(df_nasalsw, "BoxID")
-# # change columns for merge with df_freezer
-# df_nasalsw["DonorIdscanned"] = df_nasalsw["TubeScan"]
-# df_nasalsw["Level2"] = df_nasalsw["RackID"].str.replace(r'MIC-NasalRack_(\d{2})', r'Rack \1')
+# change columns for merge with df_freezer
+df_nasalsw["DonorIdscanned"] = df_nasalsw["TubeScan"]
+
+# Nasal Swabs rack name is different compare to other data
+# dirty version, found a better way to do it?
+df_nasalsw["Level2"] = df_nasalsw["RackID"].str.replace(r'MIC-NasalRack_([1, 5, 7])', r'Left Rack 0\1')
+df_nasalsw["Level2"] = df_nasalsw["Level2"].str.replace(r'MIC-NasalRack_([2, 4, 6, 8])', r'Right Rack 0\1')
+df_nasalsw["Level2"] = df_nasalsw["Level2"].str.replace(r'MIC-NasalRack_(3)', r'Rack 0\1 + 4 boxes of stools samples (rack#5)')
+# df_nasalsw["Level2"] = df_nasalsw["RackID"].str.replace(r'MIC-NasalRack_(\d{1})', r'Rack \1')
 # df_nasalsw["Level2"] = df_nasalsw["RackID"].str.replace(r'MIC-NasalRack_(\d{1})', r'Rack 0\1')
-# df_nasalsw["Box"] = df_nasalsw["BoxID"].str.replace(r'MIC_NasalBox_(\d+)', r'box \1')
-# df_nasalsw["barcodeId"] = df_nasalsw["DonorIdscanned"]
-#
-# # remove empty data in files read from Nasal Swab data
-# df_nsidate.rename(columns={ 'Box_ID': 'BoxID',
-#                             'Global.Unique.Id': 'DonorIdscanned'},
-#                  inplace = True)
-# empties = df_nsidate.loc[df_nsidate["DonorIdscanned"].isnull()].index
-# empties = empties.astype(object)
-# df_nsidate = df_nsidate.drop(empties)
-# df_nsidate.reset_index(inplace=True)
-# del df_nsidate['index']
-# # FreezerPro requires the full location for tubes, need to repeat BoxID
-# complete_column(df_nsidate, "BoxID")
-# df_nsidate["Box"] = "box " + df_nsidate["BoxID"].astype(str).str.replace(r'.0', '')
-# df_nsidate["visitId"] = df_nsidate["Visit"].str.replace(r'V', '')
+df_nasalsw["Box"] = df_nasalsw["BoxID"].str.replace(r'MIC_NasalBox_(\d+)', r'box \1')
+df_nasalsw["barcodeId"] = df_nasalsw["DonorIdscanned"]
 
-# df_nswnsd = pd.merge(df_nasalsw,
-#                      df_nsidate,
-#                      on=['Box', 'DonorIdscanned'],
-#                      how='inner')
+# remove empty data in files read from Nasal Swab data
+df_nsidate.rename(columns={ 'Box_ID': 'BoxID',
+                            'Global.Unique.Id': 'DonorIdscanned'},
+                 inplace = True)
+empties = df_nsidate.loc[df_nsidate["DonorIdscanned"].isnull()].index
+empties = empties.astype(object)
+df_nsidate = df_nsidate.drop(empties)
+df_nsidate.reset_index(inplace=True)
+del df_nsidate['index']
+# FreezerPro requires the full location for tubes, need to repeat BoxID
+complete_column(df_nsidate, "BoxID")
+df_nsidate["Box"] = "box " + df_nsidate["BoxID"].astype(str).str.replace(r'.0', '')
+df_nsidate["visitId"] = df_nsidate["Visit"].str.replace(r'V', '')
 
-# df_nswfre = pd.merge(df_nasalsw,
-#                      df_freezer,
-#                      on=['Box', 'Level2'],
-#                      how='inner')
+df_nswnsd = pd.merge(df_nasalsw,
+                     df_nsidate,
+                     on=['Box', 'DonorIdscanned'],
+                     how='inner')
+
+df_nswfre = pd.merge(df_nasalsw,
+                     df_freezer,
+                     on=['Box', 'Level2'],
+                     how='inner')
+
+df_nasalsw["barcodeId"] = df_nasalsw["TubeScan"]
 
 df_nswlab = pd.merge(df_labkey,
                      df_nasalsw,

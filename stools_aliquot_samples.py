@@ -98,7 +98,7 @@ for f_stool in l_files:
         dataset.drop(to_drop, inplace=True)
 
     # select lines in freezers with "stools" in column "Level2_Desc"
-    stools = df_freez.loc[df_freez["Level2_Desc"].str.contains("Stool samples Aliquot")]
+    stools = df_freez.loc[df_freez["Level2_Desc"].str.contains("Stool Samples Aliquot")]
 
     # merge stools data with freezer location
     dataset.rename(columns={"Shelf": "Level1"}, inplace=True)
