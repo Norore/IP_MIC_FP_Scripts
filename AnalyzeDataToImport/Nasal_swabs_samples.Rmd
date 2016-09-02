@@ -1,0 +1,115 @@
+---
+title: "Nasal swabs samples analyzes for FreezerPro import"
+author: "Nolwenn Lavielle"
+date: "22 août 2016"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+library(plyr)
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## File informations
+
+```{r loaddataL}
+path <- "/Volumes/LabExMI/Users/Nolwenn/FreezerPro/DataToImport/"
+filename <- "Nasal_Swabs_rack_samples.csv"
+df.samples <- read.csv(file = paste(path, filename, sep =""), 
+                       header=TRUE, sep=',', stringsAsFactors = TRUE)
+```
+
+QC of a file generated to import Stool aliquot sample information into FreezerPro.
+
+* **Filename**: `r filename`
+  + **file creation date:** 2016-08-25
+  + **number of rows:** `r nrow(df.samples)`
+  + **number of columns:** `r ncol(df.samples)`
+  + **column names:** `r names(df.samples)`
+
+## Data informations
+
+**Freezers**:
+
+Expect each Freezer is assign to it respective barcode.
+
+```{r freezerinfo}
+result <- data.frame(table(df.samples[,c("Freezer")], useNA = "ifany"))
+colnames(result) <- c("Freezer", "# tubes")
+pander::pander(result)
+```
+
+***Comment***: only 763 lines are assigned to a Freezer. FreezerPro import will only implement 763 lines.
+
+**Sample box type**:
+
+Expect each sample is assign to the expected Box Type for FreezerPro.
+
+```{r sampleinfos}
+result <- data.frame(table(df.samples[,"BoxType"], useNA = "ifany"))
+colnames(result) <- c("BoxType", "# tubes")
+pander::pander(result)
+```
+
+***Comment***: only 763 lines are assigned to a Box Type. FreezerPro import will only implement 763 lines.
+
+**Shelves**:
+
+Expect each Shelf is assign to the expected barcode.
+
+```{r shelfinfos}
+result <- data.frame(table(df.samples[,"Level1"], useNA = "ifany"))
+colnames(result) <- c("Level1", "# tubes")
+pander::pander(result)
+```
+
+***Comment***: only 763 lines are assigned to a Shelf. FreezerPro import will only implement 763 lines.
+
+**Racks**:
+```{r rackinfos1}
+result <- data.frame(table(df.samples[,"Level2"], useNA = "ifany"))
+colnames(result) <- c("Level2", "# tubes")
+pander::pander(result)
+```
+
+```{r rackinfos2}
+result <- ddply(df.samples, .(Level1, Level2), nrow)
+colnames(result) <- c("Level1", "Level2", "# tubes")
+pander::pander(result)
+```
+
+```{r rackinfos3}
+result <- colSums(table(df.samples[,c("Level1","Level2")], useNA = "ifany"))
+pander::pander(result)
+```
+
+```{r rackinfos4}
+result <- ddply(df.samples, .(Level2, Box), nrow)
+colnames(result) <- c("Level2", "Box", "# tubes")
+pander::pander(result)
+```
+
+```{r rackinfos5}
+result <- data.frame(colSums(table(df.samples[,c("Box","Level2")])))
+pander::pander(result)
+```
+
+***Comment***: only 763 lines are assigned to a Rack. FreezerPro import will only implement 763 lines.
+
+**Box**:
+
+```{r boxinfos}
+result <- ddply(df.samples, .(Level2, Box), nrow)
+colnames(result) <- c("Level2", "Box", "# tubes")
+pander::pander(result)
+```
+
+<!-- **Box position**: -->
+
+<!-- Expect each position is unique in each box. -->
+
+<!-- ```{r posinfosL} -->
+<!-- table(df.samples[,c("BoxPosition", "Box")]) -->
+<!-- ``` -->
+
+<!-- *Comment*: -->

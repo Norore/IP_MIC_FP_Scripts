@@ -1,0 +1,136 @@
+---
+title: "Stimuli samples analyzes for FreezerPro import"
+author: "Nolwenn Lavielle"
+date: "22 août 2016"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+library(plyr)
+```
+
+## File informations
+
+```{r loaddataL}
+path <- "/Volumes/LabExMI/Users/Nolwenn/FreezerPro/DataToImport/"
+filename <- "TC_supernatants_samples.csv"
+df.samples <- read.csv(file = paste(path, filename, sep =""), 
+                       header=TRUE, sep=',', stringsAsFactors = FALSE)
+```
+
+QC of a file generated to import Stool aliquot sample information into FreezerPro.
+
+* **Filename**: `r filename`
+  + **file creation date:** 2016-08-03
+  + **number of rows:** `r nrow(df.samples)`
+  + **number of columns:** `r ncol(df.samples)`
+  + **column names:** `r names(df.samples)`
+
+## Data informations
+
+### Freezers
+
+Expect each Freezer is assign to it respective barcode.
+
+```{r freezerinfo}
+result <- data.frame(table(df.samples[,c("Freezer")], useNA = "ifany"))#, "FreezerBarcode")])
+colnames(result) <- c("Freezer", "# tubes")
+pander::pander(result)
+```
+
+***Comment***: missing column **FreezerBarcode**, need to be generated in Python script?
+
+### Sample box type
+
+```{r sampleinfos}
+result <- ddply(df.samples, .(Type, BoxType), nrow)
+colnames(result) <- c("Type", "BoxType", "# tubes")
+pander::pander(result)
+```
+
+***Comment***: expect each sample is assign to the expected Box Type for FreezerPro.
+
+### Shelves
+
+Expect each Shelf is assign to the expected barcode.
+
+```{r shelfinfos}
+result <- data.frame(table(df.samples[,"Level1"], useNA = "ifany"))
+colnames(result) <- c("Level1", "# tubes")
+# table(df.samples[, c("ShelfBarcode","Level1")])
+pander::pander(result)
+```
+
+***Comment***: missing column **ShelfBarcode**, need to be generated in Python script?
+
+### Racks
+
+```{r rackinfos1}
+result <- data.frame(table(df.samples[,"Level2"], useNA = "ifany"))
+colnames(result) <- c("Level2", "# tubes")
+pander::pander(result)
+```
+
+***Comment***: missing racks:
+
+* Donors X97>>X00 (in Shelf 1)
+* Donors X48>>X50 (in Shelf 3)
+
+```{r rackinfos2}
+result <- ddply(df.samples, .(Level1, Level2), nrow)
+colnames(result) <- c("Level1", "Level2", "# tubes")
+pander::pander(result)
+```
+
+***Comment***: missing racks:
+
+* Donors X97>>X00 (in Shelf 1)
+* Donors X48>>X50 (in Shelf 3)
+
+### Box infos
+
+```{r boxinfos1}
+result <- data.frame(table(df.samples[, c("Box")]))
+colnames(result) <- c("Box", "# tubes")
+pander::pander(result)
+```
+
+***Comment***:
+
+### Box position
+
+```{r posinfos}
+result <- table(df.samples[,c("Position","Box")])
+levs <- unique(result)
+result <- factor(result, levels = sort(levs))
+result <- result[result!="0"]
+result <- factor(result)
+barplot(table(result), col = "royalblue3", border = "royalblue3", 
+        main = "Number of box per position", xlab = "Tube position", 
+        ylab = "Number of box")
+```
+
+***Comment***:
+
+### Donor data in function of volume
+
+```{r donorinfos}
+result <- data.frame(table(df.samples[,c("Volume")]))
+pander::pander(result)
+```
+
+***Comment***:
+
+
+### Donor infos
+
+Number of lines: `r nrow(df.samples)`
+
+Number of unique DonorID: `r length(unique(df.samples[,"DonorID"]))`
+
+Number of unique OriginalDonorID: `r length(unique(df.samples[,"OriginalDonorID"]))`
+
+Number of changed DonorID: `r abs(length(unique(df.samples[,"OriginalDonorID"]))-length(unique(df.samples[,"DonorID"])))`
+
+***Comment***: possibly missing DonorID/OriginalDonorID. Due to freezer mapping management? Need to review rack names for supernatants?

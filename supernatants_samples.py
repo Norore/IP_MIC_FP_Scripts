@@ -104,7 +104,7 @@ df_infreezers = pd.merge(df_super, df_tomerge, on=["DonorInfos",
 # prepare columns to use for merge
 df_infreezers["AliquotID"] = df_infreezers["Level2_Desc"].str.\
     replace(r'^TruCulture Supernatants, Aliquot ([1-3]), Visit ([1-2]), \w+', r'\1')
-df_infreezers["VisitID"] = df_infreezers["Level2_Desc"].str.\
+df_infreezers["VisitID"] = df_infreezers["Level2"].str.\
     replace(r'^TruCulture Supernatants, Aliquot ([1-3]), Visit ([1-2]), \w+', r'\2')
 df_infreezers["StimulusID"] = df_infreezers["Box"].str.replace(r'box ([0-9]{1,2})', r'\1')
 

@@ -1,0 +1,123 @@
+---
+title: "Freezers analyzes for FreezerPro import"
+author: "Nolwenn Lavielle"
+date: "23 août 2016"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+## File informations
+
+```{r loaddataL}
+path <- "/Volumes/LabExMI/Users/Nolwenn/FreezerPro/DataToImport/"
+filename <- "freezers.csv"
+df.samples <- read.csv(file = paste(path, filename, sep =""), 
+                       header=TRUE, sep=',', stringsAsFactors = FALSE)
+```
+
+QC of a file generated to import Freezers information into FreezerPro.
+
+* **Filename**: `r filename`
+  + **file creation date:** 2016-08-23
+  + **number of rows:** `r nrow(df.samples)`
+  + **number of columns:** `r ncol(df.samples)`
+  + **column names:** `r names(df.samples)`
+
+## Data informations
+
+### Number of boxes per freezer:
+
+Expect each Freezer is assign to it respective barcode.
+
+```{r freezerinfo}
+result <- data.frame(table(df.samples[,c("Freezer")]))
+colnames(result) <- c("Freezer", "Number of boxes")
+pander::pander(result)
+```
+
+***Comments***:
+
+* first line, freezer name
+* second line, number of boxes
+* there is no column *FreezerBarcode* because this file will be used to generate Freezers in FreezerPro software
+
+### Number of boxes per rack:
+
+```{r sampleinfos}
+result <- data.frame(table(df.samples[,"Level2_Desc"]))
+colnames(result) <- c("Rack name", "Number of boxes")
+pander::pander(result)
+```
+
+***Comment***: 
+
+### Number of boxes per shelf, in each freezer:
+
+```{r shelfinfos}
+result <- table(df.samples[,c("Level1", "Freezer")])
+pander::pander(result)
+```
+
+***Comment***: there is no column *ShelfBarcode* because this file will be used to generate Freezers in FreezerPro software. The column *Level1* will represent the shelf name in FreezerPro interface.
+
+### Number of boxes per shelf, all freezers:
+
+```{r shelfinfos2}
+result <- data.frame(colSums(table(df.samples[,c("Level2","Level1")])))
+colnames(result) <- "Number of boxes"
+pander::pander(result)
+```
+
+***Comment***:
+
+### Number of boxes per freezer:
+
+```{r sheflinfos2}
+result <- data.frame(colSums(table(df.samples[,c("Level2","Freezer")])))
+colnames(result) <- "Number of boxes"
+pander::pander(result)
+```
+
+***Comment***:
+
+### Number of boxes per compartment:
+
+```{r compartment}
+result <- data.frame(table(df.samples[,"Level3"]))
+colnames(result) <- c("Compartment name", "Number of boxes")
+pander::pander(result)
+```
+
+***Comment***: only concern rack with specific compartimentation, e.g., racks of TruCulture Supernatants aliquots.
+
+### Number of boxes per rack and per compartment:
+
+```{r compartment2}
+library(plyr)
+result <- ddply(df.samples, .(Level2, Level3), nrow)
+colnames(result) <- c("Level2", "Level3", "# boxes")
+pander::pander(result)
+```
+
+***Comment***: 
+
+### Number of boxes per type of box:
+
+```{r boxtype}
+result <- data.frame(table(df.samples[,c("BoxType")]))
+colnames(result) <- c("BoxType", "# boxes")
+pander::pander(result)
+```
+
+***Comment***:
+
+### Number of boxes per type of box and per rack:
+
+```{r boxtype2}
+result <- ddply(df.samples, .(Level1, BoxType), nrow)
+colnames(result) <- c("Level1", "BoxType", "# boxes")
+pander::pander(result)
+```

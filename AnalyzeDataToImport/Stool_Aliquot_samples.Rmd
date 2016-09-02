@@ -1,0 +1,480 @@
+---
+title: "Stool samples analyzes for FreezerPro import"
+author: "Nolwenn Lavielle"
+date: "29 août 2016"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+library(plyr)
+```
+
+# Freezer 1532, Aliquot L
+
+## File informations
+
+```{r loaddataL}
+path <- "/Volumes/LabExMI/Users/Nolwenn/FreezerPro/DataToImport/"
+filename <- "Stools_freezer1532_L_samples.csv"
+df.samples <- read.csv(file = paste(path, filename, sep =""),
+                       header=TRUE, sep=',', stringsAsFactors = FALSE)
+```
+
+QC of a file generated to import Stool aliquot sample information into FreezerPro.
+
+* **Filename**: `r filename`
+  + **file creation date:** 2016-08-29
+  + **number of rows:** `r nrow(df.samples)`
+  + **number of columns:** `r ncol(df.samples)`
+  + **column names:** `r names(df.samples)`
+
+## Data informations
+
+### Freezers
+
+```{r freezerinfoL}
+result <- data.frame(table(df.samples[,c("Freezer", "FreezerBarcode")]))
+colnames(result) <- c("Freezer", "FreezerBarcode", "# tubes")
+pander::pander(result)
+```
+
+***Comment***: only assigned to one freezer, with `r result[,3]` tubes.
+
+### Boxes
+```{r boxinfosL}
+result <- ddply(df.samples, .(Box, BoxBarcode), nrow)
+colnames(result) <- c("Box", "BoxBarcode", "# tubes")
+pander::pander(result)
+```
+
+***Comments***: expects to have one barcode per box.
+
+### Sample box type
+
+```{r sampleinfosL}
+result <- data.frame(table(df.samples[,"BoxType"]))
+colnames(result) <- c("BoxType", "# tubes")
+pander::pander(result)
+```
+
+***Comment***: should be only assigned to one box type
+
+### Shelves
+
+```{r shelfinfosL}
+result <- ddply(df.samples, .(Level1, ShelfBarcode), nrow)
+colnames(result) <- c("Level1", "ShelfBarcode", "# tubes")
+pander::pander(result)
+```
+
+***Comment***: each shelf should be assign to its expected barcode
+
+### Racks
+
+```{r rackinfosL1}
+result <- data.frame(table(df.samples[,c("Level1","Level2")]))
+colnames(result) <- c("Level1", "Level2", "# tubes")
+pander::pander(result)
+```
+
+***Comment***: each rack compartment should be assign to its expected shelf
+
+```{r rackinfosL2}
+result <- ddply(df.samples, .(Box,Level2), nrow)
+colnames(result) <- c("Box", "Level2", "# tubes")
+pander::pander(result)
+```
+
+***Comment***: each box should be assign to its respective rack compartment
+
+### Box position
+
+Expect each position is unique in each box.
+
+```{r posinfosL}
+result <- table(df.samples[,c("Box", "Position")])
+levs <- unique(result)
+result <- factor(result, levels = sort(levs))
+result <- result[result != 0]
+result <- factor(result)
+result <- data.frame(table(factor(result)))
+colnames(result) <- c("# occurences", "# tubes")
+pander::pander(result)
+```
+
+***Comment***: if more than one occurence, please check the Stool Aliquot samples source file.
+
+## Sample infos
+
+### Tube names (barcode)
+
+Number of lines in file: **`r nrow(df.samples)`**
+
+Number of unique samples: **`r length(unique(df.samples[,c("Name")]))`**
+
+***Comment***: the number of unique samples should be equal to number of lines in the file.
+
+### Sample type
+
+File to import into FreezerPro contains `r length(unique(df.samples[,c("Sample.Type")]))` type of sample:
+
+```{r sampletypeL}
+result <- data.frame(table(df.samples[,c("Sample.Type")]))
+colnames(result) <- c("Sample.Type", "# tubes")
+pander::pander(result)
+```
+
+***Comment***: the total number of tubes should be equal to the number of lines.
+
+# Freezer 1534, Aliquot R1
+
+## File informations
+
+```{r loaddataR1}
+path <- "/Volumes/LabExMI/Users/Nolwenn/FreezerPro/DataToImport/"
+filename <- "Stools_freezer1534_R1_samples.csv"
+df.samples <- read.csv(file = paste(path, filename, sep =""),
+                       header=TRUE, sep=',', stringsAsFactors = FALSE)
+```
+
+QC of a file generated to import Stool aliquot sample information into FreezerPro.
+
+* **Filename**: `r filename`
+  + **file creation date:** 2016-08-29
+  + **number of rows:** `r nrow(df.samples)`
+  + **number of columns:** `r ncol(df.samples)`
+  + **column names:** `r names(df.samples)`
+
+## Data informations
+
+### Freezers
+
+```{r freezerinfoR1}
+result <- data.frame(table(df.samples[,c("Freezer", "FreezerBarcode")]))
+colnames(result) <- c("Freezer", "FreezerBarcode", "# tubes")
+pander::pander(result)
+```
+
+***Comment***: only assigned to one freezer, with `r result[,3]` tubes.
+
+### Boxes
+
+```{r boxinfosR1}
+result <- ddply(df.samples, .(Box, BoxBarcode), nrow)
+colnames(result) <- c("Box", "BoxBarcode", "# tubes")
+pander::pander(result)
+```
+
+***Comments***: expects to have one barcode per box.
+
+### Sample box type
+
+```{r sampleinfosR1}
+result <- data.frame(table(df.samples[,"BoxType"]))
+colnames(result) <- c("BoxType", "# tubes")
+pander::pander(result)
+```
+
+***Comment***: should be only assigned to one box type
+
+### Shelves
+
+```{r shelfinfosR1}
+result <- ddply(df.samples, .(Level1, ShelfBarcode), nrow)
+colnames(result) <- c("Level1", "ShelfBarcode", "# tubes")
+pander::pander(result)
+```
+
+***Comment***: each shelf should be assign to its expected barcode
+
+### Racks
+
+```{r rackinfosR11}
+result <- data.frame(table(df.samples[,c("Level1","Level2")]))
+colnames(result) <- c("Level1", "Level2", "# tubes")
+pander::pander(result)
+```
+
+***Comment***: each rack compartment should be assign to its expected shelf
+
+```{r rackinfosR12}
+result <- ddply(df.samples, .(Box,Level2), nrow)
+colnames(result) <- c("Box", "Level2", "# tubes")
+pander::pander(result)
+```
+
+***Comment***: each box should be assign to its respective rack compartment
+
+### Box position
+
+Expect each position is unique in each box.
+
+```{r posinfosR1}
+result <- table(df.samples[,c("Box", "Position")])
+levs <- unique(result)
+result <- factor(result, levels = sort(levs))
+result <- result[result != 0]
+result <- factor(result)
+result <- data.frame(table(factor(result)))
+colnames(result) <- c("# occurences", "# tubes")
+pander::pander(result)
+```
+
+***Comment***: if more than one occurence, please check the Stool Aliquot samples source file.
+
+## Sample infos
+
+### Tube names (barcode)
+
+Number of lines in file: **`r nrow(df.samples)`**
+
+Number of unique samples: **`r length(unique(df.samples[,c("Name")]))`**
+
+***Comment***: the number of unique samples should be equal to number of lines in the file.
+
+### Sample type
+
+File to import into FreezerPro contains `r length(unique(df.samples[,c("Sample.Type")]))` type of sample:
+
+```{r sampletypeR1}
+result <- data.frame(table(df.samples[,c("Sample.Type")]))
+colnames(result) <- c("Sample.Type", "# tubes")
+pander::pander(result)
+```
+
+***Comment***: the total number of tubes should be equal to the number of lines.
+
+# Freezer 1534, Aliquot R3
+
+## File informations
+
+```{r loaddataR3}
+path <- "/Volumes/LabExMI/Users/Nolwenn/FreezerPro/DataToImport/"
+filename <- "Stools_freezer1534_R3_samples.csv"
+df.samples <- read.csv(file = paste(path, filename, sep =""),
+                       header=TRUE, sep=',', stringsAsFactors = FALSE)
+```
+
+QC of a file generated to import Stool aliquot sample information into FreezerPro.
+
+* **Filename**: `r filename`
+  + **file creation date:** 2016-08-29
+  + **number of rows:** `r nrow(df.samples)`
+  + **number of columns:** `r ncol(df.samples)`
+  + **column names:** `r names(df.samples)`
+
+## Data informations
+
+### Freezers
+
+```{r freezerinfoR3}
+result <- data.frame(table(df.samples[,c("Freezer", "FreezerBarcode")]))
+colnames(result) <- c("Freezer", "FreezerBarcode", "# tubes")
+pander::pander(result)
+```
+
+***Comment***: only assigned to one freezer, with `r result[,3]` tubes.
+
+### Boxes
+
+```{r boxinfosR3}
+result <- ddply(df.samples, .(Box, BoxBarcode), nrow)
+colnames(result) <- c("Box", "BoxBarcode", "# tubes")
+pander::pander(result)
+```
+
+***Comments***: expects to have one barcode per box.
+
+### Sample box type
+
+```{r sampleinfosR3}
+result <- data.frame(table(df.samples[,"BoxType"]))
+colnames(result) <- c("BoxType", "# tubes")
+pander::pander(result)
+```
+
+***Comment***: should be only assigned to one box type
+
+### Shelves
+
+```{r shelfinfosR3}
+result <- ddply(df.samples, .(Level1, ShelfBarcode), nrow)
+colnames(result) <- c("Level1", "ShelfBarcode", "# tubes")
+pander::pander(result)
+```
+
+***Comment***: each shelf should be assign to its expected barcode
+
+### Racks
+
+```{r rackinfosR31}
+result <- data.frame(table(df.samples[,c("Level1","Level2")]))
+colnames(result) <- c("Level1", "Level2", "# tubes")
+pander::pander(result)
+```
+
+***Comment***: each rack compartment should be assign to its expected shelf
+
+```{r rackinfosR32}
+result <- ddply(df.samples, .(Box,Level2), nrow)
+colnames(result) <- c("Box", "Level2", "# tubes")
+pander::pander(result)
+```
+
+***Comment***: each box should be assign to its respective rack compartment
+
+### Box position
+
+Expect each position is unique in each box.
+
+```{r posinfosR3}
+result <- table(df.samples[,c("Box", "Position")])
+levs <- unique(result)
+result <- factor(result, levels = sort(levs))
+result <- result[result != 0]
+result <- factor(result)
+result <- data.frame(table(factor(result)))
+colnames(result) <- c("# occurences", "# tubes")
+pander::pander(result)
+```
+
+***Comment***: if more than one occurence, please check the Stool Aliquot samples source file.
+
+## Sample infos
+
+### Tube names (barcode)
+
+Number of lines in file: **`r nrow(df.samples)`**
+
+Number of unique samples: **`r length(unique(df.samples[,c("Name")]))`**
+
+***Comment***: the number of unique samples should be equal to number of lines in the file.
+
+### Sample type
+
+File to import into FreezerPro contains `r length(unique(df.samples[,c("Sample.Type")]))` type of sample:
+
+```{r sampletypeR3}
+result <- data.frame(table(df.samples[,c("Sample.Type")]))
+colnames(result) <- c("Sample.Type", "# tubes")
+pander::pander(result)
+```
+
+***Comment***: the total number of tubes should be equal to the number of lines.
+
+# Freezer 1535, Aliquot R2
+
+## File informations
+
+```{r loaddataR2}
+path <- "/Volumes/LabExMI/Users/Nolwenn/FreezerPro/DataToImport/"
+filename <- "Stools_freezer1535_R2_samples.csv"
+df.samples <- read.csv(file = paste(path, filename, sep =""),
+                       header=TRUE, sep=',', stringsAsFactors = FALSE)
+```
+
+QC of a file generated to import Stool aliquot sample information into FreezerPro.
+
+* **Filename**: `r filename`
+  + **file creation date:** 2016-08-29
+  + **number of rows:** `r nrow(df.samples)`
+  + **number of columns:** `r ncol(df.samples)`
+  + **column names:** `r names(df.samples)`
+
+## Data informations
+
+### Freezers
+
+```{r freezerinfoR2}
+result <- data.frame(table(df.samples[,c("Freezer", "FreezerBarcode")]))
+colnames(result) <- c("Freezer", "FreezerBarcode", "# tubes")
+pander::pander(result)
+```
+
+***Comment***: only assigned to one freezer, with `r result[,3]` tubes.
+
+### Boxes
+```{r boxinfosR2}
+result <- ddply(df.samples, .(Box, BoxBarcode), nrow)
+colnames(result) <- c("Box", "BoxBarcode", "# tubes")
+pander::pander(result)
+```
+
+***Comments***: expects to have one barcode per box.
+
+### Sample box type
+
+```{r sampleinfosR2}
+result <- data.frame(table(df.samples[,"BoxType"]))
+colnames(result) <- c("BoxType", "# tubes")
+pander::pander(result)
+```
+
+***Comment***: should be only assigned to one box type
+
+### Shelves
+
+```{r shelfinfosR2}
+result <- ddply(df.samples, .(Level1, ShelfBarcode), nrow)
+colnames(result) <- c("Level1", "ShelfBarcode", "# tubes")
+pander::pander(result)
+```
+
+***Comment***: each shelf should be assign to its expected barcode
+
+### Racks
+
+```{r rackinfosR21}
+result <- data.frame(table(df.samples[,c("Level1","Level2")]))
+colnames(result) <- c("Level1", "Level2", "# tubes")
+pander::pander(result)
+```
+
+***Comment***: each rack compartment should be assign to its expected shelf
+
+```{r rackinfosR22}
+result <- ddply(df.samples, .(Box,Level2), nrow)
+colnames(result) <- c("Box", "Level2", "# tubes")
+pander::pander(result)
+```
+
+***Comment***: each box should be assign to its respective rack compartment
+
+### Box position
+
+Expect each position is unique in each box.
+
+```{r posinfosR2}
+result <- table(df.samples[,c("Box", "Position")])
+levs <- unique(result)
+result <- factor(result, levels = sort(levs))
+result <- result[result != 0]
+result <- factor(result)
+result <- data.frame(table(factor(result)))
+colnames(result) <- c("# occurences", "# tubes")
+pander::pander(result)
+```
+
+***Comment***: if more than one occurence, please check the Stool Aliquot samples source file.
+
+## Sample infos
+
+### Tube names (barcode)
+
+Number of lines in file: **`r nrow(df.samples)`**
+
+Number of unique samples: **`r length(unique(df.samples[,c("Name")]))`**
+
+***Comment***: the number of unique samples should be equal to number of lines in the file.
+
+### Sample type
+
+File to import into FreezerPro contains `r length(unique(df.samples[,c("Sample.Type")]))` type of sample:
+
+```{r sampletypeR2}
+result <- data.frame(table(df.samples[,c("Sample.Type")]))
+colnames(result) <- c("Sample.Type", "# tubes")
+pander::pander(result)
+```
+***Comment***: the total number of tubes should be equal to the number of lines.

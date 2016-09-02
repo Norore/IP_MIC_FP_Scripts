@@ -52,22 +52,25 @@ for f_stool in l_files:
     del df_stool["Unnamed: 1"], df_stool["Unnamed: 2"], df_stool["Location"]
     if "Unnamed: 6" in df_stool.columns:
         del df_stool["Unnamed: 6"]
-
+    # df_stool["RackBarcode"] = df_stool.columns[0]
+    # df_stool["RackBarcode"] = df_stool["RackBarcode"].str.replace("Rack: ", "")
     # rename columns
-    df_stool.columns = ["Box", "Freezer", "Shelf"]
+    df_stool.columns = ["Box", "Freezer", "Shelf"]#, "RackBarcode"]
 
     # split column Box
     newcols = pd.DataFrame(df_stool["Box"].str.split(",").tolist(),
                            columns=["Position", "Box", "Name"])
 
     # change position format for FreezerPro database
-    newcols["Position"] = newcols["Position"].str.replace(r'([A-Z]+)[0]?(\d+)', r'\2/\1')
-    newcols["Box"] = newcols["Box"].str.replace(r'MIC_Feces_Box[0]?(\d+)_[LR][123]?', r'box \1')
+    df_stool["Position"] = newcols["Position"].str.replace(r'([A-Z]+)[0]?(\d+)', r'\2/\1')
+    df_stool["BoxBarcode"] = newcols["Box"]
+    df_stool["Box"] = newcols["Box"].str.replace(r'MIC_Feces_Box[0]?(\d+)_[LR][123]?', r'box \1')
     freezer = 'Freezer '+str(list(df_stool["Freezer"].unique()).pop())
+    df_stool["ShelfBarcode"] = df_stool["Shelf"]
     df_stool["Shelf"] = df_stool["Shelf"].str.replace(r'' + freezer + 'Shelf(\d+)', r'Shelf \1')
+    df_stool["Name"] = newcols["Name"]
 
-    for col in ["Box", "Position", "Name"]:
-        df_stool[col] = newcols[col]
+    del newcols
 
     # add Sample Type name "Stool"
     df_stool["Sample Type"] = "Stool"

@@ -1,0 +1,140 @@
+---
+title: "TruCulture Trizol samples for FreezerPro import"
+author: "Nolwenn Lavielle"
+date: "25 août 2016"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+## File informations
+
+```{r loaddata}
+path <- "/Volumes/LabExMI/Users/Nolwenn/FreezerPro/DataToImport/"
+filename <- "TC_Trizol_rack_samples.csv"
+df.samples <- read.csv(file = paste(path, filename, sep =""), 
+                       header=TRUE, sep=',', stringsAsFactors = FALSE)
+```
+
+QC of a file generated to import TruCulture Trizol sample information into FreezerPro.
+
+* **Filename**: `r filename`
+  + **file creation date:** 2016-08-25
+  + **number of rows:** `r nrow(df.samples)`
+  + **number of columns:** `r ncol(df.samples)`
+  + **column names:** `r names(df.samples)`
+  
+The file to import contains source tubes used for stimulation analyzis.
+
+## Data informations
+
+**Freezers**:
+
+```{r freezerinfo}
+library(plyr)
+result <- ddply(df.samples, .(Freezer, FreezerBarcode), nrow)
+colnames(result) <- c("Freezer", "FreezerBarcode", "# tubes")
+pander::pander(result)
+```
+
+Each freezer is assign to the expected barcode.
+
+**Box type**:
+
+```{r sampleinfos}
+result <- data.frame(table(df.samples[,"BoxType"]))
+colnames(result) <- c("BoxType", "# tubes")
+pander::pander(result)
+```
+
+Each sample is assign to the expected box type for FreezerPro.
+
+**Shelves**:
+```{r shelfinfos2}
+pander::pander(table(df.samples[,"Level1"]))
+shelves <- ddply(df.samples, .(ShelfBarcode, Level1), nrow)
+colnames(shelves) <- c("ShelfBarcode", "Level1", "# tubes")
+pander::pander(shelves)
+```
+
+Each shelf is assign to the expected barcode.
+
+**Racks**:
+```{r rackinfos}
+result <- data.frame(table(df.samples[,"Level2"]))
+colnames(result) <- c("Level2", "# tubes")
+pander::pander(result)
+```
+
+```{r rackinfos2}
+result <- table(df.samples[,c("Level2","ShelfBarcode")])
+levs <- unique(result)
+result <- factor(result, levels = sort(levs))
+result <- result[result!="0"]
+result <- factor(result)
+barplot(table(result), col = "royalblue3", border = "royalblue3", 
+        main = "Number of tube per rack", xlab = "Number of tube per rack", 
+        ylab = "Number of rack")
+```
+
+```{r rackinfos3}
+result <- data.frame(colSums(table(df.samples[,c("Level2","ShelfBarcode")])))
+colnames(result) <- "# tubes"
+pander::pander(result)
+```
+
+### Box position
+
+```{r posinfos}
+result <- table(df.samples[, c("Box", "Position")])
+levs <- unique(result)
+result <- factor(result, levels = sort(levs))
+barplot(table(result), col = "royalblue3", border = "royalblue3", 
+        main = "Number of tube per box", xlab = "Number of tube per box", 
+        ylab = "Number of box")
+```
+
+## Sample infos
+
+### Number of tubes in funciton of StimulusID and VisitID
+
+```{r stimidvsvisidinfos}
+subdf <- df.samples[, c("VisitID", "StimulusID")]
+lvls <- unique(subdf$VisitID)
+subdf$VisitID <- factor(subdf$VisitID, levels = lvls)
+result <- table(subdf)
+pander::pander(result)
+```
+
+
+***Comment***:
+
+* first line: StimulusID
+* first column: VisitID
+
+### Number of tubes in function of StimulusID and BatchID
+
+```{r stimidvsbatidinfos}
+result <- table(df.samples[, c("BatchID", "StimulusID")])
+pander::pander(result)
+```
+
+***Comment***:
+
+* first line: StimulusID
+* first column: BatchID
+
+### Number of tubes in function of BatchID and VisitID
+```{r batidvsvisidinfos}
+result <- ddply(df.samples, .(VisitID, BatchID), nrow)
+colnames(result) <- c("VisitID", "BatchID", "# tubes")
+```
+
+## DonorIDscanned infos
+
+* `r length(unique(df.samples[,"DonorIDscanned"]))` unique DonorIDscanned in file. 
+* `r length(unique(df.samples[,"barcode"]))` unique barcode in file.
+
+***Comment***: *DonorIDscanned* column is a copy of column *barcode*.
