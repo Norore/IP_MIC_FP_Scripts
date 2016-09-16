@@ -3,12 +3,12 @@ import pandas as pd
 import argparse
 import re
 
-parser = argparse.ArgumentParser(description="Generate stools samples for FreezerPro from our data Excel file")
+parser = argparse.ArgumentParser(description="Generate supernatants samples for FreezerPro from our data Excel file")
 parser.add_argument('-f', '--freezer', required=True,
                     help="File with freezer data in CSV format for FreezerPro")
 parser.add_argument('-l', '--labkey', required=True,
                     help="""File with all the samples stored in LabKey,
-                    in CSV format, to use for merge with Trizol pellet data""")
+                    in CSV format, to use to extract Supernatants data""")
 parser.add_argument('-o', '--output', required=True,
                     help="Output file name that will be generate in CSV format for FreezerPro")
 args = vars(parser.parse_args())
@@ -35,8 +35,8 @@ del df_super["index"]
 
 # Create new colum to work in it to prepare merges
 df_super["DonorInfos"] = df_super["Level2"]
-df_super["donor_start"] = df_super["Level2"]
-df_super["donor_stop"] = df_super["Level2"]
+df_super["donor_start"] = 0
+df_super["donor_stop"] = 0
 # split lines Donors [0-9]{3}>>[0-9]{3} | Donors [0-9]{3}>>[0-9]{3}
 inc = 1
 lines = len(df_super)
@@ -64,18 +64,21 @@ for i in range(lines):
             regex.sub(r'\5', df_super.iloc[i]["Level2"]))
         df_super.loc[i+inc, "donor_stop"] = int(
             regex.sub(r'\6', df_super.iloc[i]["Level2"]))
-        inc += 1
 
-    elif re.match(r'^Donors X[0-9]{2}>>X[0-9]{2}$',
-                  df_super.iloc[i]["Level2"]):
-        regex = re.compile(r'^Donors X([0-9]{2})>>X([0-9]{2})$')
-        df_super.loc[i, "donor_start"] = int(
-            regex.sub(r'\1', df_super.iloc[i]["Level2"]))
-        df_super.loc[i, "donor_stop"] = int(
-            regex.sub(r'\2', df_super.iloc[i]["Level2"]))
+    # elif re.match(r'^Donors X[0-9]{2}>>X[0-9]{2}$',
+    #               df_super.iloc[i]["Level2"]):
+    #       df_super.loc[i, "donor_start"] = 0
+    #       df_super.loc[i, "donor_stop"] = 0
+    #     inc += 1
+    #     regex = re.compile(r'^Donors X([0-9]{2})>>X([0-9]{2})$')
+    #     df_super.loc[i, "donor_start"] = int(
+    #         regex.sub(r'\1', df_super.iloc[i]["Level2"]))
+    #     df_super.loc[i, "donor_stop"] = int(
+    #         regex.sub(r'\2', df_super.iloc[i]["Level2"]))
 
-    else:
-        df_super.loc[i, "DonorInfos"] = df_super.iloc[i]["Level2"]
+    # else:
+    #     df_super.loc[i, "DonorInfos"] = df_super.iloc[i]["Level2"]
+    #     inc += 1
 
 l_donors = df_super["DonorInfos"].unique().tolist()
 dic = df_super[["DonorInfos", "donor_start", "donor_stop"]].ix[0]
@@ -100,6 +103,9 @@ for di in l_donors:
 # merge df_super and df_tomerge
 df_infreezers = pd.merge(df_super, df_tomerge, on=["DonorInfos",
                                                    "donor_start", "donor_stop"])
+outer_result = pd.merge(df_super, df_tomerge, how = "outer",
+                        on=["DonorInfos",
+                            "donor_start", "donor_stop"])
 
 # prepare columns to use for merge
 df_infreezers["AliquotID"] = df_infreezers["Level2_Desc"].str.\
@@ -143,6 +149,7 @@ df_infreezers["AliquotID"] = df_infreezers["AliquotID"].astype(int)
 df_labkey["AliquotID"] = df_labkey["AliquotID"].astype(int)
 df_infreezers["DonorID"] = df_infreezers["DonorID"].astype(int)
 df_labkey["DonorID"] = df_labkey["DonorID"].astype(int)
+print(df_infreezers["VisitID"].head())
 df_infreezers["VisitID"] = df_infreezers["VisitID"].astype(int)
 df_labkey["VisitID"] = df_labkey["VisitID"].astype(int)
 df_infreezers["StimulusID"] = df_infreezers["StimulusID"].astype(int)
@@ -152,4 +159,8 @@ result = pd.merge(df_infreezers, df_labkey, on=["DonorID", "AliquotID",
                                                 "VisitID", "StimulusID"],
                   how='inner')
 
+del result["DonorInfos"], result["donor_start"], result["donor_stop"]
+
 result.to_csv(o_samples, index=False, header=True)
+
+outer_result.to_csv("unmerged_"+o_samples, inde=False, header=True)
