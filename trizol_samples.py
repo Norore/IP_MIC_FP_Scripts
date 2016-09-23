@@ -177,7 +177,7 @@ for nb_boxpos in range(1, 21):
     if nb_boxpos % 2 == 0:
         for pos in range(42, 82):
             boxpos.append(nb_boxpos)
-            position.append(pos-1)
+            position.append(pos)
             stimulusid.append(pos-41)
     if nb_boxpos % 2 == 1:
         for pos in range(1, 41):
@@ -416,8 +416,11 @@ merge_ftls["BoxPos"] = merge_ftls["BoxPos"].astype(int)
 # rename columns
 merge_ftls.rename(columns={"volume": "Volume",
                            "NbExtraction": "FreezeThaw",
-                           "rackId": "RackID"},
+                           "rackId": "RackID",
+                           "barcode": "Barcode"},
                   inplace=True)
+
+merge_ftls["Name"] = merge_ftls["Barcode"]
 
 # save result dataframe in a new CSV file
 merge_ftls.to_csv(o_samples, index=False, header=True)

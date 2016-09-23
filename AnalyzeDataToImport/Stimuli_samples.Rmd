@@ -1,7 +1,7 @@
 ---
 title: "Stimuli samples analyzes for FreezerPro import"
 author: "Nolwenn Lavielle"
-date: "22 août 2016"
+date: "21 sept 2016"
 output: pdf_document
 ---
 
@@ -22,7 +22,7 @@ df.samples <- read.csv(file = paste(path, filename, sep =""),
 QC of a file generated to import Stool aliquot sample information into FreezerPro.
 
 * **Filename**: `r filename`
-  + **file creation date:** 2016-08-03
+  + **file creation date:** 2016-09-21
   + **number of rows:** `r nrow(df.samples)`
   + **number of columns:** `r ncol(df.samples)`
   + **column names:** `r names(df.samples)`

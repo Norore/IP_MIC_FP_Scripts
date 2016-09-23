@@ -209,5 +209,17 @@ df_nswlabfre = pd.merge(df_nswlab,
                         on=['Box', 'Level2'],
                         how='left')
 
+# format output
+df_nswlabfre.rename(columns={"barcodeId": "BarcodeID", "visitId": "VisitID",
+                            "donorId": "DonorID", "batchId": "BatchID",
+                            "volume": "Volume", "TubeScan": "Name",
+                            "aliquotId": "AliquotID"},
+                    inplace=True)
+del df_nswlabfre["insertDate"], df_nswlabfre["updateDate"], \
+    df_nswlabfre["deleted"], df_nswlabfre["RackID"]
+df_nswlabfre["FreezerBarcode"] = "MIC_Freezer#_"+df_nswlabfre["Freezer"]
+df_nswlabfre["ShelfBarcode"] = "MIC Freezer"+df_nswlabfre["Freezer"]+" Shelf"+\
+                                df_nswlabfre["Shelf"]
+
 # save result dataframe in a new CSV file
 df_nswlabfre.to_csv(o_samples, index = False, header = True)

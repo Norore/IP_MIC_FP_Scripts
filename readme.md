@@ -8,7 +8,7 @@ Currently 3 python scripts:
 * __create_freezers_from_json.py__: generates the freezers file in CSV format for FreezerPro from a JSON file format
 * __get_duplicates.py__: short script to get the DonorIDscanned duplicate tube names from file ../DataToPrepare/3.5000samples_WL_QCs_DL_02Jul2015.xls
 * __stools_samples.py__: generates stools samples aliquots for FreezerPro from a directory with CSV files.
-* __supernatants_sampes.py__: generates supernatants samples for FreezerPro from a CSV file create from the samples LabKey table.
+* __supernatants_samples.py__: generates supernatants samples for FreezerPro from a CSV file create from the samples LabKey table.
 * __stimuli_samples_tmp.py__: generates supernatants samples for FreezerPro from an Excel file. Call *_tmp* because the boxes are not yet mapped
 * __trizol_samples.py__: generates trizol pellet samples for FreezerPro from an Excel file
 * __trizol_samples_old.py__: save previous version of __trizol_samples.py__
@@ -96,7 +96,7 @@ Example:
 
 ```
 ./supernatants_samples.py -f ../DataToImport/freezers.csv
- -l ../DataToPrepare/samples_table_labkey.csv
+ -l ../DataToPrepare/Common/samples_table_labkey.csv
  -o ../DataToImport/TC_supernatants_samples.csv
 ```
 
@@ -163,7 +163,7 @@ Example:
  -t ../DataToPrepare/1.LabExMI_TrucultureMapping_21Nov2014_FinalVersion.xlsx
  -s FinalMapping
  -o ../DataToImport/TC_Trizol_rack_samples.csv
- -l ../DataToPrepare/samples_table_labkey.csv
+ -l ../DataToPrepare/Common/samples_table_labkey.csv
  -i ../DataToPrepare/3.5000samples_WL_QCs_DL_02Jul2015.xls
  -m 5000samples_WL_QCs_DL_02Jul2015
 ```
