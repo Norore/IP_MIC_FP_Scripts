@@ -123,7 +123,7 @@ df_visit2["Level1_Descr"] = df_visit2["Level1"].str.replace(r"MIC Freezer\d{4} (
 
 # df_visit2["Level2"] = "DX48>>X50_V2"
 df_visit2["Level2"] = "DX48>>X50_V2"
-df_visit2.loc[(df_visit2["DonorID"] >= 1) & (df_visit2["DonorID"] <= 98), "Level2"] = "D001>>096_V2 D101>>195_V2"
+df_visit2.loc[(df_visit2["DonorID"] >= 1) & (df_visit2["DonorID"] <= 96), "Level2"] = "D001>>096_V2 D101>>195_V2"
 df_visit2.loc[(df_visit2["DonorID"] >= 101) & (df_visit2["DonorID"] <= 195), "Level2"] = "D001>>096_V2 D101>>195_V2"
 df_visit2.loc[(df_visit2["DonorID"] >= 203) & (df_visit2["DonorID"] <= 293), "Level2"] = "D203>>293_V2 D304>>394_V2"
 df_visit2.loc[(df_visit2["DonorID"] >= 304) & (df_visit2["DonorID"] <= 394), "Level2"] = "D203>>293_V2 D304>>394_V2"
@@ -133,8 +133,8 @@ df_visit2.loc[(df_visit2["DonorID"] >= 604) & (df_visit2["DonorID"] <= 695), "Le
 df_visit2.loc[(df_visit2["DonorID"] >= 701) & (df_visit2["DonorID"] <= 793), "Level2"] = "D604>>695_V2 D701>>793_V2"
 df_visit2.loc[(df_visit2["DonorID"] >= 802) & (df_visit2["DonorID"] <= 896), "Level2"] = "D802>>896_V2 D901>>992_V2"
 df_visit2.loc[(df_visit2["DonorID"] >= 901) & (df_visit2["DonorID"] <= 992), "Level2"] = "D802>>896_V2 D901>>992_V2"
-df_visit2["Level2_Descr"] = df_visit2["Level2"].str.replace(r"D(\d+)>>(\d+)_V2 D(\d+)>>(\d+)_V(2)", r'"Rack donors \1 to \2 and donors \3 to \4, visit \5"')
-df_visit2["Level2_Descr"] = df_visit2["Level2"].str.replace(r"DX(\d+)>>X(\d+)_V(2)", r'"Rack donors X\1 to X\2, visit \3"')
+df_visit2["Level2_Descr"] = df_visit2["Level2"].str.replace(r"D(\d+)>>(\d+)_V2 D(\d+)>>(\d+)_V(2)", r'"Rack Donors \1 to \2 and Donors \3 to \4, Visit \5"')
+df_visit2["Level2_Descr"] = df_visit2["Level2"].str.replace(r"DX(\d+)>>X(\d+)_V(2)", r'"Rack Donors X\1 to X\2, Visit \3"')
 df_visit2["Level2_Descr"] = df_visit2["Level2_Descr"].str.replace(r"001 to 096", r"1 to 96")
 
 df_visit2["VisitID"] = "2"
@@ -153,7 +153,7 @@ df_visit2.loc[(df_visit2["StimulusID"] >= 22) & (df_visit2["StimulusID"] <= 28),
 df_visit2.loc[(df_visit2["StimulusID"] >= 29) & (df_visit2["StimulusID"] <= 35),"Level3"] = df_visit2["Level3"].str.replace(r"01-07", r"29-35")
 df_visit2.loc[(df_visit2["StimulusID"] >= 36) & (df_visit2["StimulusID"] <= 40),"Level3"] = df_visit2["Level3"].str.replace(r"01-07", r"36-40")
 
-df_visit2["Level3_Descr"] = "\"Drawer with plasma for donors 1 to 96 and donors 101 to 195, stimulus 1 to 7, visit 2, aliquot "+df_visit2["AliquotID"]+"\""
+df_visit2["Level3_Descr"] = "\"Drawer with Plasma for Donors 1 to 96 and Donors 101 to 195, Stimulus 1 to 7, Visit 2, Aliquot "+df_visit2["AliquotID"]+"\""
 df_visit2.loc[df_visit2["Level3"].str.contains("08-14"), "Level3_Descr"] = df_visit2["Level3_Descr"].str.replace(r"1 to 7", r"8 to 14")
 df_visit2.loc[df_visit2["Level3"].str.contains("15-21"), "Level3_Descr"] = df_visit2["Level3_Descr"].str.replace(r"1 to 7", r"15 to 21")
 df_visit2.loc[df_visit2["Level3"].str.contains("22-28"), "Level3_Descr"] = df_visit2["Level3_Descr"].str.replace(r"1 to 7", r"22 to 28")
@@ -170,12 +170,12 @@ df_visit2["Sample Type"] = "PLASMA"
 
 df_visit2["StimulusID"] = df_visit2["StimulusID"].astype(str)
 
-df_visit2["Box_Descr"] = "\"Box of stimulus "+df_visit2["StimulusID"]+" for donors 1 to 96 and donors 101 to 195, visit 2, aliquot "+df_visit2["AliquotID"]+"\""
-df_visit2.loc[df_visit2["Level2"].str.contains("D203"), "Box_Descr"] = df_visit2["Box_Descr"].str.replace(r"1 to 96 and donors 101 to 195", r"203 to 293 and donors 304 to 394")
-df_visit2.loc[df_visit2["Level2"].str.contains("D402"), "Box_Descr"] = df_visit2["Box_Descr"].str.replace(r"1 to 96 and donors 101 to 195", r"402 to 497 and donors 507 to 597")
-df_visit2.loc[df_visit2["Level2"].str.contains("D604"), "Box_Descr"] = df_visit2["Box_Descr"].str.replace(r"1 to 96 and donors 101 to 195", r"604 to 695 and donors 701 to 793")
-df_visit2.loc[df_visit2["Level2"].str.contains("D802"), "Box_Descr"] = df_visit2["Box_Descr"].str.replace(r"1 to 96 and donors 101 to 195", r"802 to 896 and donors 901 to 992")
-df_visit2.loc[df_visit2["Level2"].str.contains("DX"), "Box_Descr"] = df_visit2["Box_Descr"].str.replace(r"1 to 96 and donors 101 to 195", r"X48 to X50")
+df_visit2["Box_Descr"] = "\"Box of Stimulus "+df_visit2["StimulusID"]+" for Donors 1 to 96 and Donors 101 to 195, Visit 2, Aliquot "+df_visit2["AliquotID"]+"\""
+df_visit2.loc[df_visit2["Level2"].str.contains("D203"), "Box_Descr"] = df_visit2["Box_Descr"].str.replace(r"1 to 96 and Donors 101 to 195", r"203 to 293 and Donors 304 to 394")
+df_visit2.loc[df_visit2["Level2"].str.contains("D402"), "Box_Descr"] = df_visit2["Box_Descr"].str.replace(r"1 to 96 and Donors 101 to 195", r"402 to 497 and Donors 507 to 597")
+df_visit2.loc[df_visit2["Level2"].str.contains("D604"), "Box_Descr"] = df_visit2["Box_Descr"].str.replace(r"1 to 96 and Donors 101 to 195", r"604 to 695 and Donors 701 to 793")
+df_visit2.loc[df_visit2["Level2"].str.contains("D802"), "Box_Descr"] = df_visit2["Box_Descr"].str.replace(r"1 to 96 and Donors 101 to 195", r"802 to 896 and Donors 901 to 992")
+df_visit2.loc[df_visit2["Level2"].str.contains("DX"), "Box_Descr"] = df_visit2["Box_Descr"].str.replace(r"1 to 96 and Donors 101 to 195", r"X48 to X50")
 
 df_visit2["Box"] = "MIC_S"+df_visit2["StimulusID"]+"_V2_A"+df_visit2["AliquotID"]+"_D1-96 MIC_S"+df_visit2["StimulusID"]+"_V2_A"+df_visit2["AliquotID"]+"_D101-195"
 df_visit2.loc[df_visit2["Level2"].str.contains("D203"), "Box"] = df_visit2["Box"].str.replace(r"1-96", r"203-293")
@@ -188,28 +188,38 @@ df_visit2.loc[df_visit2["Level2"].str.contains("D604"), "Box"] = df_visit2["Box"
 df_visit2.loc[df_visit2["Level2"].str.contains("D802"), "Box"] = df_visit2["Box"].str.replace(r"101-195", r"901-992")
 df_visit2.loc[df_visit2["Level2"].str.contains("DX"), "Box"] = "MIC_S"+df_visit2["StimulusID"]+"_V2_A"+df_visit2["AliquotID"]+"_DX48-X50"
 
-df_visit2["Level3_Descr"].unique()
-
-df_visit2["Box_Descr"] = "\"Box of stimulus "+df_visit2["StimulusID"]+" for donors 1 to 96 and donors 101 to 195, visit 2, aliquot "+df_visit2["AliquotID"]+"\""
-df_visit2.loc[df_visit2["Level2"].str.contains("D203"), "Box_Descr"] = df_visit2["Box_Descr"].str.replace(r"1 to 96", r"203 to 293")
-df_visit2.loc[df_visit2["Level2"].str.contains("D402"), "Box_Descr"] = df_visit2["Box_Descr"].str.replace(r"1 to 96", r"402 to 497")
-df_visit2.loc[df_visit2["Level2"].str.contains("D604"), "Box_Descr"] = df_visit2["Box_Descr"].str.replace(r"1 to 96", r"604 to 695")
-df_visit2.loc[df_visit2["Level2"].str.contains("D802"), "Box_Descr"] = df_visit2["Box_Descr"].str.replace(r"1 to 96", r"802 to 896")
-df_visit2.loc[df_visit2["Level2"].str.contains("D203"), "Box_Descr"] = df_visit2["Box_Descr"].str.replace(r"101 to 195", r"304 to 394")
-df_visit2.loc[df_visit2["Level2"].str.contains("D402"), "Box_Descr"] = df_visit2["Box_Descr"].str.replace(r"101 to 195", r"507 to 597")
-df_visit2.loc[df_visit2["Level2"].str.contains("D604"), "Box_Descr"] = df_visit2["Box_Descr"].str.replace(r"101 to 195", r"701 to 793")
-df_visit2.loc[df_visit2["Level2"].str.contains("D802"), "Box_Descr"] = df_visit2["Box_Descr"].str.replace(r"101 to 195", r"901 to 992")
-df_visit2.loc[df_visit2["Level2"].str.contains("DX"), "Box_Descr"] = "\"Box of stimulus "+df_visit2["StimulusID"]+" for donors X48 to X50, visit 2, aliquot "+df_visit2["AliquotID"]+"\""
-
 df_visit2["StimulusID"] = df_visit2["StimulusID"].astype(str)
 
-df_visit2["Box_Descr"] = "\"Box of stimulus "+df_visit2["StimulusID"]+" for donors 1 to 96 and donors 101 to 195, visit 2, aliquot "+df_visit2["AliquotID"]+"\""
+# replacement donors
+df_visit2.loc[df_visit2["DonorID"] == 96, "DonorID"] = 5096
+df_visit2.loc[df_visit2["DonorID"] == 104, "DonorID"] = 5104
+df_visit2.loc[df_visit2["DonorID"] == 122, "DonorID"] = 5122
+df_visit2.loc[df_visit2["DonorID"] == 167, "DonorID"] = 5167
+df_visit2.loc[df_visit2["DonorID"] == 178, "DonorID"] = 5178
+df_visit2.loc[df_visit2["DonorID"] == 219, "DonorID"] = 5219
+df_visit2.loc[df_visit2["DonorID"] == 268, "DonorID"] = 5268
+df_visit2.loc[df_visit2["DonorID"] == 279, "DonorID"] = 5279
+df_visit2.loc[df_visit2["DonorID"] == 303, "DonorID"] = 5303
+df_visit2.loc[df_visit2["DonorID"] == 308, "DonorID"] = 5308
+df_visit2.loc[df_visit2["DonorID"] == 534, "DonorID"] = 5534
+df_visit2.loc[df_visit2["DonorID"] == 701, "DonorID"] = 5701
 
-df_visit2["Box"] = "MIC_S"+df_visit2["StimulusID"]+"_V2_A"+df_visit2["AliquotID"]+"_D1-96 MIC_S"+df_visit2["StimulusID"]+"_V2_A"+df_visit2["AliquotID"]+"_D101-195"
+df_visit2.loc[df_visit2["Sample Source"] == 96, "Sample Source"] = 5096
+df_visit2.loc[df_visit2["Sample Source"] == 104, "Sample Source"] = 5104
+df_visit2.loc[df_visit2["Sample Source"] == 122, "Sample Source"] = 5122
+df_visit2.loc[df_visit2["Sample Source"] == 167, "Sample Source"] = 5167
+df_visit2.loc[df_visit2["Sample Source"] == 178, "Sample Source"] = 5178
+df_visit2.loc[df_visit2["Sample Source"] == 219, "Sample Source"] = 5219
+df_visit2.loc[df_visit2["Sample Source"] == 268, "Sample Source"] = 5268
+df_visit2.loc[df_visit2["Sample Source"] == 279, "Sample Source"] = 5279
+df_visit2.loc[df_visit2["Sample Source"] == 303, "Sample Source"] = 5303
+df_visit2.loc[df_visit2["Sample Source"] == 308, "Sample Source"] = 5308
+df_visit2.loc[df_visit2["Sample Source"] == 534, "Sample Source"] = 5534
+df_visit2.loc[df_visit2["Sample Source"] == 701, "Sample Source"] = 5701
 
 df_visit2["DonorID"] = df_visit2["DonorID"].astype(str)
 
-df_visit2["Description"] = '"Donor '+df_visit2["DonorID"]+', stimulus '+df_visit2["StimulusID"]+', visit 2, aliquot '+df_visit2["AliquotID"]+'"'
+df_visit2["Description"] = '"Donor '+df_visit2["DonorID"]+', Stimulus '+df_visit2["StimulusID"]+', Visit 2, Aliquot '+df_visit2["AliquotID"]+'"'
 
 df_labkey = pd.read_csv("/Volumes/LabExMI/Users/Nolwenn/FreezerPro/DataToPrepare/Common/samples_table_labkey.csv")
 df_labkey.rename(columns={"barcodeId": "Name", "donorId": "DonorID",
@@ -237,4 +247,4 @@ df_labkey_plasma["VisitID"] = df_labkey_plasma["VisitID"].astype(str)
 df_labkey_plasma["AliquotID"] = df_labkey_plasma["AliquotID"].astype(str)
 
 df_visit2_final = pd.merge(df_labkey_plasma, df_visit2)
-df_visit2_final.to_csv("/Volumes/LabExMI/Users/Nolwenn/FreezerPro/DataToImport/TC_supernatants_samples_V2_all_20161010.csv", header=True, index=False)
+df_visit2_final.to_csv("/Volumes/LabExMI/Users/Nolwenn/FreezerPro/DataToImport/TC_supernatants_samples_V2_all_20161014.csv", header=True, index=False)
