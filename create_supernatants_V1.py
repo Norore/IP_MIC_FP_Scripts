@@ -72,7 +72,6 @@ df_final.reset_index(inplace=True)
 del(df_final["index"])
 
 df_final["Volume"] = 400.0
-df_final["Sample Type"] = "PLASMA"
 df_final["ThawCycle"] = 0
 df_final["CreationDate"] = "05/10/2016"
 df_final["BatchID"] = "A"
@@ -82,6 +81,8 @@ df_final["Sample Source"] = df_final["DonorID"]
 df_final["VisitID"] = df_final["VisitID"].astype(str)
 
 df_final["AliquotID"] = df_final["AliquotID"].astype(int)
+
+df_final["Sample Type"] = "PLASMA_"+df_final["AliquotID"]
 
 df_final["Freezer"] = "MIC_Freezer_1532"
 df_final.loc[df_final["AliquotID"] == 2, "Freezer"] = df_final["Freezer"].str.replace("32", "34")
@@ -132,7 +133,7 @@ df_final.loc[(df_final["DonorID"] >= 801) & (df_final["DonorID"] <= 896), "Level
 df_final.loc[(df_final["DonorID"] >= 901) & (df_final["DonorID"] <= 996), "Level2_Descr"] = df_final["Level2_Descr"].str.replace(r"X97 to X00", r"901 to 996")
 
 df_final["AliquotID"] = df_final["AliquotID"].astype(str)
-df_final["Level3"] = "MIC_Plasma_"+df_final["Level2"]+"_S01-07_V"+df_final["VisitID"]+"_A"+df_final["AliquotID"]
+df_final["Level3"] = "MIC_Plasma_"+df_final["Level2"].str.replace(r"D(\d+)>>(\d+)_V1", r"D\1-\2")+"_S01-07_V"+df_final["VisitID"]+"_A"+df_final["AliquotID"]
 df_final.loc[df_final["StimulusID"] > 7, "Level3"] = df_final["Level3"].str.replace("S01-07", "S08-14")
 df_final.loc[df_final["StimulusID"] > 14, "Level3"] = df_final["Level3"].str.replace("S08-14", "S15-21")
 df_final.loc[df_final["StimulusID"] > 21, "Level3"] = df_final["Level3"].str.replace("S15-21", "S22-28")
@@ -210,4 +211,11 @@ df_merged.rename(columns={"batchId": "BatchID", "BarcodeID": "Name", "insertDate
 df_merged["CreationDate"] = df_merged["CreationDate"].str.replace(" \d+:\d+:\d+$", "")
 df_merged["UpdateDate"] = df_merged["UpdateDate"].str.replace(" \d+:\d+:\d+$", "")
 
-df_merged.to_csv("/Volumes/LabExMI/Users/Nolwenn/FreezerPro/DataToImport/TC_supernatants_samples_V1_all_20161014.csv", header=True, index=False)
+df_merged["FreezerBarcode"] = df_merged["Freezer"]
+df_merged["ShelfBarcode"] = df_merged["Level1"]
+df_merged["RackBarcode"] = df_merged["Level2"]
+df_merged["DrawerBarcode"] = df_merged["Level3"]
+df_merged["BOX_BARCODE"] = df_merged["Box"]
+df_merged["BoxBarcode"] = df_merged["Box"]
+
+df_merged.to_csv("/Volumes/LabExMI/Users/Nolwenn/FreezerPro/DataToImport/TC_supernatants_samples_V1_all_20161025.csv", header=True, index=False)

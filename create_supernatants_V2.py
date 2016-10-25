@@ -4,19 +4,38 @@ import pandas as pd
 df_v2 = pd.read_csv("/Volumes/LabExMI/Users/Nolwenn/FreezerPro/DataToPrepare/list_of_donors_visit2.csv")
 
 donors = [d for d in df_v2["SUBJID"]]
-df = pd.DataFrame({"DonorID": donors, "RackID": 6})
+df = pd.DataFrame({"DonorID": donors, "RackID": 6, "Group": 0})
+
+df.loc[df["DonorID"]==5096, "DonorID"] = 96
+df.loc[df["DonorID"]==5104, "DonorID"] = 104
+df.loc[df["DonorID"]==5122, "DonorID"] = 122
+df.loc[df["DonorID"]==5167, "DonorID"] = 167
+df.loc[df["DonorID"]==5178, "DonorID"] = 178
+df.loc[df["DonorID"]==5219, "DonorID"] = 219
+df.loc[df["DonorID"]==5268, "DonorID"] = 268
+df.loc[df["DonorID"]==5279, "DonorID"] = 279
+df.loc[df["DonorID"]==5303, "DonorID"] = 303
+df.loc[df["DonorID"]==5308, "DonorID"] = 308
+df.loc[df["DonorID"]==5534, "DonorID"] = 534
+df.loc[df["DonorID"]==5701, "DonorID"] = 701
 df.sort_values(by="DonorID", inplace=True)
 
-df.loc[(df["DonorID"] >= 1) & (df["DonorID"] <= 96), "RackID"] = 1
-df.loc[(df["DonorID"] >= 101) & (df["DonorID"] <= 195), "RackID"] = 1
-df.loc[(df["DonorID"] >= 203) & (df["DonorID"] <= 293), "RackID"] = 2
-df.loc[(df["DonorID"] >= 304) & (df["DonorID"] <= 394), "RackID"] = 2
-df.loc[(df["DonorID"] >= 402) & (df["DonorID"] <= 497), "RackID"] = 3
-df.loc[(df["DonorID"] >= 507) & (df["DonorID"] <= 597), "RackID"] = 3
-df.loc[(df["DonorID"] >= 604) & (df["DonorID"] <= 695), "RackID"] = 4
-df.loc[(df["DonorID"] >= 701) & (df["DonorID"] <= 793), "RackID"] = 4
-df.loc[(df["DonorID"] >= 802) & (df["DonorID"] <= 896), "RackID"] = 5
-df.loc[(df["DonorID"] >= 901) & (df["DonorID"] <= 992), "RackID"] = 5
+df.loc[(df["DonorID"] >= 1) & (df["DonorID"] <= 100), "Group"] = 1
+df.loc[(df["DonorID"] >= 101) & (df["DonorID"] <= 200), "Group"] = 2
+df.loc[(df["DonorID"] >= 201) & (df["DonorID"] <= 300), "Group"] = 1
+df.loc[(df["DonorID"] >= 301) & (df["DonorID"] <= 400), "Group"] = 2
+df.loc[(df["DonorID"] >= 401) & (df["DonorID"] <= 500), "Group"] = 1
+df.loc[(df["DonorID"] >= 501) & (df["DonorID"] <= 600), "Group"] = 2
+df.loc[(df["DonorID"] >= 601) & (df["DonorID"] <= 700), "Group"] = 1
+df.loc[(df["DonorID"] >= 701) & (df["DonorID"] <= 800), "Group"] = 2
+df.loc[(df["DonorID"] >= 801) & (df["DonorID"] <= 900), "Group"] = 1
+df.loc[(df["DonorID"] >= 901) & (df["DonorID"] <= 1000), "Group"] = 2
+
+df.loc[(df["DonorID"] >= 1) & (df["DonorID"] <= 200), "RackID"] = 1
+df.loc[(df["DonorID"] >= 201) & (df["DonorID"] <= 400), "RackID"] = 2
+df.loc[(df["DonorID"] >= 401) & (df["DonorID"] <= 600), "RackID"] = 3
+df.loc[(df["DonorID"] >= 601) & (df["DonorID"] <= 800), "RackID"] = 4
+df.loc[(df["DonorID"] >= 801) & (df["DonorID"] <= 1000), "RackID"] = 5
 
 racks = pd.DataFrame({"Level2": ["D001>>096_V2 D101>>195_V2",
                                  "D203>>293_V2 D304>>394_V2",
@@ -27,7 +46,7 @@ racks = pd.DataFrame({"Level2": ["D001>>096_V2 D101>>195_V2",
                       "RackID": [1, 2, 3, 4, 5, 6]})
 
 l_aliquots = [1, 2, 3]
-l_position = [i+1 for i in range(0, 96)]
+l_position = [i+1 for i in range(0, 100)]
 l_donors = [d for d in df["DonorID"]]
 l_stimuli = [i+1 for i in range(0, 40)]
 lines = []
@@ -52,7 +71,15 @@ df5["Position"] = [i+1 for i, v in enumerate(df5["DonorID"])]
 
 df_pos_tmp = pd.concat([df1, df2, df3, df4, df5])
 
-df6 = df[df["RackID"] == 6]
+df6 = df_pos_tmp[(df_pos_tmp["Position"] == 49)]
+df6 = pd.concat([df6, df_pos_tmp[(df_pos_tmp["Position"] == 50)]])
+df6 = pd.concat([df6, df_pos_tmp[(df_pos_tmp["Position"] > 98)]])
+df_pos_tmp = df_pos_tmp[df_pos_tmp["Position"] != 49]
+df_pos_tmp = df_pos_tmp[df_pos_tmp["Position"] != 50]
+df_pos_tmp.loc[df_pos_tmp["Position"] > 48, "Position"] = df_pos_tmp["Position"] - 2
+df6["RackID"] = 6
+df_pos_tmp = df_pos_tmp[df_pos_tmp["Position"] <= 96]
+df6.sort_values(by=["DonorID", "RackID", "Position"], inplace=True)
 
 import string
 string.uppercase
@@ -69,7 +96,6 @@ df6_7 = df6[(df6["DonorID"] >= 601) & (df6["DonorID"] <= 700)]
 df6_8 = df6[(df6["DonorID"] >= 701) & (df6["DonorID"] <= 800)]
 df6_9 = df6[(df6["DonorID"] >= 801) & (df6["DonorID"] <= 900)]
 df6_10 = df6[(df6["DonorID"] > 901) & (df6["DonorID"] <= 1000)]
-df6_11 = df6[(df6["DonorID"] > 1000)]
 
 df6_1["Position"] = [letters[i]+"/1" for i, v in enumerate(df6_1["DonorID"])]
 df6_2["Position"] = [letters[i]+"/2" for i, v in enumerate(df6_2["DonorID"])]
@@ -81,15 +107,16 @@ df6_7["Position"] = [letters[i]+"/7" for i, v in enumerate(df6_7["DonorID"])]
 df6_8["Position"] = [letters[i]+"/8" for i, v in enumerate(df6_8["DonorID"])]
 df6_9["Position"] = [letters[i]+"/9" for i, v in enumerate(df6_9["DonorID"])]
 df6_10["Position"] = [letters[i]+"/10" for i, v in enumerate(df6_10["DonorID"])]
-df6_11["Position"] = [letters[i]+"/11" for i, v in enumerate(df6_11["DonorID"])]
 
-df_pos_extra = pd.concat([df6_1, df6_2, df6_3, df6_4, df6_5, df6_6, df6_7, df6_8, df6_9, df6_10, df6_11])
+df_pos_extra = pd.concat([df6_1, df6_2, df6_3, df6_4, df6_5, df6_6, df6_7, df6_8, df6_9, df6_10])
 
 df_pos = pd.concat([df_pos_tmp, df_pos_extra])
-
+del df["RackID"]
 df_donor_pos = pd.merge(df, df_pos)
 
-df_visit2 = pd.merge(df_donor_pos, donors_as)
+df_visit2_tmp = pd.merge(df_donor_pos, donors_as)
+df_visit2 = pd.merge(df_visit2_tmp, racks)
+df_visit2.sort_values(by=["DonorID", "RackID", "Position"], inplace=True)
 del df_visit2["RackID"]
 
 df_visit2["Volume"] = 400.0
@@ -102,8 +129,6 @@ df_visit2_st = pd.merge(df_visit2, df_stim)
 df_visit2 = df_visit2_st
 
 df_visit2["ThawCycle"] = 0
-
-df_visit2["Sample Source"] = df_visit2["DonorID"]
 
 df_visit2["BoxType"] = "96 (12 x 8) Well Plate"
 
@@ -121,20 +146,20 @@ df_visit2.loc[df_visit2["AliquotID"] == 3, "Level1"] = df_visit2["Level1"].str.r
 
 df_visit2["Level1_Descr"] = df_visit2["Level1"].str.replace(r"MIC Freezer\d{4} (Shelf)(\d)$", r"\1 \2")
 
-# df_visit2["Level2"] = "DX48>>X50_V2"
-df_visit2["Level2"] = "DX48>>X50_V2"
-df_visit2.loc[(df_visit2["DonorID"] >= 1) & (df_visit2["DonorID"] <= 96), "Level2"] = "D001>>096_V2 D101>>195_V2"
-df_visit2.loc[(df_visit2["DonorID"] >= 101) & (df_visit2["DonorID"] <= 195), "Level2"] = "D001>>096_V2 D101>>195_V2"
-df_visit2.loc[(df_visit2["DonorID"] >= 203) & (df_visit2["DonorID"] <= 293), "Level2"] = "D203>>293_V2 D304>>394_V2"
-df_visit2.loc[(df_visit2["DonorID"] >= 304) & (df_visit2["DonorID"] <= 394), "Level2"] = "D203>>293_V2 D304>>394_V2"
-df_visit2.loc[(df_visit2["DonorID"] >= 402) & (df_visit2["DonorID"] <= 497), "Level2"] = "D402>>497_V2 D507>>597_V2"
-df_visit2.loc[(df_visit2["DonorID"] >= 507) & (df_visit2["DonorID"] <= 597), "Level2"] = "D402>>497_V2 D507>>597_V2"
-df_visit2.loc[(df_visit2["DonorID"] >= 604) & (df_visit2["DonorID"] <= 695), "Level2"] = "D604>>695_V2 D701>>793_V2"
-df_visit2.loc[(df_visit2["DonorID"] >= 701) & (df_visit2["DonorID"] <= 793), "Level2"] = "D604>>695_V2 D701>>793_V2"
-df_visit2.loc[(df_visit2["DonorID"] >= 802) & (df_visit2["DonorID"] <= 896), "Level2"] = "D802>>896_V2 D901>>992_V2"
-df_visit2.loc[(df_visit2["DonorID"] >= 901) & (df_visit2["DonorID"] <= 992), "Level2"] = "D802>>896_V2 D901>>992_V2"
-df_visit2["Level2_Descr"] = df_visit2["Level2"].str.replace(r"D(\d+)>>(\d+)_V2 D(\d+)>>(\d+)_V(2)", r'"Rack Donors \1 to \2 and Donors \3 to \4, Visit \5"')
-df_visit2["Level2_Descr"] = df_visit2["Level2"].str.replace(r"DX(\d+)>>X(\d+)_V(2)", r'"Rack Donors X\1 to X\2, Visit \3"')
+df_visit2.loc[(df_visit2["DonorID"] >= 1) & (df_visit2["DonorID"] <= 100), "Level2"] = "D001>>096_V2 D101>>195_V2"
+df_visit2.loc[(df_visit2["DonorID"] >= 101) & (df_visit2["DonorID"] <= 200), "Level2"] = "D001>>096_V2 D101>>195_V2"
+df_visit2.loc[(df_visit2["DonorID"] >= 201) & (df_visit2["DonorID"] <= 300), "Level2"] = "D203>>293_V2 D304>>394_V2"
+df_visit2.loc[(df_visit2["DonorID"] >= 301) & (df_visit2["DonorID"] <= 400), "Level2"] = "D203>>293_V2 D304>>394_V2"
+df_visit2.loc[(df_visit2["DonorID"] >= 401) & (df_visit2["DonorID"] <= 500), "Level2"] = "D402>>497_V2 D507>>597_V2"
+df_visit2.loc[(df_visit2["DonorID"] >= 501) & (df_visit2["DonorID"] <= 600), "Level2"] = "D402>>497_V2 D507>>597_V2"
+df_visit2.loc[(df_visit2["DonorID"] >= 601) & (df_visit2["DonorID"] <= 700), "Level2"] = "D604>>695_V2 D701>>793_V2"
+df_visit2.loc[(df_visit2["DonorID"] >= 701) & (df_visit2["DonorID"] <= 800), "Level2"] = "D604>>695_V2 D701>>793_V2"
+df_visit2.loc[(df_visit2["DonorID"] >= 801) & (df_visit2["DonorID"] <= 900), "Level2"] = "D802>>896_V2 D901>>992_V2"
+df_visit2.loc[(df_visit2["DonorID"] >= 901) & (df_visit2["DonorID"] <= 1000), "Level2"] = "D802>>896_V2 D901>>992_V2"
+df_visit2.loc[df_visit2["Position"].str.contains(r"[A-Z]", na=False), "Level2"] = "DX48>>X50_V2"
+
+df_visit2.loc[df_visit2["Level2"].str.contains(r"DX"), "Level2_Descr"] = df_visit2["Level2"].str.replace(r"DX(\d+)>>X(\d+)_V(2)", r'"Rack Donors X\1 to X\2, Visit \3"')
+df_visit2.loc[df_visit2["Level2"].str.contains(r"D[0-9]"), "Level2_Descr"] = df_visit2["Level2"].str.replace(r"D(\d+)>>(\d+)_V2 D(\d+)>>(\d+)_V(2)", r'"Rack Donors \1 to \2 and Donors \3 to \4, Visit \5"')
 df_visit2["Level2_Descr"] = df_visit2["Level2_Descr"].str.replace(r"001 to 096", r"1 to 96")
 
 df_visit2["VisitID"] = "2"
@@ -143,7 +168,17 @@ df_visit2["VisitID"] = "2"
 df_visit2["AliquotID"] = df_visit2["AliquotID"].astype(str)
 df_visit2["StimulusID"] = df_visit2["StimulusID"].astype(str)
 
-df_visit2["Level3"] = "MIC_Plasma_S01-07_V"+df_visit2["VisitID"]+"_A"+df_visit2["AliquotID"]
+df_visit2.loc[(df_visit2["DonorID"] >= 1) & (df_visit2["DonorID"] <= 100), "Level3"] = "MIC_Plasma_D001-096_D101-195_S01-07_V"+df_visit2["VisitID"]+"_A"+df_visit2["AliquotID"]
+df_visit2.loc[(df_visit2["DonorID"] >= 101) & (df_visit2["DonorID"] <= 200), "Level3"] = "MIC_Plasma_D001-096_D101-195_S01-07_V"+df_visit2["VisitID"]+"_A"+df_visit2["AliquotID"]
+df_visit2.loc[(df_visit2["DonorID"] >= 201) & (df_visit2["DonorID"] <= 300), "Level3"] = "MIC_Plasma_D203-293_D304-394_S01-07_V"+df_visit2["VisitID"]+"_A"+df_visit2["AliquotID"]
+df_visit2.loc[(df_visit2["DonorID"] >= 301) & (df_visit2["DonorID"] <= 400), "Level3"] = "MIC_Plasma_D203-293_D304-394_S01-07_V"+df_visit2["VisitID"]+"_A"+df_visit2["AliquotID"]
+df_visit2.loc[(df_visit2["DonorID"] >= 401) & (df_visit2["DonorID"] <= 500), "Level3"] = "MIC_Plasma_D402-497_D507-597_S01-07_V"+df_visit2["VisitID"]+"_A"+df_visit2["AliquotID"]
+df_visit2.loc[(df_visit2["DonorID"] >= 501) & (df_visit2["DonorID"] <= 600), "Level3"] = "MIC_Plasma_D402-497_D507-597_S01-07_V"+df_visit2["VisitID"]+"_A"+df_visit2["AliquotID"]
+df_visit2.loc[(df_visit2["DonorID"] >= 601) & (df_visit2["DonorID"] <= 700), "Level3"] = "MIC_Plasma_D604-695_D701-793_S01-07_V"+df_visit2["VisitID"]+"_A"+df_visit2["AliquotID"]
+df_visit2.loc[(df_visit2["DonorID"] >= 701) & (df_visit2["DonorID"] <= 800), "Level3"] = "MIC_Plasma_D604-695_D701-793_S01-07_V"+df_visit2["VisitID"]+"_A"+df_visit2["AliquotID"]
+df_visit2.loc[(df_visit2["DonorID"] >= 801) & (df_visit2["DonorID"] <= 900), "Level3"] = "MIC_Plasma_D802-896_D901-992_S01-07_V"+df_visit2["VisitID"]+"_A"+df_visit2["AliquotID"]
+df_visit2.loc[(df_visit2["DonorID"] >= 901) & (df_visit2["DonorID"] <= 1000), "Level3"] = "MIC_Plasma_D802-896_D901-992_S01-07_V"+df_visit2["VisitID"]+"_A"+df_visit2["AliquotID"]
+df_visit2.loc[df_visit2["Position"].str.contains("A|B", na=False), "Level3"] = "MIC_Plasma_DX48-X50_S01-07_V"+df_visit2["VisitID"]+"_A"+df_visit2["AliquotID"]
 
 df_visit2["StimulusID"] = df_visit2["StimulusID"].astype(int)
 
@@ -166,7 +201,7 @@ df_visit2.loc[df_visit2["Level2"].str.contains("D604"), "Level3_Descr"] = df_vis
 df_visit2.loc[df_visit2["Level2"].str.contains("D802"), "Level3_Descr"] = df_visit2["Level3_Descr"].str.replace(r"1 to 96 and donors 101 to 195", r"802 to 896 and donors 901 to 992")
 df_visit2.loc[df_visit2["Level2"].str.contains("DX"), "Level3_Descr"] = df_visit2["Level3_Descr"].str.replace(r"1 to 96 and donors 101 to 195", r"X48 to X50")
 
-df_visit2["Sample Type"] = "PLASMA"
+df_visit2["Sample Type"] = "PLASMA_"+df_visit2["AliquotID"]
 
 df_visit2["StimulusID"] = df_visit2["StimulusID"].astype(str)
 
@@ -204,29 +239,24 @@ df_visit2.loc[df_visit2["DonorID"] == 308, "DonorID"] = 5308
 df_visit2.loc[df_visit2["DonorID"] == 534, "DonorID"] = 5534
 df_visit2.loc[df_visit2["DonorID"] == 701, "DonorID"] = 5701
 
-df_visit2.loc[df_visit2["Sample Source"] == 96, "Sample Source"] = 5096
-df_visit2.loc[df_visit2["Sample Source"] == 104, "Sample Source"] = 5104
-df_visit2.loc[df_visit2["Sample Source"] == 122, "Sample Source"] = 5122
-df_visit2.loc[df_visit2["Sample Source"] == 167, "Sample Source"] = 5167
-df_visit2.loc[df_visit2["Sample Source"] == 178, "Sample Source"] = 5178
-df_visit2.loc[df_visit2["Sample Source"] == 219, "Sample Source"] = 5219
-df_visit2.loc[df_visit2["Sample Source"] == 268, "Sample Source"] = 5268
-df_visit2.loc[df_visit2["Sample Source"] == 279, "Sample Source"] = 5279
-df_visit2.loc[df_visit2["Sample Source"] == 303, "Sample Source"] = 5303
-df_visit2.loc[df_visit2["Sample Source"] == 308, "Sample Source"] = 5308
-df_visit2.loc[df_visit2["Sample Source"] == 534, "Sample Source"] = 5534
-df_visit2.loc[df_visit2["Sample Source"] == 701, "Sample Source"] = 5701
+df_visit2["Sample Source"] = df_visit2["DonorID"]
 
 df_visit2["DonorID"] = df_visit2["DonorID"].astype(str)
 
 df_visit2["Description"] = '"Donor '+df_visit2["DonorID"]+', Stimulus '+df_visit2["StimulusID"]+', Visit 2, Aliquot '+df_visit2["AliquotID"]+'"'
 
+# print df_visit2.groupby(by=["Level3", "Position"]).count()
+
 df_labkey = pd.read_csv("/Volumes/LabExMI/Users/Nolwenn/FreezerPro/DataToPrepare/Common/samples_table_labkey.csv")
+df_donor_fix = pd.read_csv("/Volumes/LabExMI/Users/Nolwenn/FreezerPro/DataToPrepare/Common/LabExMISamples_Donor_402_Visit_2_2012_Week_42.csv")
+
+df_labkey = df_labkey.loc[df_labkey["donorId"] != 402]
+df_labkey = pd.concat([df_labkey, df_donor_fix])
+
 df_labkey.rename(columns={"barcodeId": "Name", "donorId": "DonorID",
                           "batchId": "BatchID", "stimulusId": "StimulusID",
                           "aliquotId": "AliquotID", "visitId": "VisitID"},
                  inplace=True)
-
 del df_labkey["volume"], df_labkey["id"], df_labkey["well"]
 del df_labkey["rackId"], df_labkey["auditTrail"], df_labkey["deleted"]
 
@@ -247,4 +277,12 @@ df_labkey_plasma["VisitID"] = df_labkey_plasma["VisitID"].astype(str)
 df_labkey_plasma["AliquotID"] = df_labkey_plasma["AliquotID"].astype(str)
 
 df_visit2_final = pd.merge(df_labkey_plasma, df_visit2)
-df_visit2_final.to_csv("/Volumes/LabExMI/Users/Nolwenn/FreezerPro/DataToImport/TC_supernatants_samples_V2_all_20161014.csv", header=True, index=False)
+
+df_visit2["FreezerBarcode"] = df_visit2["Freezer"]
+df_visit2["ShelfBarcode"] = df_visit2["Level1"]
+df_visit2["RackBarcode"] = df_visit2["Level2"]
+df_visit2["DrawerBarcode"] = df_visit2["Level3"]
+df_visit2["BOX_BARCODE"] = df_visit2["Box"]
+df_visit2["BoxBarcode"] = df_visit2["Box"]
+
+df_visit2_final.to_csv("/Volumes/LabExMI/Users/Nolwenn/FreezerPro/DataToImport/TC_supernatants_samples_V2_all_20161025.csv", header=True, index=False)

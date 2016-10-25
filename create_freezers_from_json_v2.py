@@ -133,14 +133,17 @@ for freezer in freezers["freezers"]:
             #                           + compartment + ",,,box " + str(aa) + "," + a["boxtype"]
             #             outfile.write(string + "\n")
             #
-            # if "Trizol" in compartment:
-            #     for t in freezer["racks"][shelf][c]["trizol"]:
-            #         for tt in range(t["compartments"]["boxes"]):
-            #             tt = str(tt + 1)
-            #             string = freezer["name"] + "," + shelf + ",," + t['name'] + "," \
-            #                           + compartment + ",,,box " + tt + "," + t["compartments"]["boxtype"]
-            #             outfile.write(string + "\n")
-            #
+            if "Trizol" in compartment:
+                for t in freezer["racks"][shelf][c]["trizol"]:
+                    for tt in range(t["compartments"]["boxes"]):
+                        l_freez = freezer["name"].split("_")
+                        l_shelf = shelf.split()
+                        tt = str(tt + 1)
+                        string = freezer["name"] + ",Freezer "+l_freez[2]+"," + \
+                                 shelf + ","+" ".join(l_shelf[2:])+",," + t['name'] + "," \
+                                      + compartment + ",,,box " + tt + "," + t["compartments"]["boxtype"]
+                        outfile.write(string + "\n")
+
             # if "DNA" in compartment:
             #     for d in freezer["racks"][shelf][c]["stools DNA"]:
             #         for dd in range(d["compartments"]["boxes"]):
