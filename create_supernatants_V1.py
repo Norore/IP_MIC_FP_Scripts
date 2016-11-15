@@ -82,8 +82,6 @@ df_final["VisitID"] = df_final["VisitID"].astype(str)
 
 df_final["AliquotID"] = df_final["AliquotID"].astype(int)
 
-df_final["Sample Type"] = "PLASMA_"+df_final["AliquotID"]
-
 df_final["Freezer"] = "MIC_Freezer_1532"
 df_final.loc[df_final["AliquotID"] == 2, "Freezer"] = df_final["Freezer"].str.replace("32", "34")
 df_final.loc[df_final["AliquotID"] == 3, "Freezer"] = df_final["Freezer"].str.replace("32", "35")
@@ -108,19 +106,21 @@ df_final.loc[(df_final["DonorID"] >= 501) & (df_final["DonorID"] <= 596), "Level
 df_final.loc[(df_final["DonorID"] >= 701) & (df_final["DonorID"] <= 796), "Level1_Descr"] = df_final["Level1_Descr"].str.replace("1", "2")
 df_final.loc[(df_final["DonorID"] >= 901) & (df_final["DonorID"] <= 996), "Level1_Descr"] = df_final["Level1_Descr"].str.replace("1", "2")
 
-df_final["Level2"] = "DX97>>X00_V1"
-df_final.loc[(df_final["DonorID"] >= 1) & (df_final["DonorID"] <= 96), "Level2"] = "D001>>096_V1"
-df_final.loc[(df_final["DonorID"] >= 101) & (df_final["DonorID"] <= 196), "Level2"] = "D101>>196_V1"
-df_final.loc[(df_final["DonorID"] >= 201) & (df_final["DonorID"] <= 296), "Level2"] = "D201>>296_V1"
-df_final.loc[(df_final["DonorID"] >= 301) & (df_final["DonorID"] <= 396), "Level2"] = "D301>>396_V1"
-df_final.loc[(df_final["DonorID"] >= 401) & (df_final["DonorID"] <= 496), "Level2"] = "D401>>496_V1"
-df_final.loc[(df_final["DonorID"] >= 501) & (df_final["DonorID"] <= 596), "Level2"] = "D501>>596_V1"
-df_final.loc[(df_final["DonorID"] >= 601) & (df_final["DonorID"] <= 696), "Level2"] = "D601>>696_V1"
-df_final.loc[(df_final["DonorID"] >= 701) & (df_final["DonorID"] <= 796), "Level2"] = "D701>>796_V1"
-df_final.loc[(df_final["DonorID"] >= 801) & (df_final["DonorID"] <= 896), "Level2"] = "D801>>896_V1"
-df_final.loc[(df_final["DonorID"] >= 901) & (df_final["DonorID"] <= 996), "Level2"] = "D901>>996_V1"
+df_final["AliquotID"] = df_final["AliquotID"].astype(str)
 
-df_final["Level2_Descr"] = "\"Rack Donors X97 to X00, Visit "+df_final["VisitID"]+"\""
+df_final["Level2"] = "MIC_Plasma_DX97-X00_S01-40_V1_A"+df_final["AliquotID"]
+df_final.loc[(df_final["DonorID"] >= 1) & (df_final["DonorID"] <= 96), "Level2"] = df_final["Level2"].str.replace(r"DX97-X00", r"D001-096")
+df_final.loc[(df_final["DonorID"] >= 101) & (df_final["DonorID"] <= 196), "Level2"] = df_final["Level2"].str.replace(r"DX97-X00", r"D101-196")
+df_final.loc[(df_final["DonorID"] >= 201) & (df_final["DonorID"] <= 296), "Level2"] = df_final["Level2"].str.replace(r"DX97-X00", r"D201-296")
+df_final.loc[(df_final["DonorID"] >= 301) & (df_final["DonorID"] <= 396), "Level2"] = df_final["Level2"].str.replace(r"DX97-X00", r"D301-396")
+df_final.loc[(df_final["DonorID"] >= 401) & (df_final["DonorID"] <= 496), "Level2"] = df_final["Level2"].str.replace(r"DX97-X00", r"D401-496")
+df_final.loc[(df_final["DonorID"] >= 501) & (df_final["DonorID"] <= 596), "Level2"] = df_final["Level2"].str.replace(r"DX97-X00", r"D501-596")
+df_final.loc[(df_final["DonorID"] >= 601) & (df_final["DonorID"] <= 696), "Level2"] = df_final["Level2"].str.replace(r"DX97-X00", r"D601-696")
+df_final.loc[(df_final["DonorID"] >= 701) & (df_final["DonorID"] <= 796), "Level2"] = df_final["Level2"].str.replace(r"DX97-X00", r"D701-796")
+df_final.loc[(df_final["DonorID"] >= 801) & (df_final["DonorID"] <= 896), "Level2"] = df_final["Level2"].str.replace(r"DX97-X00", r"D801-896")
+df_final.loc[(df_final["DonorID"] >= 901) & (df_final["DonorID"] <= 996), "Level2"] = df_final["Level2"].str.replace(r"DX97-X00", r"D901-996")
+
+df_final["Level2_Descr"] = "\"Rack Donors X97 to X00, Stimulus 1 to 40, Visit "+df_final["VisitID"]+", Aliquot "+df_final["AliquotID"]+"\""
 df_final.loc[(df_final["DonorID"] >= 1) & (df_final["DonorID"] <= 96), "Level2_Descr"] = df_final["Level2_Descr"].str.replace(r"X97 to X00", r"1 to 96")
 df_final.loc[(df_final["DonorID"] >= 101) & (df_final["DonorID"] <= 196), "Level2_Descr"] = df_final["Level2_Descr"].str.replace(r"X97 to X00", r"101 to 196")
 df_final.loc[(df_final["DonorID"] >= 201) & (df_final["DonorID"] <= 296), "Level2_Descr"] = df_final["Level2_Descr"].str.replace(r"X97 to X00", r"201 to 296")
@@ -132,8 +132,10 @@ df_final.loc[(df_final["DonorID"] >= 701) & (df_final["DonorID"] <= 796), "Level
 df_final.loc[(df_final["DonorID"] >= 801) & (df_final["DonorID"] <= 896), "Level2_Descr"] = df_final["Level2_Descr"].str.replace(r"X97 to X00", r"801 to 896")
 df_final.loc[(df_final["DonorID"] >= 901) & (df_final["DonorID"] <= 996), "Level2_Descr"] = df_final["Level2_Descr"].str.replace(r"X97 to X00", r"901 to 996")
 
-df_final["AliquotID"] = df_final["AliquotID"].astype(str)
-df_final["Level3"] = "MIC_Plasma_"+df_final["Level2"].str.replace(r"D(\d+)>>(\d+)_V1", r"D\1-\2")+"_S01-07_V"+df_final["VisitID"]+"_A"+df_final["AliquotID"]
+df_tmp = df_final["Level2"].str.extract(r"D(X?\d+)-(X?\d+)")
+df_tmp.rename(columns={0: "from", 1: "to"}, inplace=True)
+df_final["Level3"] = "MIC_Plasma_D"+df_tmp["from"]+"-"+df_tmp["to"]+"_S01-07_V"+df_final["VisitID"]+"_A"+df_final["AliquotID"]
+df_final.loc[df_final["Level3"].str.contains("D001-096"), "Level3"] = df_final["Level3"].str.replace(r"D001-096", r"D1-96")
 df_final.loc[df_final["StimulusID"] > 7, "Level3"] = df_final["Level3"].str.replace("S01-07", "S08-14")
 df_final.loc[df_final["StimulusID"] > 14, "Level3"] = df_final["Level3"].str.replace("S08-14", "S15-21")
 df_final.loc[df_final["StimulusID"] > 21, "Level3"] = df_final["Level3"].str.replace("S15-21", "S22-28")
@@ -189,6 +191,8 @@ df_final.loc[df_final["Sample Source"] == 701, "Sample Source"] = 5701
 df_final["DonorID"] = df_final["DonorID"].astype(str)
 df_final["Description"] = "\"Donor "+df_final["DonorID"]+", Stimulus "+df_final["StimulusID"]+", Visit 1, Aliquot "+df_final["AliquotID"]+"\""
 
+df_final["Sample Type"] = "PLASMA_"+df_final["AliquotID"]
+
 df_labkey = pd.read_csv("/Volumes/LabExMI/Users/Nolwenn/FreezerPro/DataToPrepare/Common/samples_table_labkey.csv")
 del df_labkey["id"], df_labkey["auditTrail"]
 
@@ -218,4 +222,4 @@ df_merged["DrawerBarcode"] = df_merged["Level3"]
 df_merged["BOX_BARCODE"] = df_merged["Box"]
 df_merged["BoxBarcode"] = df_merged["Box"]
 
-df_merged.to_csv("/Volumes/LabExMI/Users/Nolwenn/FreezerPro/DataToImport/TC_supernatants_samples_V1_all_20161025.csv", header=True, index=False)
+df_merged.to_csv("/Volumes/LabExMI/Users/Nolwenn/FreezerPro/DataToImport/TC_supernatants_samples_V1_all_20161027.csv", header=True, index=False)

@@ -117,7 +117,7 @@ df_donor_pos = pd.merge(df, df_pos)
 df_visit2_tmp = pd.merge(df_donor_pos, donors_as)
 df_visit2 = pd.merge(df_visit2_tmp, racks)
 df_visit2.sort_values(by=["DonorID", "RackID", "Position"], inplace=True)
-del df_visit2["RackID"]
+del df_visit2["RackID"], df_visit2["Group"]
 
 df_visit2["Volume"] = 400.0
 
@@ -146,26 +146,36 @@ df_visit2.loc[df_visit2["AliquotID"] == 3, "Level1"] = df_visit2["Level1"].str.r
 
 df_visit2["Level1_Descr"] = df_visit2["Level1"].str.replace(r"MIC Freezer\d{4} (Shelf)(\d)$", r"\1 \2")
 
-df_visit2.loc[(df_visit2["DonorID"] >= 1) & (df_visit2["DonorID"] <= 100), "Level2"] = "D001>>096_V2 D101>>195_V2"
-df_visit2.loc[(df_visit2["DonorID"] >= 101) & (df_visit2["DonorID"] <= 200), "Level2"] = "D001>>096_V2 D101>>195_V2"
-df_visit2.loc[(df_visit2["DonorID"] >= 201) & (df_visit2["DonorID"] <= 300), "Level2"] = "D203>>293_V2 D304>>394_V2"
-df_visit2.loc[(df_visit2["DonorID"] >= 301) & (df_visit2["DonorID"] <= 400), "Level2"] = "D203>>293_V2 D304>>394_V2"
-df_visit2.loc[(df_visit2["DonorID"] >= 401) & (df_visit2["DonorID"] <= 500), "Level2"] = "D402>>497_V2 D507>>597_V2"
-df_visit2.loc[(df_visit2["DonorID"] >= 501) & (df_visit2["DonorID"] <= 600), "Level2"] = "D402>>497_V2 D507>>597_V2"
-df_visit2.loc[(df_visit2["DonorID"] >= 601) & (df_visit2["DonorID"] <= 700), "Level2"] = "D604>>695_V2 D701>>793_V2"
-df_visit2.loc[(df_visit2["DonorID"] >= 701) & (df_visit2["DonorID"] <= 800), "Level2"] = "D604>>695_V2 D701>>793_V2"
-df_visit2.loc[(df_visit2["DonorID"] >= 801) & (df_visit2["DonorID"] <= 900), "Level2"] = "D802>>896_V2 D901>>992_V2"
-df_visit2.loc[(df_visit2["DonorID"] >= 901) & (df_visit2["DonorID"] <= 1000), "Level2"] = "D802>>896_V2 D901>>992_V2"
-df_visit2.loc[df_visit2["Position"].str.contains(r"[A-Z]", na=False), "Level2"] = "DX48>>X50_V2"
+df_visit2["AliquotID"] = df_visit2["AliquotID"].astype(str)
 
-df_visit2.loc[df_visit2["Level2"].str.contains(r"DX"), "Level2_Descr"] = df_visit2["Level2"].str.replace(r"DX(\d+)>>X(\d+)_V(2)", r'"Rack Donors X\1 to X\2, Visit \3"')
-df_visit2.loc[df_visit2["Level2"].str.contains(r"D[0-9]"), "Level2_Descr"] = df_visit2["Level2"].str.replace(r"D(\d+)>>(\d+)_V2 D(\d+)>>(\d+)_V(2)", r'"Rack Donors \1 to \2 and Donors \3 to \4, Visit \5"')
-df_visit2["Level2_Descr"] = df_visit2["Level2_Descr"].str.replace(r"001 to 096", r"1 to 96")
+df_visit2["Level2"] = "MIC_Plasma_DX49-X50_S01-40_V2_A"+df_visit2["AliquotID"]
+df_visit2.loc[(df_visit2["DonorID"] >= 1) & (df_visit2["DonorID"] <= 100), "Level2"] = df_visit2["Level2"].str.replace(r"DX49-X50", r"D001-096_D101-195")
+df_visit2.loc[(df_visit2["DonorID"] >= 101) & (df_visit2["DonorID"] <= 200), "Level2"] = df_visit2["Level2"].str.replace(r"DX49-X50", r"D001-096_D101-195")
+df_visit2.loc[(df_visit2["DonorID"] >= 201) & (df_visit2["DonorID"] <= 300), "Level2"] = df_visit2["Level2"].str.replace(r"DX49-X50", r"D203-293_D304-394")
+df_visit2.loc[(df_visit2["DonorID"] >= 301) & (df_visit2["DonorID"] <= 400), "Level2"] = df_visit2["Level2"].str.replace(r"DX49-X50", r"D203-293_D304-394")
+df_visit2.loc[(df_visit2["DonorID"] >= 401) & (df_visit2["DonorID"] <= 500), "Level2"] = df_visit2["Level2"].str.replace(r"DX49-X50", r"D402-497_D507-597")
+df_visit2.loc[(df_visit2["DonorID"] >= 501) & (df_visit2["DonorID"] <= 600), "Level2"] = df_visit2["Level2"].str.replace(r"DX49-X50", r"D402-497_D507-597")
+df_visit2.loc[(df_visit2["DonorID"] >= 601) & (df_visit2["DonorID"] <= 700), "Level2"] = df_visit2["Level2"].str.replace(r"DX49-X50", r"D604-695_D701-793")
+df_visit2.loc[(df_visit2["DonorID"] >= 701) & (df_visit2["DonorID"] <= 800), "Level2"] = df_visit2["Level2"].str.replace(r"DX49-X50", r"D604-695_D701-793")
+df_visit2.loc[(df_visit2["DonorID"] >= 801) & (df_visit2["DonorID"] <= 900), "Level2"] = df_visit2["Level2"].str.replace(r"DX49-X50",  r"D802-896_D901-992")
+df_visit2.loc[(df_visit2["DonorID"] >= 901) & (df_visit2["DonorID"] <= 1000), "Level2"] = df_visit2["Level2"].str.replace(r"DX49-X50", r"D802-896_D901-992")
+df_visit2.loc[df_visit2["Position"].str.contains(r"[A-Z]", na=False), "Level2"] = "MIC_Plasma_DX48-X50_S01-40_V1_A"+df_visit2["AliquotID"]
+
+df_visit2["Level2_Descr"] = "\"Rack Donors X49 to X50, Stimulus 1 to 40, Visit 2, Aliquot "+df_visit2["AliquotID"]+"\""
+df_visit2.loc[(df_visit2["Level2"].str.contains(r"D001")), "Level2_Descr"] = df_visit2["Level2_Descr"].str.replace(r"X49 to X50", r"1 to 96 and Donors 101 to 195")
+df_visit2.loc[(df_visit2["Level2"].str.contains(r"D001")), "Level2_Descr"] = df_visit2["Level2_Descr"].str.replace(r"X49 to X50", r"1 to 96 and Donors 101 to 195")
+df_visit2.loc[(df_visit2["Level2"].str.contains(r"D203")), "Level2_Descr"] = df_visit2["Level2_Descr"].str.replace(r"X49 to X50", r"203 to 293 and Donors 304 to 394")
+df_visit2.loc[(df_visit2["Level2"].str.contains(r"D203")), "Level2_Descr"] = df_visit2["Level2_Descr"].str.replace(r"X49 to X50", r"203 to 293 and Donors 304 to 394")
+df_visit2.loc[(df_visit2["Level2"].str.contains(r"D402")), "Level2_Descr"] = df_visit2["Level2_Descr"].str.replace(r"X49 to X50", r"402 to 497 and Donors 507 to 597")
+df_visit2.loc[(df_visit2["Level2"].str.contains(r"D402")), "Level2_Descr"] = df_visit2["Level2_Descr"].str.replace(r"X49 to X50", r"402 to 497 and Donors 507 to 597")
+df_visit2.loc[(df_visit2["Level2"].str.contains(r"D604")), "Level2_Descr"] = df_visit2["Level2_Descr"].str.replace(r"X49 to X50", r"604 to 695 and Donors 701 to 793")
+df_visit2.loc[(df_visit2["Level2"].str.contains(r"D604")), "Level2_Descr"] = df_visit2["Level2_Descr"].str.replace(r"X49 to X50", r"604 to 695 and Donors 701 to 793")
+df_visit2.loc[(df_visit2["Level2"].str.contains(r"D802")), "Level2_Descr"] = df_visit2["Level2_Descr"].str.replace(r"X49 to X50", r"802 to 896 and Donors 901 to 992")
+df_visit2.loc[(df_visit2["Level2"].str.contains(r"D802")), "Level2_Descr"] = df_visit2["Level2_Descr"].str.replace(r"X49 to X50", r"802 to 896 and Donors 901 to 992")
+df_visit2.loc[df_visit2["Position"].str.contains(r"[A-Z]", na=False), "Level2_Descr"] = "\"Rack Donors X49 to X50, Stimulus 1 to 40, Visit 2, Aliquot "+df_visit2["AliquotID"]+"\""
 
 df_visit2["VisitID"] = "2"
-# df_visit2["VisitID"].astype(str)
 
-df_visit2["AliquotID"] = df_visit2["AliquotID"].astype(str)
 df_visit2["StimulusID"] = df_visit2["StimulusID"].astype(str)
 
 df_visit2.loc[(df_visit2["DonorID"] >= 1) & (df_visit2["DonorID"] <= 100), "Level3"] = "MIC_Plasma_D001-096_D101-195_S01-07_V"+df_visit2["VisitID"]+"_A"+df_visit2["AliquotID"]
@@ -195,10 +205,10 @@ df_visit2.loc[df_visit2["Level3"].str.contains("22-28"), "Level3_Descr"] = df_vi
 df_visit2.loc[df_visit2["Level3"].str.contains("29-35"), "Level3_Descr"] = df_visit2["Level3_Descr"].str.replace(r"1 to 7", r"29 to 35")
 df_visit2.loc[df_visit2["Level3"].str.contains("36-40"), "Level3_Descr"] = df_visit2["Level3_Descr"].str.replace(r"1 to 7", r"36 to 40")
 
-df_visit2.loc[df_visit2["Level2"].str.contains("D203"), "Level3_Descr"] = df_visit2["Level3_Descr"].str.replace(r"1 to 96 and donors 101 to 195", r"203 to 293 and donors 304 to 394")
-df_visit2.loc[df_visit2["Level2"].str.contains("D402"), "Level3_Descr"] = df_visit2["Level3_Descr"].str.replace(r"1 to 96 and donors 101 to 195", r"402 to 497 and donors 507 to 597")
-df_visit2.loc[df_visit2["Level2"].str.contains("D604"), "Level3_Descr"] = df_visit2["Level3_Descr"].str.replace(r"1 to 96 and donors 101 to 195", r"604 to 695 and donors 701 to 793")
-df_visit2.loc[df_visit2["Level2"].str.contains("D802"), "Level3_Descr"] = df_visit2["Level3_Descr"].str.replace(r"1 to 96 and donors 101 to 195", r"802 to 896 and donors 901 to 992")
+df_visit2.loc[df_visit2["Level2"].str.contains("D203"), "Level3_Descr"] = df_visit2["Level3_Descr"].str.replace(r"1 to 96 and Donors 101 to 195", r"203 to 293 and Donors 304 to 394")
+df_visit2.loc[df_visit2["Level2"].str.contains("D402"), "Level3_Descr"] = df_visit2["Level3_Descr"].str.replace(r"1 to 96 and Donors 101 to 195", r"402 to 497 and Donors 507 to 597")
+df_visit2.loc[df_visit2["Level2"].str.contains("D604"), "Level3_Descr"] = df_visit2["Level3_Descr"].str.replace(r"1 to 96 and Donors 101 to 195", r"604 to 695 and Donors 701 to 793")
+df_visit2.loc[df_visit2["Level2"].str.contains("D802"), "Level3_Descr"] = df_visit2["Level3_Descr"].str.replace(r"1 to 96 and Donors 101 to 195", r"802 to 896 and Donors 901 to 992")
 df_visit2.loc[df_visit2["Level2"].str.contains("DX"), "Level3_Descr"] = df_visit2["Level3_Descr"].str.replace(r"1 to 96 and donors 101 to 195", r"X48 to X50")
 
 df_visit2["Sample Type"] = "PLASMA_"+df_visit2["AliquotID"]
@@ -245,10 +255,16 @@ df_visit2["DonorID"] = df_visit2["DonorID"].astype(str)
 
 df_visit2["Description"] = '"Donor '+df_visit2["DonorID"]+', Stimulus '+df_visit2["StimulusID"]+', Visit 2, Aliquot '+df_visit2["AliquotID"]+'"'
 
-# print df_visit2.groupby(by=["Level3", "Position"]).count()
+df_visit2["FreezerBarcode"] = df_visit2["Freezer"]
+df_visit2["ShelfBarcode"] = df_visit2["Level1"]
+df_visit2["RackBarcode"] = df_visit2["Level2"]
+df_visit2["DrawerBarcode"] = df_visit2["Level3"]
+df_visit2["BOX_BARCODE"] = df_visit2["Box"]
+df_visit2["BoxBarcode"] = df_visit2["Box"]
 
 df_labkey = pd.read_csv("/Volumes/LabExMI/Users/Nolwenn/FreezerPro/DataToPrepare/Common/samples_table_labkey.csv")
 df_donor_fix = pd.read_csv("/Volumes/LabExMI/Users/Nolwenn/FreezerPro/DataToPrepare/Common/LabExMISamples_Donor_402_Visit_2_2012_Week_42.csv")
+del df_donor_fix["Unnamed: 15"]
 
 df_labkey = df_labkey.loc[df_labkey["donorId"] != 402]
 df_labkey = pd.concat([df_labkey, df_donor_fix])
@@ -278,11 +294,4 @@ df_labkey_plasma["AliquotID"] = df_labkey_plasma["AliquotID"].astype(str)
 
 df_visit2_final = pd.merge(df_labkey_plasma, df_visit2)
 
-df_visit2["FreezerBarcode"] = df_visit2["Freezer"]
-df_visit2["ShelfBarcode"] = df_visit2["Level1"]
-df_visit2["RackBarcode"] = df_visit2["Level2"]
-df_visit2["DrawerBarcode"] = df_visit2["Level3"]
-df_visit2["BOX_BARCODE"] = df_visit2["Box"]
-df_visit2["BoxBarcode"] = df_visit2["Box"]
-
-df_visit2_final.to_csv("/Volumes/LabExMI/Users/Nolwenn/FreezerPro/DataToImport/TC_supernatants_samples_V2_all_20161025.csv", header=True, index=False)
+df_visit2_final.to_csv("/Volumes/LabExMI/Users/Nolwenn/FreezerPro/DataToImport/TC_supernatants_samples_V2_all_20161027.csv", header=True, index=False)
