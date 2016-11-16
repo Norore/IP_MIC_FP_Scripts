@@ -136,12 +136,19 @@ for freezer in freezers["freezers"]:
             if "Trizol" in compartment:
                 for t in freezer["racks"][shelf][c]["trizol"]:
                     for tt in range(t["compartments"]["boxes"]):
+                        """
+                        Columns order:
+                        Freezer,Freezer_Descr,Level1,Level1_Descr,Level2,Level2_Descr,Level3,
+                        Level3_Descr,Box,Box_Descr,BoxType
+                        """
                         l_freez = freezer["name"].split("_")
                         l_shelf = shelf.split()
                         tt = str(tt + 1)
+                        box_descr = t["description"][:-1] + ", Box "+tt+"\""
                         string = freezer["name"] + ",Freezer "+l_freez[2]+"," + \
-                                 shelf + ","+" ".join(l_shelf[2:])+",," + t['name'] + "," \
-                                      + compartment + ",,,box " + tt + "," + t["compartments"]["boxtype"]
+                                 shelf + ","+" ".join(l_shelf[2:])+"," + t["name"] + \
+                                 "," + t["description"] + ",,," \
+                                 "Box " + tt + "," + box_descr + "," + t["compartments"]["boxtype"]
                         outfile.write(string + "\n")
 
             # if "DNA" in compartment:
