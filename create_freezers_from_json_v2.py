@@ -142,11 +142,12 @@ for freezer in freezers["freezers"]:
                         Level3_Descr,Box,Box_Descr,BoxType
                         """
                         l_freez = freezer["name"].split("_")
-                        l_shelf = shelf.split()
+                        l_shelf = shelf.split()[2:].pop()
+                        l_shelf = l_shelf.replace("Shelf", "Shelf ")
                         tt = str(tt + 1)
                         box_descr = t["description"][:-1] + ", Box "+tt+"\""
                         string = freezer["name"] + ",Freezer "+l_freez[2]+"," + \
-                                 shelf + ","+" ".join(l_shelf[2:])+"," + t["name"] + \
+                                 shelf + ","+l_shelf+"," + t["name"] + \
                                  "," + t["description"] + ",,," \
                                  "Box " + tt + "," + box_descr + "," + t["compartments"]["boxtype"]
                         outfile.write(string + "\n")
