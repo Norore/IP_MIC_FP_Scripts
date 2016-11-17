@@ -146,8 +146,8 @@ for freezer in freezers["freezers"]:
                         l_shelf = l_shelf.replace("Shelf", "Shelf ")
                         tt = str(tt + 1)
                         box_descr = t["description"][:-1] + ", Box "+tt+"\""
-                        string = freezer["name"] + ",Freezer "+l_freez[2]+"," + \
-                                 shelf + ","+l_shelf+"," + t["name"] + \
+                        string = freezer["name"] + ",Freezer "+str(l_freez[2])+"," + \
+                                 shelf + ","+str(l_shelf)+"," + t["name"] + \
                                  "," + t["description"] + ",,," \
                                  "Box " + tt + "," + box_descr + "," + t["compartments"]["boxtype"]
                         outfile.write(string + "\n")

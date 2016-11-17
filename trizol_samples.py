@@ -32,6 +32,10 @@ parser.add_argument('-i', '--stimulation', required=True,
 parser.add_argument('-m', '--sheet2', required=True,
                     help="""Name of sheet in stimulated data in XLSX
                     format to use for merge with freezer data""")
+# Stimulus info file import
+parser.add_argument('-u', '--stimulus', required=True,
+                    help="""File with all stimuli in CSV
+                    format to use for merge with Trizol pellet data""")
 # Output file export
 parser.add_argument('-o', '--output', required=True,
                     help="""Output file name that will be generate in
@@ -48,6 +52,8 @@ f_labkey = args['labkey']
 # Stimulation file import args
 f_stimul = args['stimulation']
 n_stsheet = args['sheet2']
+# Stimulus file import args
+f_stimulus = args['stimulus']
 # Output file export args
 o_samples = args['output']
 
@@ -86,6 +92,13 @@ except:
     print "Sheet '" + n_stsheet + "' does not exist in file '" + f_stimul + "'"
     print "Error:", sys.exc_info()[0]
 
+# Read stimulus file
+try:
+    df_stimulus = pd.read_csv(f_stimulus, dtype=object)
+except IOError:
+    print "File '" + f_stimulus + "' does not exist"
+    exit()
+
 '''
 Defined reusable functions
 '''
@@ -104,15 +117,15 @@ truc_data = df_dtypes_object(truc_data)
 
 # change info in samples moved at Fernbach building
 indexes = list(truc_data.loc[truc_data["Processed"].isnull() == False].index)
-df_fern = truc_data.loc[indexes]
-df_fern.reset_index(inplace=True)
-del df_fern["index"]
-df_fern["FreezerID ShelfID"] = df_fern['FreezerID ShelfID'].str.\
+df_fernbach = truc_data.loc[indexes]
+df_fernbach.reset_index(inplace=True)
+del df_fernbach["index"]
+df_fernbach["FreezerID ShelfID"] = df_fernbach['FreezerID ShelfID'].str.\
     replace(r'[0-9]{4}', r'1538')
 truc_data.drop(indexes, inplace=True)
 truc_data.reset_index(inplace=True)
 del truc_data["index"]
-truc_data = pd.concat([truc_data, df_fern])
+truc_data = pd.concat([truc_data, df_fernbach])
 del truc_data["Processed"]
 # remove samples with no box
 indexes = list(truc_data.loc[truc_data["DonorID"].str.contains("no box")].index)
@@ -134,7 +147,8 @@ truc_data.reset_index(inplace=True)
 del truc_data["index"]
 
 # rename column 'FreezerID ShelfID' to 'FreezerLoc'
-truc_data.rename(columns={"FreezerID ShelfID": "FreezerLoc"}, inplace=True)
+truc_data.rename(columns={"FreezerID ShelfID": "FreezerLoc",
+                          "RackID": "Level2"}, inplace=True)
 
 # split column 'FreezerLoc' into 3 new columns: 'MIC', 'FreezerID' and 'ShelfID'
 newcols = pd.DataFrame(truc_data.FreezerLoc.str.split().tolist(),
@@ -144,14 +158,12 @@ newcols["ShelfID"] = newcols["ShelfID"].str.replace('Shelf', 'Shelf ')
 # remove 'MIC' column which is not necessary
 del newcols["MIC"]
 
-# replace 'MIC-TruCRack_' string by 'Rack ' for a good merge in next instructions
-#truc_data["RackID"] = truc_data["RackID"].str.replace('MIC-TruCRack_', 'Rack ')
 # create column 'FreezerID'
-truc_data["FreezerID"] = newcols["FreezerID"]
-truc_data["FreezerBarcode"] = "MIC_Freezer#_" + newcols["FreezerID"]
+newcols["FreezerID"] = newcols["FreezerID"].astype(str)
+truc_data["Freezer"] = "MIC_Freezer_" + newcols["FreezerID"]
 # create column 'ShelfID'
-truc_data["ShelfID"] = newcols["ShelfID"]
-truc_data["ShelfBarcode"] = "MIC Freezer" + newcols["FreezerID"] + " " + newcols["ShelfID"].str.replace(" ", "")
+newcols["ShelfID"] = newcols["ShelfID"].astype(str)
+truc_data["Level1"] = "MIC Freezer" + newcols["FreezerID"] + " " + newcols["ShelfID"].str.replace(" ", "")
 # remove column 'FreezerLoc' which is not yet necessary
 del truc_data["FreezerLoc"]
 
@@ -159,9 +171,9 @@ del truc_data["FreezerLoc"]
 values = []
 for value in truc_data["BoxPos"]:
     if int(value) % 2 == 0:
-        values.append("box " + str(int(value) / 2))
+        values.append("Box " + str(int(value) / 2))
     else:
-        values.append("box " + str((int(value) + 1) / 2))
+        values.append("Box " + str((int(value) + 1) / 2))
 # create column 'Box' with the 'box number' assigned to each donor
 truc_data["Box"] = values
 
@@ -187,11 +199,18 @@ for nb_boxpos in range(1, 21):
 
 boxes = pd.DataFrame({'BoxPos': boxpos, 'Position': position,
                       'StimulusID': stimulusid}, dtype=object)
-boxes["Sample Type"] = ["TC_Source_Tube"]*len(stimulusid)
-df_trucult = pd.merge(truc_data, boxes, on=["BoxPos"], how="inner")
-# rename columns for merge the dataframes
-df_trucult.rename(columns={"FreezerID": "Freezer", "ShelfID": "Level1",
-                           "RackID": "Level2"}, inplace=True)
+boxes["Sample Type"] = ["TC Source Tube"]*len(stimulusid)
+boxes["StimulusID"] = boxes["StimulusID"].astype(int)
+
+# prepare stimulus dataframe
+del df_stimulus["type"], df_stimulus["description"], df_stimulus["sensor"]
+df_stimulus.rename(columns={"stimulusId": "StimulusID", "name": "StimulusName"},
+                    inplace = True)
+df_stimulus["StimulusID"] = df_stimulus["StimulusID"].astype(int)
+
+df_boxes = pd.merge(boxes, df_stimulus, on=["StimulusID"])
+df_trucult = pd.merge(truc_data, df_boxes, on=["BoxPos"])
+
 # add column 'Name' that is necessary to create vial samples
 df_trucult["Name"] = df_trucult["DonorID"]
 
@@ -215,7 +234,7 @@ df_trucult['DonorID'] = df_trucult['DonorID'].str.\
                         .str.replace(r'^0+', '')
 
 # keep only TruCulture Trizol pellets data from Freezer CSV file
-trizol = df_freezer.loc[df_freezer["Level2_Desc"].str.contains('Trizol')]
+trizol = df_freezer.loc[df_freezer["Level2_Descr"].str.contains('Trizol')]
 # drop duplicates
 indexes = df_trucult[['DonorID', 'VisitID', 'BatchID', 'StimulusID']].drop_duplicates(keep="first").index
 df_trucult = df_trucult.loc[indexes]
@@ -226,7 +245,7 @@ del df_trucult["index"]
 merge_ft = pd.merge(trizol,
                     df_trucult,
                     on=['Freezer', 'Level1', 'Level2', 'Box'],
-                    how='outer')
+                    how='inner')
 merge_ft = df_dtypes_object(merge_ft)
 
 # keep only TRUCULTURE type from LabKey CSV file
@@ -234,7 +253,7 @@ truculture = df_labkey.loc[df_labkey['type'] == 'TRUCULTURE']
 # rename some columns for merge
 truculture.rename(columns={'donorId': 'DonorID', 'visitId': 'VisitID',
                            'batchId': 'BatchID', 'stimulusId': 'StimulusID',
-                           'barcodeId': 'barcode'},
+                           'barcodeId': 'BARCODE'},
                   inplace=True)
 
 # drop line if no DonorID
@@ -406,7 +425,7 @@ rm_columns = ["id", "type", "well", "auditTrail", "deleted",
               "NFwaterVolume", "CaliperRQS", "BioanalyzerRIN",
               "Nanodrop260_280", "Nanodrop260_230", "TECAN_RackNumber",
               "TECAN_RackPosition", "Matrix_RackBarcodeScanned",
-              "Matrix_TubeBarcodeScanned", "Matrix_TubePosition."]
+              "Matrix_TubeBarcodeScanned", "Matrix_TubePosition.", "rackId"]
 for col in rm_columns:
     del merge_ftls[col]
 
@@ -415,12 +434,14 @@ merge_ftls["BoxPos"] = merge_ftls["BoxPos"].astype(int)
 
 # rename columns
 merge_ftls.rename(columns={"volume": "Volume",
-                           "NbExtraction": "FreezeThaw",
-                           "rackId": "RackID",
-                           "barcode": "Barcode"},
+                           "NbExtraction": "FreezeThaw"},
                   inplace=True)
 
-merge_ftls["Name"] = merge_ftls["Barcode"]
+merge_ftls["FreezerBarcode"] = merge_ftls["Freezer"]
+merge_ftls["ShelfBarcode"] = merge_ftls["Level1"]
+merge_ftls["RackBarcode"] = merge_ftls["Level2"]
+merge_ftls["Name"] = merge_ftls["BARCODE"]
+
 
 # save result dataframe in a new CSV file
 merge_ftls.to_csv(o_samples, index=False, header=True)
