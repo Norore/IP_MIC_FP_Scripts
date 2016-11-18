@@ -442,6 +442,23 @@ merge_ftls["ShelfBarcode"] = merge_ftls["Level1"]
 merge_ftls["RackBarcode"] = merge_ftls["Level2"]
 merge_ftls["Name"] = merge_ftls["BARCODE"]
 
+'''
+Box and BoxBarcode should have this barcode:
+    CDDDDVB:
+        * C -> CenterID
+        * D -> DonnorID (4 digits)
+        * V -> VisitID
+        * B -> BatchID
+'''
+
+merge_ftls["F_Donor"] = merge_ftls["DonorID"]
+merge_ftls["F_Donor"] = merge_ftls["F_Donor"].str.replace(r"^(\d{1)$", r"000\1")
+merge_ftls["F_Donor"] = merge_ftls["F_Donor"].str.replace(r"^(\d{2)$", r"00\1")
+merge_ftls["F_Donor"] = merge_ftls["F_Donor"].str.replace(r"^(\d{3)$", r"0\1")
+
+merge_ftls["FLAG"] = merge_ftls["CenterID"] + merge_ftls["F_Donor"] \
+                     + merge_ftls["VisitID"] + merge_ftls["BatchID"]
+
 
 # save result dataframe in a new CSV file
 merge_ftls.to_csv(o_samples, index=False, header=True)
