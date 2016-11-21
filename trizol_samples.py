@@ -446,19 +446,37 @@ merge_ftls["Name"] = merge_ftls["BARCODE"]
 Box and BoxBarcode should have this barcode:
     CDDDDVB:
         * C -> CenterID
-        * D -> DonnorID (4 digits)
+        * D -> DonorID (4 digits)
         * V -> VisitID
         * B -> BatchID
 '''
-
+merge_ftls["DonorID"] = merge_ftls["DonorID"].astype(str)
 merge_ftls["F_Donor"] = merge_ftls["DonorID"]
-merge_ftls["F_Donor"] = merge_ftls["F_Donor"].str.replace(r"^(\d{1)$", r"000\1")
-merge_ftls["F_Donor"] = merge_ftls["F_Donor"].str.replace(r"^(\d{2)$", r"00\1")
-merge_ftls["F_Donor"] = merge_ftls["F_Donor"].str.replace(r"^(\d{3)$", r"0\1")
 
+merge_ftls["F_Donor"] = merge_ftls["F_Donor"].str.zfill(4)
+
+merge_ftls["CenterID"] = merge_ftls["CenterID"].astype(str)
+merge_ftls["VisitID"] = merge_ftls["VisitID"].astype(str)
+merge_ftls["BatchID"] = merge_ftls["BatchID"].astype(str)
 merge_ftls["FLAG"] = merge_ftls["CenterID"] + merge_ftls["F_Donor"] \
                      + merge_ftls["VisitID"] + merge_ftls["BatchID"]
 
+df_boxbc = merge_ftls[["Freezer", "Level1", "Level2", "Box", "FLAG"]].drop_duplicates()
+df_boxbc["Location"] = df_boxbc["Freezer"] + " " + df_boxbc["Level1"] + " " \
+                        + df_boxbc["Level2"] + " " + df_boxbc["Box"]
+
+dic_boxbc = { k:" ".join(df_boxbc.loc[df_boxbc["Location"] == k, "FLAG"]\
+                            .unique()) for k in df_boxbc["Location"].unique()}
+
+df_dicbox = pd.DataFrame({"Location": dic_boxbc.keys(), \
+                          "BOXBARCODE": dic_boxbc.values()}, dtype=object)
+
+merge_boxloc = pd.merge(df_dicbox, df_boxbc, on=["Location"])\
+                [["FLAG", "BOXBARCODE"]]
+
+merge_final = pd.merge(merge_ftls, merge_boxloc, on=["FLAG"])
+merge_final["Box"] = merge_final["BOXBARCODE"]
+del merge_final["F_Donor"], merge_final["FLAG"]
 
 # save result dataframe in a new CSV file
-merge_ftls.to_csv(o_samples, index=False, header=True)
+merge_final.to_csv(o_samples, index=False, header=True)
