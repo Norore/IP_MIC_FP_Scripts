@@ -1,0 +1,179 @@
+---
+title: "Stimuli samples analyzes for FreezerPro import"
+author: "Nolwenn Lavielle"
+date: "27 oct 2016"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+library(plyr)
+library(pander)
+```
+
+## File informations
+
+```{r loaddataL}
+path <- "/Volumes/LabExMI/Users/Nolwenn/FreezerPro/DataToImport/"
+filename <- "TC_supernatants_samples_V1_all_20161027.csv"
+df.samples <- read.csv(file = paste(path, filename, sep =""), 
+                       header=TRUE, sep=',', stringsAsFactors = FALSE)
+```
+
+QC of a file generated to import Stool aliquot sample information into FreezerPro.
+
+* **Filename**: `r filename`
+  + **file creation date:** 2016-10-27
+  + **number of rows:** `r nrow(df.samples)`
+  + **number of columns:** `r ncol(df.samples)`
+  + **column names:** `r names(df.samples)`
+
+## Data informations
+
+### Freezers
+
+```{r freezerinfo}
+result <- ddply(df.samples, .(Freezer, Freezer_Descr), nrow)
+colnames(result) <- c("Freezer", "Freezer_Descr", "# tubes")
+pander(result)
+```
+
+***Comment***: 
+
+* expect each sample is assign to the expected Freezer for FreezerPro.
+
+### Sample box type
+
+```{r sampleinfos}
+result <- ddply(df.samples, .(Sample.Type, BoxType), nrow)
+colnames(result) <- c("Sample Type", "BoxType", "# tubes")
+pander(result)
+```
+
+***Comment***: 
+
+* expect each sample is assign to the expected Box Type for FreezerPro.
+
+### Shelves
+
+```{r shelfinfos}
+result <- ddply(df.samples, .(Freezer, Level1, Level1_Descr), nrow)
+colnames(result) <- c("Freezer", "Level1", "Level1_Descr", "# tubes")
+pander(result)
+```
+
+***Comment***: 
+
+* expect each sample is assign to the expected Level1 (Shelf) for FreezerPro.
+
+### Racks
+
+```{r rackinfos}
+result <- ddply(df.samples, .(Level1, Level2), nrow)
+colnames(result) <- c("Level1", "Level2", "# tubes")
+pander(result)
+```
+
+***Comment***: 
+
+* expect to have the good racks in the good shelf, for each freezer
+
+```{r rackinfos3}
+result <- ddply(df.samples, .(Level2, Level2_Descr), nrow)
+colnames(result) <- c("Level2", "Level2_Descr", "# tubes")
+pander(result)
+```
+
+***Comment***:
+
+* `r nrow(result)` unique racks
+* expect `r 11` unique racks for Visit 1 and `r 6` unique racks for Visit 2, in all freezers
+
+```{r rackinfos4}
+result <- ddply(df.samples, .(Level3, Level3_Descr), nrow)
+colnames(result) <- c("Level3", "Level3_Descr", "# tubes")
+pander(result, split.cells = 5)
+```
+
+***Comment***:
+
+* `r length(unique(df.samples$Level3))` unique drawers
+* expect `r 11*6*3` unique drawers for Visit 1 and `r 6*6*3` unique drawers for Visit 2, in all freezers
+
+### Box infos
+
+```{r boxinfos1}
+result <- ddply(df.samples, .(Box, Box_Descr), nrow)
+colnames(result) <- c("Box", "Box_Descr", "# tubes")
+pander(result)
+```
+
+***Comment***:
+
+* `r length(unique(df.samples$Box))` unique boxes
+* expect `r 11*40*3` unique boxes for Visit 1 and `r 6*3*40` unique boxes for Visit 2, in all freezers
+
+### Box position
+
+```{r posinfos}
+result <- table(df.samples[,c("Position","Box")])
+levs <- unique(result)
+result <- factor(result, levels = sort(levs))
+result <- result[result!="0"]
+result <- factor(result)
+result <- as.data.frame(table(result))
+colnames(result) <- c("Duplicated position per box", "# tubes")
+pander(result)
+```
+
+***Comment***: 
+
+* expect to have unique positions in each box
+
+### Donor data in function of volume
+
+```{r donorinfos}
+result <- data.frame(table(df.samples[,c("Volume")]))
+colnames(result) <- c("Volume", "# tubes")
+pander(result)
+```
+
+***Comment***:
+
+* each tubes should contain a volume of 400.0 µL
+
+### BatchID info
+
+```{r batchinfos}
+result <- ddply(df.samples, .(VisitID, BatchID), nrow)
+colnames(result) <- c("VisitID", "BatchID", "# tubes")
+pander(result)
+```
+
+***Comment***: 
+
+* Total number of tubes: `r sum(result[,3])`
+* donors were included in two batches in Visit 1 and Visit 2.
+
+### More donor infos
+
+* Number of lines: `r nrow(df.samples)`
+* Number of unique DonorID: `r length(unique(df.samples[,"DonorID"]))`
+* Number of unique Sample Source: `r length(unique(df.samples[,"Sample.Source"]))`
+* Number of unique Name: `r length(unique(df.samples[,"Name"]))`
+* Visit number: `r unique(df.samples$VisitID)`
+* ***Comment***: 
+
+    * expect 1.000 DonorID and Sample Source, and 1 Name per line, for Visit 1
+    * expect 500 DonorID and Sample Source, and 1 Name per line, for Visit 2
+
+```{r donorsub}
+sdf <- subset(df.samples, DonorID > 5000)
+result <- ddply(sdf, .(DonorID, AliquotID), nrow)
+colnames(result) <- c("DonorID", "AliquotID", "# tubes")
+pander(result)
+```
+
+***Comment***: 
+
+* `r length(unique(sdf$DonorID))` DonorID were replaced, expect 40 tubes per DonorID and AliquotID
