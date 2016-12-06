@@ -145,7 +145,7 @@ df_al2_fr.loc[:, "ALIQUOT"] = 2
 df_al2_fr.loc[:, "Volume"] = 100.0
 del df_al2_fr["Vial Volume"], df_al2_fr["SrcBox_BoxID"], df_al2_fr["Name"], \
     df_al2_fr["BoxBarcode"]
-df_al2_fr.loc[:, "BoxBarcode"] = None
+df_al2_fr.loc[:, "Box"] = None
 df_al2_fr.rename(columns = {"UID": "ID", \
                             "Al2Box_BoxID": "ThermoBoxBarcode",
                             "Al2Box_TubeScan": "Name"}, \
@@ -162,10 +162,12 @@ df_al_fr.loc[df_al_fr["ALIQUOT"] == 2, "BOX_BARCODE"] = df_al_fr.loc[df_al_fr["A
 df_al_fr.loc[df_al_fr["ALIQUOT"] == 2, "Freezer"] = "Freezer_Outside"
 df_al_fr.loc[df_al_fr["ALIQUOT"] == 2, "Freezer_Descr"] = "Freezer Outside of Pasteur Institute"
 df_al_fr.loc[:, "BoxType"] = "96 (12 x 8) Well Plate"
+df_al_fr.loc[:, "Box"] = df_al_fr["BOX_BARCODE"]
+df_al_fr.loc[:, "Box_Descr"] = df_al_fr["Box"].str.replace(r"\w+S(\d{1,2})_V(\d)_A(\d)_F(\d)_D(\w+)-(\w+)", r"""Box of Stimulus \1 for Donors \5 to \6, Visit \2, Aliquot \3, Fraction \4""")
 
-keep_cols = ["ALIQUOT", "BoxBarcode", "ID", "Name", \
-             "Position", "Volume", "BARCODE", \
-             "BOX_BARCODE", "Freezer", "Freezer_Descr", "BoxType"]
+keep_cols = ["ID", "ALIQUOT", "Name", "BARCODE", "Position", "Volume", \
+             "Freezer", "Freezer_Descr", "BoxType", "Box", "Box_Descr", \
+             "BOX_BARCODE"]
 
 df_al_fr[keep_cols].to_csv(o_samples_new, index = False, header = True)
 
