@@ -166,8 +166,8 @@ df_al_fr.loc[:, "Box"] = df_al_fr["BOX_BARCODE"]
 df_al_fr.loc[:, "Box_Descr"] = df_al_fr["Box"].str.replace(r"\w+S(\d{1,2})_V(\d)_A(\d)_F(\d)_D(\w+)-(\w+)", r"""Box of Stimulus \1 for Donors \5 to \6, Visit \2, Aliquot \3, Fraction \4""")
 
 keep_cols = ["ID", "ALIQUOT", "Name", "BARCODE", "Position", "Volume", \
-             "Freezer", "Freezer_Descr", "BoxType", "Box", "Box_Descr", \
-             "BOX_BARCODE"]
+             "Freezer", "Freezer_Descr", "BoxType", \
+             "Box", "Box_Descr", "BOX_BARCODE"]
 
 df_al_fr[keep_cols].to_csv(o_samples_new, index = False, header = True)
 
