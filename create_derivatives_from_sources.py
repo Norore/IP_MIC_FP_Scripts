@@ -28,6 +28,10 @@ parser.add_argument('-e', '--remove_tubes', required=False,
 # Replace errors tubes
 parser.add_argument('-c', '--change_tubes', required=False,
                     help="""File of tubes to replace""")
+# Add missing tubes
+parser.add_argument('-a', '--add_tubes', required=False,
+                    help="""File of tubes to add, need to be in same format as
+                    run files from argument --directory""")
 # Box location in freezers
 parser.add_argument('-f', '--freezers', required=True,
                     help="""File with location of each box of aliquots in
@@ -97,6 +101,13 @@ try:
 except IOError:
     print "Directory '" + d_dir + "' does not exist"
     exit()
+
+
+# Add tubes file input
+if args["add_tubes"]:
+    add_file = args["add_tubes"]
+    l_files.append(add_file)
+
 
 '''
 Defined reusable functions
@@ -191,7 +202,7 @@ df_aliquot.loc[:, "Name"] = df_aliquot["Name"].astype(float).\
 
 # keep date in date format only (YYYY/MM/DD)
 df_aliquot.loc[:, "AliquotingDate"] = df_aliquot["AliquotingDate"].str.\
-                           replace(r"(\d{4})(\d{2})(\d{2})_[A-Z]*$", \
+                           replace(r"(\d{4})(\d{2})(\d{2})_[A-Z]*", \
                            r"\3/\2/\1")
 
 # list of columns for aliquot 1 data
@@ -201,7 +212,8 @@ cols_aliq1 = ["AliquotingDate", "SrcBox_BoxID", "BoxBarcode", \
 df_aliquot1 = df_aliquot[cols_aliq1]
 df_aliquot1.rename(columns = {"Well VisionMate.1": "Position"},
                    inplace = True)
-
+df_aliquot1.loc[:, "Position"] = df_aliquot1["Position"].str.\
+                                        replace(r"^([A-Z]+)(\d+)$", r"\1 / \2")
 # list of columns for aliquot 2 data
 cols_aliq2 = ["AliquotingDate", "SrcBox_BoxID", "BoxBarcode", \
               "Name", "Al2Box_BoxID", "Al2Box_TubeScan", \
@@ -209,6 +221,8 @@ cols_aliq2 = ["AliquotingDate", "SrcBox_BoxID", "BoxBarcode", \
 df_aliquot2 = df_aliquot[cols_aliq2]
 df_aliquot2.rename(columns = {"Well VisionMate.2": "Position"},
                    inplace = True)
+df_aliquot2.loc[:, "Position"] = df_aliquot2["Position"].str.\
+                                        replace(r"^([A-Z]+)(\d+)$", r"\1 / \2")
 df_aliquot2 = df_aliquot2[df_aliquot2["Name"].notnull()]
 df_aliquot2 = df_aliquot2[df_aliquot2["Name"].str.contains("[^0-9]") == False]
 
@@ -223,8 +237,37 @@ df_input.rename(columns={"Position": "TubeWell"}, inplace=True)
 # if user don't want at least one stimulus, don't keep it
 if 'rm_stimuli' in locals():
     for st in rm_stimuli:
+        df_rm_samples = df_aliquot1[df_aliquot1["Al1Box_LabExID"].str.\
+                            contains(r"S"+st)]
         df_aliquot1 = df_aliquot1[~df_aliquot1["Al1Box_LabExID"].str.\
                         contains(r"S"+st)]
+        del df_rm_samples["BoxBarcode"]
+        df_rm_al_fr = pd.merge(df_input, df_rm_samples, on="Name")
+
+        df_rm_al_fr.loc[:, "Sample Type"] = "Fraction1"
+        df_rm_al_fr.loc[:, "Volume"] = 100.0
+        del df_rm_al_fr["SrcBox_BoxID"], df_rm_al_fr["BoxBarcode"], \
+            df_rm_al_fr["Name"]
+        df_rm_al_fr.rename(columns = {"UID": "ParentID", \
+                                      "BARCODE": "SrcTube_Barcode", \
+                                      "Al1Box_LabExID": "BoxBarcode", \
+                                      "Al1Box_BoxID": "ThermoBoxBarcode", \
+                                      "Al1Box_TubeScan": "Name"}, \
+                           inplace = True)
+
+        df_rm_al_fr.loc[:, "Name"] = df_rm_al_fr["Name"].astype(str)
+        del df_rm_al_fr["SrcTube_Barcode"]
+
+        df_rm_al_fr.loc[:, "BARCODE"] = df_rm_al_fr["Name"]
+        df_rm_al_fr.loc[:, "BOX_BARCODE"] = df_rm_al_fr["BoxBarcode"]
+        df_rm_al_fr.loc[:, "BoxType"] = "96 (12 x 8) Well Plate"
+        df_rm_al_fr.loc[:, "Box"] = df_rm_al_fr["BOX_BARCODE"]
+        df_rm_al_fr.loc[:, "Box_Descr"] = df_rm_al_fr["Box"].str.\
+                            replace(r"\w+S(\d{1,2})_V(\d)_A(\d)_F(\d)_D(\w+)-(\w+)", \
+                            r"""Box of Stimulus \1 for Donors \5 to \6, Visit \2, Aliquot \3, Fraction \4""")
+        df_rm_al_fr.loc[:, "CreationDate"] = df_rm_al_fr["AliquotingDate"]
+        df_rm_al_fr.loc[:, "UpdateDate"] = df_rm_al_fr["AliquotingDate"]
+        df_rm_al_fr.loc[:, "Edition comment"] = "Tube sent to RBM. The tube "+df_rm_al_fr["Name"]+" no longer exists."
 
 print("Nb tubes in Aliquot 1:")
 print(len(df_aliquot1))
@@ -246,8 +289,7 @@ df_al1_fr = pd.merge(df_freez, df_al1_fr, on="BoxBarcode")
 df_al_fr = df_al1_fr.copy(deep=True)
 df_al_fr.loc[:, "Name"] = df_al_fr["Name"].astype(str)
 del df_al_fr["SrcTube_Barcode"]
-df_al_fr.loc[:, "TubeWell"] = df_al_fr["TubeWell"].str.\
-                    replace(r"^([A-Z]+)(\d+)$", r"\1 / \2")
+
 df_al_fr.loc[:, "BARCODE"] = df_al_fr["Name"]
 df_al_fr.loc[:, "BOX_BARCODE"] = df_al_fr["BoxBarcode"]
 df_al_fr.loc[:, "BoxType"] = "96 (12 x 8) Well Plate"
@@ -255,14 +297,14 @@ df_al_fr.loc[:, "Box"] = df_al_fr["BOX_BARCODE"]
 df_al_fr.loc[:, "Box_Descr"] = df_al_fr["Box"].str.\
                     replace(r"\w+S(\d{1,2})_V(\d)_A(\d)_F(\d)_D(\w+)-(\w+)", \
                     r"""Box of Stimulus \1 for Donors \5 to \6, Visit \2, Aliquot \3, Fraction \4""")
-df_al_fr.loc[:, "CreationDate"] = df_al_fr["AliquotingDate"]#.str.replace(r"(\d{4})(\d{2})(\d{2})", r"\3/\2/\1")
-df_al_fr.loc[:, "UpdateDate"] = df_al_fr["AliquotingDate"]#.str.replace(r"(\d{4})(\d{2})(\d{2})", r"\3/\2/\1")
+df_al_fr.loc[:, "CreationDate"] = df_al_fr["AliquotingDate"]
+df_al_fr.loc[:, "UpdateDate"] = df_al_fr["AliquotingDate"]
 
 # list of columns to keep for import into FreezerPro
 keep_cols = ["ParentID", "Name", "BARCODE", "Position", "Volume", \
              "Freezer", "Freezer_Descr", "Level1", "Level1_Descr", \
              "Level2", "Level2_Descr", "Level3", "Level3_Descr", \
-             "BoxType", "Box", "Box_Descr", \
+             "BoxType", "Box", "Box_Descr", "ThermoBoxBarcode",\
              "BOX_BARCODE", "CreationDate", "UpdateDate", "AliquotID", \
              "DonorID", "StimulusID", "StimulusName", "VisitID", "ThawCycle", \
              "Sample Source", "Description", "BatchID", \
@@ -293,11 +335,6 @@ if 'df_ctubes' in locals():
                         astype(str)
     df_ctubes.rename(columns={"DonorId": "DonorID"}, inplace=True)
     df_ctubes.loc[:, "DonorID"] = df_ctubes["DonorID"].astype(float).astype(str)
-    dp = pd.DataFrame([str(col)+" / "+str(line+1) for col in \
-                        ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'] \
-                        for line in range(0, 12)],
-                       columns=["TubeWell"])
-    dp["Position"] = dp.index+1
     df_tmp_tubes_origin = pd.merge(df_ctubes, df_input, \
                                    on=["StimulusID", "DonorID"])
     df_tmp_tubes_origin = df_tmp_tubes_origin[["UID", "Name", "Volume", \
@@ -308,10 +345,12 @@ if 'df_ctubes' in locals():
                                                "ThawCycle", "BarcodeId_Source",\
                                                "Description", "BatchID", \
                                                "ShelfBarcode", "RackBarcode", \
-                                               "Sample Source", \
+                                               "Sample Source", "F1TF_Barcode",\
+                                               "F1Box_Barcode", \
                                                "DrawerBarcode", "TubeWell"]]
     df_tmp_tubes_origin.rename(columns={"Name": "NewSrcTube_Barcode", \
-                                        "BarcodeId_Source": "SrcTube_Barcode"},\
+                                        "BarcodeId_Source": "SrcTube_Barcode",
+                                        "F1TF_Barcode": "ThermoBoxBarcode"},\
                                inplace=True)
     # we have the good source tubes, we need to get the good fractions barcodes
     df_errors = df_errors[["Well VisionMate", "Well VisionMate.1"]]
@@ -324,10 +363,17 @@ if 'df_ctubes' in locals():
     df_all_bcds.loc[:, "SrcTube_Barcode"] = df_all_bcds["SrcTube_Barcode"].\
                                             astype(str)
     df_ali1.loc[:, "SrcTube_Barcode"] = df_ali1["SrcTube_Barcode"].astype(str)
+    df_ali1.loc[:, "Position"] = df_ali1["Position"].str.\
+                                        replace(r"^([A-Z]+)(\d+)$", r"\1 / \2")
     df_ali1_changed = pd.merge(df_all_bcds, df_ali1, on="SrcTube_Barcode")
+    del df_ali1_changed["BoxBarcode"]
+
     df_ali1_changed.rename(columns={"NewSrcTube_Barcode": "Name", \
-                                    "UID": "ParentID"}, inplace=True)
+                                    "UID": "ParentID", \
+                                    "Al1Box_LabExID": "BoxBarcode"}, inplace=True)
+    print("%d lines in df_ali1_changed (before)" % len(df_ali1_changed))
     df_ali1_changed = pd.merge(df_freez, df_ali1_changed, on="BoxBarcode")
+    print("%d lines in df_ali1_changed (after)" % len(df_ali1_changed))
 
     df_al1_cplt = df_ali1_changed.copy(deep=True)
     # get list of aliquot tube barcode that are wrong and would be changed
@@ -337,14 +383,15 @@ if 'df_ctubes' in locals():
     del df_al1_cplt["SrcTube_Barcode"], df_al1_cplt["Al1Box_TubeScan"], \
         df_al1_cplt["Name"]
     df_al1_cplt.rename(columns={"NewAl1Tube_Barcode": "Name"}, inplace=True)
-    df_al1_cplt.loc[:, "Position"] = df_al1_cplt["Position"].str.replace(r"^([A-Z]+)(\d+)$", r"\1 / \2")
+    df_al1_cplt.loc[:, "Position"] = df_al1_cplt["Position"].str.\
+                replace(r"^([A-Z]+)(\d+)$", r"\1 / \2")
     df_al1_cplt.loc[:, "BARCODE"] = df_al1_cplt["Name"]
-    df_al1_cplt.loc[:, "BOX_BARCODE"] = df_al1_cplt["BoxBarcode"]
-    # df_al1_cplt.loc[:, "Freezer"] = "MIC_Freezer_1537"
-    # df_al1_cplt.loc[:, "Freezer_Descr"] = "Freezer 1537"
-    df_al1_cplt.loc[:, "BoxType"] = "96 (12 x 8) Well Plate"
+    df_al1_cplt.loc[:, "BOX_BARCODE"] = df_al1_cplt["F1Box_Barcode"]
     df_al1_cplt.loc[:, "Box"] = df_al1_cplt["BOX_BARCODE"]
-    df_al1_cplt.loc[:, "Box_Descr"] = df_al1_cplt["Box"].str.replace(r"\w+S(\d{1,2})_V(\d)_A(\d)_F(\d)_D(\w+)-(\w+)", r"""Box of Stimulus \1 for Donors \5 to \6, Visit \2, Aliquot \3, Fraction \4""")
+    df_al1_cplt.loc[:, "BoxType"] = "96 (12 x 8) Well Plate"
+    df_al1_cplt.loc[:, "Box_Descr"] = df_al1_cplt["F1Box_Barcode"].str.\
+                replace(r"\w+S(\d{1,2})_V(\d)_A(\d)_F(\d)_D(\w+)-(\w+)", \
+                r"""Box of Stimulus \1 for Donors \5 to \6, Visit \2, Aliquot \3, Fraction \4""")
     df_al1_cplt.loc[:, "CreationDate"] = df_al1_cplt["AliquotingDate"]
     df_al1_cplt.loc[:, "UpdateDate"] = df_al1_cplt["AliquotingDate"]
 
@@ -366,4 +413,16 @@ df_update = pd.merge(df_al_fr, df_input[["ParentID", "BARCODE", "Volume"]], on="
 df_update.loc[:, "Volume"] = df_update["Volume"]-(2*100.0)
 df_update.loc[:, "UpdateDate"] = df_update["AliquotingDate"].str.replace(r"(\d{4})(\d{2})(\d{2})", r"\3/\2/\1")
 
-df_update[["BARCODE", "Volume", "UpdateDate"]].to_csv(u_samples, index = False, header = True)
+if 'df_rm_al_fr' in locals():
+    df_update.loc[:, "Edition comment"] = ""
+    on_cols = ["BARCODE", "Volume", "UpdateDate", "Edition comment"]
+    # print(df_rm_al_fr.columns)
+    # exit()
+    df_update = pd.concat([df_update[on_cols], df_rm_al_fr[on_cols]])
+    print(df_update)
+    df_update.to_csv(u_samples, index = False, header = True)
+
+    print("Save %d lines in %s" % (len(df_update), u_samples))
+
+else:
+    df_update[["BARCODE", "Volume", "UpdateDate"]].to_csv(u_samples, index = False, header = True)
