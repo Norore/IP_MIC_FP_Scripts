@@ -326,6 +326,7 @@ if 'rm_stimuli' in locals():
         df_rm_al2_fr.loc[:, "Edition comment"] = "Tube sent to RBM. The tube "+df_rm_al2_fr["Name"]+" no longer exists."
 
         df_rm_al_fr = pd.concat([df_rm_al1_fr, df_rm_al2_fr])
+        df_rm_al_fr.loc[:, "Volume"] = 0.0
 
 """
 Merge Aliquot Fraction 1 with Freezer location
@@ -572,8 +573,8 @@ df_input.rename(columns = {"UID": "ParentID"}, inplace = True)
 df_input["Volume"] = df_input["Volume"].astype(float)
 
 df_update = pd.merge(df_al_fr, df_input[["ParentID", "BARCODE", "Volume"]], on="ParentID")
-
-df_update.loc[:, "Volume"] = df_update["Volume"]-(2*100.0)
+nb_fractions = len(df_update["Sample Type"].unique())
+df_update.loc[:, "Volume"] = df_update["Volume"]-(nb_fractions*100.0)
 df_update.loc[:, "UpdateDate"] = df_update["AliquotingDate"].str.replace(r"(\d{4})(\d{2})(\d{2})", r"\3/\2/\1")
 
 if 'df_rm_al_fr' in locals():
@@ -581,13 +582,7 @@ if 'df_rm_al_fr' in locals():
     on_cols = ["BARCODE", "Volume", "UpdateDate", "Edition comment"]
     df_update = pd.concat([df_update[on_cols], df_rm_al_fr[on_cols]])
 
-    print("%d lines in df_update before dropping duplicates" % len(df_update))
     df_update.drop_duplicates(inplace=True)
-    print("%d lines in df_update after dropping duplicates" % len(df_update))
-    print("%d unique BARCODE in df_update" % len(df_update["BARCODE"].unique()))
-    print("%d unique Volume in df_update" % len(df_update["Volume"].unique()))
-    print("%d unique UpdateDate in df_update" % len(df_update["UpdateDate"].unique()))
-    print("%d unique Edition comment in df_update" % len(df_update["Edition comment"].unique()))
     df_update.to_csv(u_samples, index = False, header = True)
 
     print("Save %d lines in %s" % (len(df_update), u_samples))
