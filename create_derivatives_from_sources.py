@@ -5,6 +5,9 @@ import re
 import os
 import glob
 
+rfidlist = ['24690', '24665']
+donorslist = ['337', '362']
+
 '''
 Initialize arguments
 '''
@@ -27,7 +30,12 @@ parser.add_argument('-e', '--remove_tubes', required=False,
                     help="""File of excluded tubes.""")
 # Replace errors tubes
 parser.add_argument('-c', '--change_tubes', required=False,
-                    help="""File of tubes to replace""")
+                    help="""File of tubes to replace (tube from the wrong
+                    StimulusID)""")
+# Replace errors tubes
+parser.add_argument('-p', '--replace_tubes', required=False,
+                    help="""File of tubes to replace (tube with wrong
+                    barcode)""")
 # Add missing tubes
 parser.add_argument('-a', '--add_tubes', required=False,
                     help="""File of tubes to add, need to be in same format as
@@ -252,8 +260,13 @@ df_input = df_input[["UID", "Name", "Volume", "BoxBarcode", "BARCODE", \
                      "Position"]]
 df_input.rename(columns={"Position": "TubeWell"}, inplace=True)
 
+# print("Check Barcode for df_aliquot")
+# df_aliquot.loc[df_aliquot["Name"].isin(['3260593993','3260623087'])].to_csv("/Users/nlaviell/Desktop/tubes_aliquoted.csv", header=True, index=False, sep=";")
+# exit()
+
 # if user don't want at least one stimulus, don't keep it
 if 'rm_stimuli' in locals():
+    df_rm_tmp = []
     for st in rm_stimuli:
         """
         Aliquot Fraction 1, remove stimuli
@@ -290,6 +303,11 @@ if 'rm_stimuli' in locals():
         df_rm_al1_fr.loc[:, "UpdateDate"] = df_rm_al1_fr["AliquotingDate"]
         df_rm_al1_fr.loc[:, "Edition comment"] = "Tube sent to RBM. The tube "+df_rm_al1_fr["Name"]+" no longer exists."
 
+        # print("Check DonorID for df_rm_al1_fr")
+        # print(df_rm_al1_fr.loc[df_rm_al1_fr["DonorID"].isin(['337.0', '362.0'])])
+        # print("Check DonorID for df_input")
+        # print(df_input.loc[(df_input["StimulusID"] == '9.0') & (df_input["DonorID"].isin(['337.0', '362.0']))])
+        # exit()
         """
         Aliquot 1 Fraction 2, remove stimuli
         """
@@ -325,8 +343,9 @@ if 'rm_stimuli' in locals():
         df_rm_al2_fr.loc[:, "UpdateDate"] = df_rm_al2_fr["AliquotingDate"]
         df_rm_al2_fr.loc[:, "Edition comment"] = "Tube sent to RBM. The tube "+df_rm_al2_fr["Name"]+" no longer exists."
 
-        df_rm_al_fr = pd.concat([df_rm_al1_fr, df_rm_al2_fr])
-        df_rm_al_fr.loc[:, "Volume"] = 0.0
+        df_rm_tmp.append(pd.concat([df_rm_al1_fr, df_rm_al2_fr]))
+
+    df_rm_al_fr = pd.concat(df_rm_tmp)
 
 """
 Merge Aliquot Fraction 1 with Freezer location
@@ -463,9 +482,7 @@ if 'df_ctubes' in locals():
     df_ali1_changed.rename(columns={"NewSrcTube_Barcode": "Name", \
                                     "UID": "ParentID", \
                                     "Al1Box_LabExID": "BoxBarcode"}, inplace=True)
-    # print("%d lines in df_ali1_changed (before)" % len(df_ali1_changed))
     df_ali1_changed = pd.merge(df_freez, df_ali1_changed, on="BoxBarcode")
-    # print("%d lines in df_ali1_changed (after)" % len(df_ali1_changed))
 
     df_al1_cplt = df_ali1_changed.copy(deep=True)
     # get list of aliquot tube barcode that are wrong and would be changed
@@ -530,9 +547,7 @@ if 'df_ctubes' in locals():
                                     "UID": "ParentID", \
                                     "Al2Box_LabExID": "BoxBarcode"}, \
                            inplace=True)
-    # print("%d lines in df_ali1_changed (before)" % len(df_ali1_changed))
     df_ali2_changed = pd.merge(df_freez, df_ali2_changed, on="BoxBarcode")
-    # print("%d lines in df_ali1_changed (after)" % len(df_ali1_changed))
 
     df_al2_cplt = df_ali2_changed.copy(deep=True)
     # get list of aliquot tube barcode that are wrong and would be changed
@@ -576,16 +591,23 @@ df_update = pd.merge(df_al_fr, df_input[["ParentID", "BARCODE", "Volume"]], on="
 nb_fractions = len(df_update["Sample Type"].unique())
 df_update.loc[:, "Volume"] = df_update["Volume"]-(nb_fractions*100.0)
 df_update.loc[:, "UpdateDate"] = df_update["AliquotingDate"].str.replace(r"(\d{4})(\d{2})(\d{2})", r"\3/\2/\1")
+df_update.loc[:, "Freezer"] = df_update["ShelfBarcode"].str.replace(r"MIC Freezer(\d{4}) Shelf\d", r"MIC_Freezer\1")
 
 if 'df_rm_al_fr' in locals():
     df_update.loc[:, "Edition comment"] = ""
-    on_cols = ["BARCODE", "Volume", "UpdateDate", "Edition comment"]
+    on_cols = ["ParentID", "BARCODE", "Volume", "UpdateDate", "Position", \
+               "Edition comment", "BoxBarcode", "Freezer", "DonorID"]
+    df_rm_al_fr.loc[:, "Freezer"] = "MIC_Trash_RBM"
+    # rfidlist = ['24690', '24665']
+    # print("Check datas for df_update")
+    # print(df_update.loc[df_update["ParentID"].isin(rfidlist), on_cols])
+    # print("Check datas for df_rm_al_fr")
+    # print(df_rm_al_fr.loc[df_rm_al_fr["ParentID"].isin(rfidlist), on_cols])
     df_update = pd.concat([df_update[on_cols], df_rm_al_fr[on_cols]])
 
     df_update.drop_duplicates(inplace=True)
-    df_update.to_csv(u_samples, index = False, header = True)
 
-    print("Save %d lines in %s" % (len(df_update), u_samples))
+df_update.rename(columns={"ParentID": "RFID"}, inplace=True)
+df_update.to_csv(u_samples, index = False, header = True)
 
-else:
-    df_update[["BARCODE", "Volume", "UpdateDate"]].to_csv(u_samples, index = False, header = True)
+print("Save %d lines in %s" % (len(df_update), u_samples))
