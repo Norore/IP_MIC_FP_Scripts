@@ -78,7 +78,10 @@ optional arguments:
   -e REMOVE_TUBES, --remove_tubes REMOVE_TUBES
                         File of excluded tubes.
   -c CHANGE_TUBES, --change_tubes CHANGE_TUBES
-                        File of tubes to replace
+                        File of tubes to replace (tube from the wrong
+                        StimulusID)
+  -p REPLACE_TUBES, --replace_tubes REPLACE_TUBES
+                        File of tubes to replace (tube with wrong barcode)
   -a ADD_TUBES, --add_tubes ADD_TUBES
                         File of tubes to add, need to be in same format as run
                         files from argument --directory
@@ -103,9 +106,9 @@ Example:
  -c ../DataToPrepare/Aliquoting/Error_Tubes.xlsx
  -a ../DataToPrepare/Aliquoting/Add_Tubes.xlsx
  -f ../DataToPrepare/Aliquoting/box_location_20161221.csv
- -o ../DataToImport/Supernatants_Derivatives_F1F2_20170111.csv
- -u ../DataToImport/Supernatants_Samples_Derivatived_F1F2_20170111.csv
-
+ -o ../DataToImport/Supernatants_Derivatives_F1F2_20170118.csv
+ -u ../DataToImport/Supernatants_Samples_Derivatived_F1F2_20170118.csv
+ -p ../DataToPrepare/Aliquoting/ReplaceSourceBarcode.xlsx
 ```
 
 ### create_freezers_from_json_v2.py
