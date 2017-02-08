@@ -105,14 +105,16 @@ Main script starts here
 '''
 # dataframe from excel can't be load as dtype object, conversion
 truc_data = df_dtypes_object(truc_data)
+# ignore rack 77
+truc_data = truc_data.loc[~(truc_data["RackID"] == "MIC-TruCRack_77")]
 
 # change info in samples moved at Fernbach building
-df_fernbach = truc_data.loc[truc_data["Processed"].isnull() == False]
+df_fernbach = truc_data.loc[truc_data["Processed"].isnull() == False].copy(deep=True)
 df_fernbach.reset_index(drop=True, inplace=True)
 df_fernbach.loc[:, "FreezerID ShelfID"] = df_fernbach['FreezerID ShelfID'].str.\
                                             replace(r'[0-9]{4}', r'1538')
 
-truc_data = truc_data.loc[truc_data["Processed"].isnull()]
+truc_data = truc_data.loc[truc_data["Processed"].isnull()].copy(deep=True)
 truc_data.reset_index(drop=True, inplace=True)
 
 truc_data = pd.concat([truc_data, df_fernbach])
@@ -120,8 +122,9 @@ truc_data.reset_index(drop=True, inplace=True)
 del truc_data["Processed"]
 
 # remove samples with no box
-truc_data = truc_data.loc[~(truc_data["DonorID"].isin(["no box", "No box", \
-                                                      "No donor", "No Donor"]))]
+truc_data = truc_data.loc[~(truc_data["DonorID"].\
+                            isin(["no box", "No box", \
+                            "No donor", "No Donor"])).copy(deep=True)]
 truc_data.reset_index(drop=True, inplace=True)
 
 # rename column 'FreezerID ShelfID' to 'FreezerLoc'
@@ -130,15 +133,15 @@ truc_data.rename(columns={"FreezerID ShelfID": "FreezerLoc",
 
 # split column 'FreezerLoc' into 3 new columns: 'MIC', 'FreezerID' and 'ShelfID'
 newcols = pd.DataFrame(truc_data.FreezerLoc.str.split().tolist(),
-                       columns=["MIC", "FreezerID", "ShelfID"])
+                       columns=["MIC", "FreezerID", "ShelfID"]).copy(deep=True)
 newcols.loc[:, "FreezerID"] = newcols["FreezerID"].str.replace('Freezer', '')
 newcols.loc[:, "ShelfID"] = newcols["ShelfID"].str.replace('Shelf', 'Shelf ')
 # remove 'MIC' column which is not necessary
 del newcols["MIC"]
 
 # create column 'FreezerID'
-newcols["FreezerID"] = newcols["FreezerID"].astype(str)
-truc_data["Freezer"] = "MIC_Freezer_" + newcols["FreezerID"]
+newcols.loc[:, "FreezerID"] = newcols["FreezerID"].astype(str)
+truc_data.loc[:, "Freezer"] = "MIC_Freezer_" + newcols["FreezerID"]
 # create column 'ShelfID'
 newcols.loc[:, "ShelfID"] = newcols["ShelfID"].astype(str)
 truc_data.loc[:, "Level1"] = "MIC Freezer" + newcols["FreezerID"] + \
@@ -191,7 +194,7 @@ df_boxes = pd.merge(boxes, df_stimulus, on=["StimulusID"])
 df_trucult = pd.merge(truc_data, df_boxes, on=["BoxPos"])
 
 # add column 'Name' that is necessary to create vial samples
-df_trucult.loc[:, "Name"] = df_trucult["DonorID"]
+# df_trucult.loc[:, "Name"] = df_trucult["DonorID"]
 
 ''' Populate columns
 add columns:
@@ -215,35 +218,36 @@ df_trucult.loc[:, 'DonorID'] = df_trucult['DonorID'].str.\
                                replace(r'[0-9]{1}([0-9]{4})[0-9]{1}[A-Z]{1}', \
                                        r'\1').str.replace(r'^0+', '')
 
+df_trucult.loc[:, "StimulusID"] = df_trucult["StimulusID"].astype(object)
+df_trucult.loc[:, "Name"] = df_trucult["DonorID"]
+
 print("{} unique DonorID in df_trucult.".\
         format(df_trucult["DonorID"].nunique()))
-print(df_trucult.groupby("DonorID")["Name"].nunique())
 
-# keep only TruCulture Trizol pellets data from Freezer CSV file
-trizol = df_freezer.loc[df_freezer["Level2_Descr"].str.contains('Trizol')]
 # drop duplicates
 indexes = df_trucult[['DonorID', 'VisitID', 'BatchID', 'StimulusID']].\
                         drop_duplicates(keep="first").index
-df_trucult = df_trucult.loc[indexes]
+df_trucult = df_trucult.loc[indexes].copy(deep=True)
 df_trucult.reset_index(inplace=True)
 del df_trucult["index"]
 
-print("{} unique Level1 in df_trucult.".\
-        format(df_trucult["Level1"].nunique()))
-print("{} unique Level1 in trizol.".\
-        format(trizol["Level1"].nunique()))
-
 # merge trizol and datatest
-merge_ft = pd.merge(trizol,
-                    df_trucult,
-                    on=['Freezer', 'Level1', 'Level2', 'Box'],
-                    how='inner')
+trizol = df_freezer[df_freezer.columns.difference(["Freezer", \
+                                                   "Level1"])].\
+                                                   copy(deep=True)
+merge_ft = pd.merge(trizol, df_trucult, on=['Level2', 'Box'], how='inner')
 merge_ft = df_dtypes_object(merge_ft)
+
 print("{} unique Level1 in merge_ft.".\
         format(merge_ft["Level1"].nunique()))
 
+print("{} unique DonorID in merge_ft.".\
+        format(merge_ft["DonorID"].nunique()))
+
+print("{} lines in merge_ft.".format(len(merge_ft)))
+
 # keep only TRUCULTURE type from LabKey CSV file
-truculture = df_labkey.loc[df_labkey['type'] == 'TRUCULTURE']
+truculture = df_labkey.loc[df_labkey['type'] == 'TRUCULTURE'].copy(deep=True)
 # rename some columns for merge
 truculture.rename(columns={'donorId': 'DonorID', 'visitId': 'VisitID',
                            'batchId': 'BatchID', 'stimulusId': 'StimulusID',
@@ -253,11 +257,15 @@ truculture.rename(columns={'donorId': 'DonorID', 'visitId': 'VisitID',
 print("{} unique DonorID in truculture.".\
         format(truculture["DonorID"].nunique()))
 
+print("{} lines in truculture.".format(len(truculture)))
+
 # drop line if no DonorID
-indexes = list(merge_ft.loc[merge_ft["DonorID"].isnull() == True].index)
-merge_ft.drop(indexes, inplace=True)
-merge_ft.reset_index(inplace=True)
-del merge_ft["index"]
+merge_ft = merge_ft.loc[~merge_ft["DonorID"].isnull()].copy(deep=True)
+# drop line if DonorID is exclud
+merge_ft = merge_ft.loc[~merge_ft["DonorID"].isin(excludeddonors)].copy(deep=True)
+
+print("{} lines in merge_ft after removing lines with empty DonorID.".\
+                format(len(merge_ft)))
 
 # merge merge_ft and truculture
 merge_ft.loc[:, 'DonorID'] = merge_ft['DonorID'].astype(int)
@@ -266,6 +274,7 @@ merge_ft.loc[:, 'StimulusID'] = merge_ft['StimulusID'].astype(int)
 truculture.loc[:, 'DonorID'] = truculture['DonorID'].astype(int)
 truculture.loc[:, 'VisitID'] = truculture['VisitID'].astype(int)
 truculture.loc[:, 'StimulusID'] = truculture['StimulusID'].astype(int)
+
 merge_ftl = pd.merge(merge_ft,
                      truculture,
                      on=['DonorID', 'VisitID', 'BatchID', 'StimulusID'],
@@ -275,6 +284,7 @@ merge_ftl = df_dtypes_object(merge_ftl)
 
 print("{} unique DonorID in merge_ftl.".\
         format(merge_ftl["DonorID"].nunique()))
+print("{} lines in merge_ftl.".format(len(merge_ftl)))
 
 '''
     create DonorIDscanned column from :
@@ -286,16 +296,15 @@ merge_ftl.loc[:, "DonorFormat"] = [str(i).zfill(4) \
 # StimulusID is not in the same format as df_stimul["DonorIDscanned"]
 merge_ftl.loc[:, "StimulusFormat"] = [str(i).zfill(2) \
                                         for i in merge_ftl["StimulusID"]]
-# generate column DonorIDscanned for dataframe merge_ftl
-l_donors = []
-for idx in range(len(merge_ftl)):
-    l_donors.append("".join([str(i) for i in
-                              merge_ftl.ix[idx][['CenterID',
-                                                 'DonorFormat',
-                                                 'VisitID',
-                                                 'BatchID',
-                                                 'StimulusFormat']]]))
-merge_ftl.loc[:, "DonorIDscanned"] = l_donors
+
+merge_ftl.loc[:, "DonorIDscanned"] = merge_ftl["CenterID"] + \
+                                     merge_ftl["DonorFormat"] + \
+                                     merge_ftl["VisitID"].astype(str) + \
+                                     merge_ftl["BatchID"] + \
+                                     merge_ftl["StimulusFormat"]
+
+print("{} lines in merge_ftl after adding column DonorIDscanned".format(len(merge_ftl)))
+
 del merge_ftl['DonorFormat'], merge_ftl['StimulusFormat']
 merge_ftl.loc[:, "volume"] = int(3000)
 merge_ftl = df_dtypes_object(merge_ftl)
@@ -304,6 +313,9 @@ df_stimul.rename(columns={"Donor_ID.": "DonorID", "Visit": "VisitID",
                           "StimulationNumber": "StimulusID",},
                  inplace=True)
 df_stimul = df_dtypes_object(df_stimul)
+
+print("{} lines in df_stimul".format(len(df_stimul)))
+
 # clean df_stimul
 # remove test tubes
 spikelist = df_stimul.loc[df_stimul["DonorIDscanned"].str.
@@ -314,6 +326,8 @@ indexlist = list(spikelist) + list(blanclist)
 df_stimul.drop(indexlist, inplace=True)
 df_stimul.reset_index(inplace=True)
 del df_stimul["index"]
+
+print("{} lines in df_stimul after cleaning".format(len(df_stimul)))
 
 # if _E2$ or _E2_[0-9]{2}$ in DonorIDscanned, increase NbExtraction
 df_stimul.loc[:, "NbExtraction"] = 1
@@ -332,7 +346,7 @@ for donor in list_donors:
 # change number of extractions
 dic = df_stimul.ix[0]
 for e in donorsindex:
-    dic = df_stimul.ix[e]
+    dic = df_stimul.ix[e].copy(deep=True)
     dic["NbExtraction"] = 2
     df_stimul.loc[e] = dic
 # remove _E2$ lines
@@ -354,7 +368,7 @@ for donor in list_donors:
                        ["DonorIDscanned"].index.get_values()[0])
 dic = df_stimul.ix[0]
 for e in donorsindex:
-    dic = df_stimul.ix[e]
+    dic = df_stimul.ix[e].copy(deep=True)
     dic["NbExtraction"] = 3
     df_stimul.loc[e] = dic
 # remove _E2_[0-9]{2}$ lines
@@ -418,6 +432,9 @@ merge_ftls.loc[:, "NbExtraction"] = merge_ftls["NbExtraction"].\
 merge_ftls.loc[:, "volume"] = (merge_ftls["volume"] -
                         (600*merge_ftls["NbExtraction"])).astype(int)
 
+print("{} lines in merge_ftls".format(len(merge_ftls)))
+print("{} unique DonorID in merge_ftls".format(merge_ftls["DonorID"].nunique()))
+
 # remove columns that will not be usefull in FreezerPro
 rm_columns = ["id", "type", "well", "auditTrail", "deleted",
               "insertDate", "updateDate", "aliquotId",
@@ -446,7 +463,7 @@ merge_ftls.loc[:, "Name"] = merge_ftls["BARCODE"]
 
 '''
 Box and BoxBarcode should have this barcode:
-    CDDDDVB:
+    CDDDDVB CDDDDVB:
         * C -> CenterID
         * D -> DonorID (4 digits)
         * V -> VisitID
@@ -479,6 +496,30 @@ merge_boxloc = pd.merge(df_dicbox, df_boxbc, on=["Location"])\
 merge_final = pd.merge(merge_ftls, merge_boxloc, on=["FLAG"])
 merge_final.loc[:, "Box"] = merge_final["BOXBARCODE"]
 del merge_final["F_Donor"], merge_final["FLAG"]
+
+# Remove excluded donors
+merge_final.loc[:, "DonorID"] = merge_final["DonorID"].astype(int)
+merge_final = merge_final.loc[~(merge_final["DonorID"].isin(excludeddonors))].copy()
+print("{} unique DonorID in merge_final".format(merge_final["DonorID"].nunique()))
+print("{} lines in merge_final".format(len(merge_final)))
+
+# Remove donors that are not supposed to be present in Visit 2
+df_donors = pd.read_csv("/Volumes/LabExMI/Users/Nolwenn/FreezerPro/DataToPrepare/Common/donors_table_labkey.csv")
+donorsV1 = [i for i in df_donors.loc[df_donors["VISIT1"] == 1]["SUBJID"].tolist() if i in expecteddonors]
+donorsV2 = df_donors.loc[df_donors["VISIT2"] == 1]["SUBJID"].tolist()
+print("{} donors in donorsV1".format(len(donorsV1)))
+print("{} donors in donorsV2".format(len(donorsV2)))
+# print([i for i in donorsV1 if i not in expecteddonors])
+# exit()
+merge_final_donorsV1 = merge_final.loc[(merge_final["DonorID"].isin(donorsV1)) \
+                                       & (merge_final["VisitID"] == "1")].copy()
+merge_final_donorsV2 = merge_final.loc[(merge_final["DonorID"].isin(donorsV2)) \
+                                       & (merge_final["VisitID"] == "2")].copy()
+print("{} lines for Visit 1".format(len(merge_final_donorsV1)))
+print("{} lines for Visit 2".format(len(merge_final_donorsV2)))
+merge_final = pd.concat([merge_final_donorsV1, merge_final_donorsV2])
+print("{} lines in merge_final".format(len(merge_final)))
+# exit()
 
 # save result dataframe in a new CSV file
 merge_final.to_csv(o_samples, index=False, header=True)

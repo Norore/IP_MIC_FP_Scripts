@@ -12,3 +12,4 @@ def complete_columns(dataframe, list_columns):
     return dataframe
 
 excludeddonors = [96, 104, 122, 167, 178, 219, 268, 279, 303, 308, 534, 701]
+expecteddonors = [int(i+5001) if i+1 in excludeddonors else int(i+1) for i in range(1000)]
