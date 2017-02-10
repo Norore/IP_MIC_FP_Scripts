@@ -504,21 +504,21 @@ print("{} unique DonorID in merge_final".format(merge_final["DonorID"].nunique()
 print("{} lines in merge_final".format(len(merge_final)))
 
 # Remove donors that are not supposed to be present in Visit 2
-df_donors = pd.read_csv("/Volumes/LabExMI/Users/Nolwenn/FreezerPro/DataToPrepare/Common/donors_table_labkey.csv")
-donorsV1 = [i for i in df_donors.loc[df_donors["VISIT1"] == 1]["SUBJID"].tolist() if i in expecteddonors]
-donorsV2 = df_donors.loc[df_donors["VISIT2"] == 1]["SUBJID"].tolist()
-print("{} donors in donorsV1".format(len(donorsV1)))
-print("{} donors in donorsV2".format(len(donorsV2)))
+# df_donors = pd.read_csv("/Volumes/LabExMI/Users/Nolwenn/FreezerPro/DataToPrepare/Common/donors_table_labkey.csv")
+# donorsV1 = [i for i in df_donors.loc[df_donors["VISIT1"] == 1]["SUBJID"].tolist() if i in expecteddonors]
+# donorsV2 = df_donors.loc[df_donors["VISIT2"] == 1]["SUBJID"].tolist()
+# print("{} donors in donorsV1".format(len(donorsV1)))
+# print("{} donors in donorsV2".format(len(donorsV2)))
 # print([i for i in donorsV1 if i not in expecteddonors])
 # exit()
-merge_final_donorsV1 = merge_final.loc[(merge_final["DonorID"].isin(donorsV1)) \
-                                       & (merge_final["VisitID"] == "1")].copy()
-merge_final_donorsV2 = merge_final.loc[(merge_final["DonorID"].isin(donorsV2)) \
-                                       & (merge_final["VisitID"] == "2")].copy()
-print("{} lines for Visit 1".format(len(merge_final_donorsV1)))
-print("{} lines for Visit 2".format(len(merge_final_donorsV2)))
-merge_final = pd.concat([merge_final_donorsV1, merge_final_donorsV2])
-print("{} lines in merge_final".format(len(merge_final)))
+# merge_final_donorsV1 = merge_final.loc[(merge_final["DonorID"].isin(donorsV1)) \
+#                                        & (merge_final["VisitID"] == "1")].copy()
+# merge_final_donorsV2 = merge_final.loc[(merge_final["DonorID"].isin(donorsV2)) \
+#                                        & (merge_final["VisitID"] == "2")].copy()
+# print("{} lines for Visit 1".format(len(merge_final_donorsV1)))
+# print("{} lines for Visit 2".format(len(merge_final_donorsV2)))
+# merge_final = pd.concat([merge_final_donorsV1, merge_final_donorsV2])
+# print("{} lines in merge_final".format(len(merge_final)))
 # exit()
 
 # save result dataframe in a new CSV file
