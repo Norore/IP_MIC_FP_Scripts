@@ -37,6 +37,10 @@ parser.add_argument('-m', '--sheet2', required=True,
 parser.add_argument('-u', '--stimulus', required=True,
                     help="""File with all stimuli in CSV
                     format to use for merge with Trizol pellet data""")
+# Remove excluded stimuli
+parser.add_argument('-e', '--extracted_stimuli', required=False,
+                    help="""List of extracted stimuli. Need to be exactly like
+                    9,31,40""")
 # Output file export
 parser.add_argument('-o', '--output', required=True,
                     help="""Output file name that will be generate in
@@ -99,6 +103,10 @@ try:
 except IOError:
     print "File '" + f_stimulus + "' does not exist"
     exit()
+
+# Get StimulusID list
+if args['extracted_stimuli']:
+    ex_stimuli = [int(st) for st in args['extracted_stimuli'].split(',')]
 
 '''
 Main script starts here
@@ -369,7 +377,7 @@ for donor in list_donors:
 dic = df_stimul.ix[0]
 for e in donorsindex:
     dic = df_stimul.ix[e].copy(deep=True)
-    dic["NbExtraction"] = 3
+    dic["NbExtraction"] = 2
     df_stimul.loc[e] = dic
 # remove _E2_[0-9]{2}$ lines
 df_stimul.drop(extract3index, inplace=True)
@@ -429,6 +437,18 @@ merge_ftls = pd.merge(merge_ftl,
                       how='left')
 merge_ftls.loc[:, "NbExtraction"] = merge_ftls["NbExtraction"].\
     replace(np.nan, r'0').astype(int)
+# Extracted stimuli
+if 'ex_stimuli' in locals():
+    # print(merge_ftls.loc[(merge_ftls["StimulusID"].isin(ex_stimuli)) & \
+    #                      (merge_ftls["VisitID"] == 1) & \
+    #                      (merge_ftls["NbExtraction"] == 0), "NbExtraction"].count())
+    # print(ex_stimuli)
+    merge_ftls.loc[(merge_ftls["StimulusID"].isin(ex_stimuli)) & \
+                   (merge_ftls["NbExtraction"] == 0) & \
+                   (merge_ftls["VisitID"] == 1), "NbExtraction"] = 1
+    # print(merge_ftls.loc[(merge_ftls["StimulusID"].isin(ex_stimuli)), "NbExtraction"].unique())
+    # exit()
+
 merge_ftls.loc[:, "volume"] = (merge_ftls["volume"] -
                         (600*merge_ftls["NbExtraction"])).astype(int)
 
