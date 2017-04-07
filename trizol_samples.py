@@ -66,42 +66,42 @@ o_samples = args['output']
 try:
     df_freezer = pd.read_csv(f_freezer, dtype=object)
 except IOError:
-    print "File '" + f_freezer + "' does not exist"
+    print("File '{}' does not exist".format(f_freezer))
     exit()
 
 # Read Trizol file
 try:
     truc_data = pd.read_excel(f_trucult, n_trsheet)  # use sheet 'FinalMapping'
 except IOError:
-    print "File '" + f_trucult + "' does not exist"
+    print("File '{}' does not exist".format(f_trucult))
     exit()
 except:
-    print "Sheet '" + n_trsheet + "' does not exist in file '" + f_trucult + "'"
-    print "Error:", sys.exc_info()[0]
+    print("Sheet '{}' does not exist in file '{}'".format(n_trsheet, f_trucult))
+    print("Error: {}".format(sys.exc_info()[0]))
     exit()
 
 # Read LabKey file
 try:
     df_labkey = pd.read_csv(f_labkey, dtype=object)
 except IOError:
-    print "File '" + f_labkey + "' does not exist"
+    print("File '{}' does not exist".format(f_labkey))
     exit()
 
 # Read stimulation file
 try:
     df_stimul = pd.read_excel(f_stimul, n_stsheet)
 except IOError:
-    print "File '" + f_stimul + "' does not exist"
+    print("File '{}' does not exist".format(f_stimul))
     exit()
 except:
-    print "Sheet '" + n_stsheet + "' does not exist in file '" + f_stimul + "'"
-    print "Error:", sys.exc_info()[0]
+    print("Sheet '{}' does not exist in file '{}'".format(n_stsheet, f_stimul))
+    print("Error: {}".formart(sys.exc_info()[0]))
 
 # Read stimulus file
 try:
     df_stimulus = pd.read_csv(f_stimulus, dtype=object)
 except IOError:
-    print "File '" + f_stimulus + "' does not exist"
+    print("File '{}' does not exist".format(f_stimulus))
     exit()
 
 # Get StimulusID list
@@ -161,9 +161,9 @@ del truc_data["FreezerLoc"]
 values = []
 for value in truc_data["BoxPos"]:
     if int(value) % 2 == 0:
-        values.append("Box " + str(int(value) / 2))
+        values.append("Box " + str(int(int(value) / 2)))
     else:
-        values.append("Box " + str((int(value) + 1) / 2))
+        values.append("Box " + str(int((int(value) + 1) / 2)))
 # create column 'Box' with the 'box number' assigned to each donor
 truc_data.loc[:, "Box"] = values
 
@@ -178,14 +178,14 @@ boxpos, position, stimulusid = [], [], []
 for nb_boxpos in range(1, 21):
     if nb_boxpos % 2 == 0:
         for pos in range(42, 82):
-            boxpos.append(nb_boxpos)
-            position.append(pos)
-            stimulusid.append(pos-41)
+            boxpos.append(int(nb_boxpos))
+            position.append(int(pos))
+            stimulusid.append(int(int(pos)-41))
     if nb_boxpos % 2 == 1:
         for pos in range(1, 41):
-            boxpos.append(nb_boxpos)
-            position.append(pos)
-            stimulusid.append(pos)
+            boxpos.append(int(nb_boxpos))
+            position.append(int(pos))
+            stimulusid.append(int(pos))
 
 boxes = pd.DataFrame({'BoxPos': boxpos, 'Position': position,
                       'StimulusID': stimulusid}, dtype=object)
@@ -481,6 +481,25 @@ merge_ftls.loc[:, "ShelfBarcode"] = merge_ftls["Level1"]
 merge_ftls.loc[:, "RackBarcode"] = merge_ftls["Level2"]
 merge_ftls.loc[:, "Name"] = merge_ftls["BARCODE"]
 
+# Remove donors that are not supposed to be present in Visit 2
+df_donors = pd.read_csv("/Volumes/LabExMI/Users/Nolwenn/FreezerPro/DataToPrepare/Common/donors_table_labkey.csv")
+donorsV1 = [i for i in df_donors.loc[df_donors["VISIT1"] == 1]["SUBJID"].tolist() if i in expecteddonors]
+donorsV2 = df_donors.loc[df_donors["VISIT2"] == 1]["SUBJID"].tolist()
+print("{} donors in donorsV1".format(len(donorsV1)))
+print("{} donors in donorsV2".format(len(donorsV2)))
+print([i for i in donorsV1 if i not in expecteddonors])
+# exit()
+
+merge_ftls_donorsV1 = merge_ftls.loc[(merge_ftls["DonorID"].isin(donorsV1)) \
+                                       & (merge_ftls["VisitID"] == 1)].copy()
+merge_ftls_donorsV2 = merge_ftls.loc[(merge_ftls["DonorID"].isin(donorsV2)) \
+                                       & (merge_ftls["VisitID"] == 2)].copy()
+# print("{} lines for Visit 1".format(len(merge_final_donorsV1)))
+# print("{} lines for Visit 2".format(len(merge_final_donorsV2)))
+merge_ftls = pd.concat([merge_ftls_donorsV1, merge_ftls_donorsV2])
+# print("{} lines in merge_final".format(len(merge_final)))
+# exit()
+
 '''
 Box and BoxBarcode should have this barcode:
     CDDDDVB CDDDDVB:
@@ -507,19 +526,22 @@ df_boxbc.loc[:, "Location"] = df_boxbc["Freezer"] + " " + df_boxbc["Level1"] + "
 dic_boxbc = { k:" ".join(df_boxbc.loc[df_boxbc["Location"] == k, "FLAG"]\
                             .unique()) for k in df_boxbc["Location"].unique()}
 
-df_dicbox = pd.DataFrame({"Location": dic_boxbc.keys(), \
-                          "BOXBARCODE": dic_boxbc.values()}, dtype=object)
+df_dicbox = pd.DataFrame({"Location": list(dic_boxbc.keys()), \
+                          "BOX_BARCODE": list(dic_boxbc.values())}, dtype=object)
 
 merge_boxloc = pd.merge(df_dicbox, df_boxbc, on=["Location"])\
-                [["FLAG", "BOXBARCODE"]]
+                [["FLAG", "BOX_BARCODE"]]
 
 merge_final = pd.merge(merge_ftls, merge_boxloc, on=["FLAG"])
-merge_final.loc[:, "Box"] = merge_final["BOXBARCODE"]
+merge_final.loc[:, "Box"] = merge_final["BOX_BARCODE"]
+merge_final.loc[:, "BoxBarcode"] = merge_final["BOX_BARCODE"]
 del merge_final["F_Donor"], merge_final["FLAG"]
 
 # Remove excluded donors
 merge_final.loc[:, "DonorID"] = merge_final["DonorID"].astype(int)
-merge_final = merge_final.loc[~(merge_final["DonorID"].isin(excludeddonors))].copy()
+merge_final = merge_final.loc[~(merge_final["DonorID"].isin(excludeddonors))]\
+                            .copy()
+merge_final.loc[:, "Sample Source"] = merge_final["DonorID"].copy()
 print("{} unique DonorID in merge_final".format(merge_final["DonorID"].nunique()))
 print("{} lines in merge_final".format(len(merge_final)))
 

@@ -2,6 +2,7 @@
 import json
 import argparse
 import re
+import pprint
 
 parser = argparse.ArgumentParser(description="Generate freezers file in CSV format from JSON file format.")
 parser.add_argument('-f', '--freezer', required=True,
@@ -138,8 +139,8 @@ for freezer in freezers["freezers"]:
                     for tt in range(t["compartments"]["boxes"]):
                         """
                         Columns order:
-                        Freezer,Freezer_Descr,Level1,Level1_Descr,Level2,Level2_Descr,Level3,
-                        Level3_Descr,Box,Box_Descr,BoxType
+                        Freezer,Freezer_Descr,Level1,Level1_Descr,Level2,
+                        Level2_Descr,Level3,Level3_Descr,Box,Box_Descr,BoxType
                         """
                         l_freez = freezer["name"].split("_")
                         l_shelf = shelf.split()[2:].pop()
@@ -159,15 +160,95 @@ for freezer in freezers["freezers"]:
             #             string = freezer["name"] + "," + shelf + ",," + d['name'] + "," \
             #                           + compartment + ",,,box " + dd + "," + d["compartments"]["boxtype"]
             #             outfile.write(string + "\n")
-            #
-            # if "Stool Samples Source" in compartment:
-            #     for o in freezer["racks"][shelf][c]["stool source"]:
-            #         for oo in range(o["compartments"]["boxes"]):
-            #             oo = str(oo + 1)
-            #             string = freezer["name"] + "," + shelf + ",," + o['name'] + "," \
-            #                           + compartment + ",,,box " + oo + "," + o["compartments"]["boxtype"]
-            #             outfile.write(string + "\n")
-            #
+
+            if "Stool Samples Source Tubes" in compartment or "Stools DNA" in compartment:
+                if "Stools DNA" in compartment:
+                    for o in freezer["racks"][shelf][c]["stools DNA"]:
+                        for oo in range(o["compartments"]["first"], \
+                                        o["compartments"]["last"]+1):
+                            """
+                            Columns order:
+                            Freezer,Freezer_Descr,Level1,Level1_Descr,Level2,
+                            Level2_Descr,Level3,Level3_Descr,Box,Box_Descr,BoxType
+                            """
+                            l_freez = freezer["name"].split("_")
+                            l_shelf = shelf.split()[2:].pop()
+                            l_shelf = l_shelf.replace("Shelf", "Shelf ")
+                            oo = str(oo)
+                            if "Stools DNA" in compartment:
+                                box = "BOX"+oo
+                            else:
+                                box = o["description"]
+                            box_descr = o["description"][:-1] + ", Box "+oo+"\""
+                            string = freezer["name"] + ",Freezer"+str(l_freez[2])+ \
+                                     "," + shelf + "," + str(l_shelf) + "," + \
+                                     compartment + "," + compartment + "," + \
+                                     o['name'] + ",\"" + compartment + ", " + \
+                                     o["name"].lower() + "\"," \
+                                     + box + ",Box " + \
+                                     oo + "," + \
+                                     o["compartments"]["boxtype"]
+                            outfile.write(string + "\n")
+                else:
+                    for o in freezer["racks"][shelf][c]["stool source"]:
+                        for oo in range(o["compartments"]["boxes"]):
+                            # pprint.pprint(o)
+                            """
+                            Columns order:
+                            Freezer,Freezer_Descr,Level1,Level1_Descr,Level2,
+                            Level2_Descr,Level3,Level3_Descr,Box,Box_Descr,BoxType
+                            """
+                            l_freez = freezer["name"].split("_")
+                            l_shelf = shelf.split()[2:].pop()
+                            l_shelf = l_shelf.replace("Shelf", "Shelf ")
+                            oo = str(oo+1)
+                            if "Stools DNA" in compartment:
+                                box = "BOX"+oo
+                            else:
+                                box = o["description"]
+                            box_descr = o["description"][:-1] + ", Box "+oo+"\""
+                            string = freezer["name"] + ",Freezer"+str(l_freez[2])+ \
+                                     "," + shelf + "," + str(l_shelf) + "," + \
+                                     compartment + "," + compartment + "," + \
+                                     o['name'] + ",\"" + compartment + ", " + \
+                                     o["name"].lower() + "\"," \
+                                     + box + ",Box " + \
+                                     oo + "," + \
+                                     o["compartments"]["boxtype"]
+                            outfile.write(string + "\n")
+
+
+            if "Stool Samples Aliquot" in compartment:
+                for o in freezer["racks"][shelf][c]["samples aliquot"]:
+                    for oo in range(o["first"], o["last"]+1):
+                        """
+                        Columns order:
+                        Freezer,Freezer_Descr,Level1,Level1_Descr,Level2,
+                        Level2_Descr,Level3,Level3_Descr,Box,Box_Descr,BoxType
+                        """
+                        l_freez = freezer["name"].split("_")
+                        l_shelf = shelf.split()[2:].pop()
+                        l_shelf = l_shelf.replace("Shelf", "Shelf ")
+                        oo = str(oo)
+                        if len(oo) < 2:
+                            nbbox = "0" + oo
+                        else:
+                            nbbox = oo
+                        rack = "MIC_Feces_Box"+nbbox
+                        rack += compartment.replace("Stool Samples Aliquot ", "_")
+                        if "Excluded" in o["description"]:
+                            rack = o["name"]
+                        box_descr = o["description"][:-1] + ", Box "+oo+"\""
+                        string = freezer["name"] + ",Freezer"+str(l_freez[2])+ \
+                                 "," + shelf + "," + str(l_shelf) + "," + \
+                                 compartment + "," + compartment +"," + \
+                                 o['name'] + ",\"" + compartment + ", " + \
+                                 o["name"].lower() + "\"," \
+                                 + rack + ",Box " + \
+                                 oo + "," + \
+                                 o["boxtype"]
+                        outfile.write(string + "\n")
+
             # if "Nasal" in compartment:
             #     for n in freezer["racks"][shelf][c]["nasal"]:
             #         for nn in range(n["compartments"]["boxes"]):

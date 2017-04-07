@@ -290,11 +290,13 @@ optional arguments:
 Example:
 
 ```
-./trizol_samples.py -f ../DataToImport/freezers.csv
- -t ../DataToPrepare/1.LabExMI_TrucultureMapping_21Nov2014_FinalVersion.xlsx
- -s FinalMapping
- -o ../DataToImport/TC_Trizol_rack_samples.csv
+./trizol_samples.py
+ -f ../DataToImport/freezers_trizol_pellets_20170203.csv
+  -t ../DataToPrepare/1.LabExMI_TrucultureMapping_21Nov2014_FinalVersion.xlsx
+ -s FinalMapping -o ../DataToImport/TC_Trizol_rack_samples_20170309.csv
  -l ../DataToPrepare/Common/samples_table_labkey.csv
  -i ../DataToPrepare/3.5000samples_WL_QCs_DL_02Jul2015.xls
  -m 5000samples_WL_QCs_DL_02Jul2015
+ -u ../DataToPrepare/LabExMI_Stimuli_List.csv
+ -e 9,17,18,21,27,32,27
 ```
