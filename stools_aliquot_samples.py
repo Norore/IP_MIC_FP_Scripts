@@ -15,7 +15,14 @@ parser.add_argument('-r', '--repository', required=True,
                     help="""Directory with files that contains informations
                          about the tubes location.""")
 parser.add_argument('-v', '--verbose', required=False,
-                    help="""If set, will display text of each kind of step.""")
+                    help="""If set, will display text of each kind of step.
+                    Accepted values:
+                        - True
+                        - T
+                        - Yes
+                        - Y
+                        - 1
+                    """)
 parser.add_argument('-o', '--output', required=True,
                     help="""Output file name that will be generate in CSV
                          format for FreezerPro""")
@@ -25,6 +32,12 @@ f_freezer = args['freezer']
 d_dir = args['directory']
 r_dir = args['repository']
 o_samples = args['output']
+verbose = args['verbose']
+
+if verbose in ["True", "T", "Yes", "Y", "1"]:
+    verbose = True
+else:
+    verbose = False
 
 if d_dir[-1] != "/":
     d_dir += "/*.csv"
@@ -55,12 +68,12 @@ except IOError:
 
 # create dataframe for stools metadata
 # initialize list of dataframes
-print("Get files for aliquot of stools metadata:")
+if verbose: print("Get files for aliquot of stools metadata:")
 
 list_df = []
 for f_stool_md in ld_files:
 
-    print(">>> Works on '{}' file <<<".format(f_stool_md))
+    if verbose: print(">>> Works on '{}' file <<<".format(f_stool_md))
 
     try:
         df_stool_md = pd.read_csv(f_stool_md, sep=",", dtype=object)
@@ -79,12 +92,12 @@ df_stools_md = pd.concat(list_df)
 
 # create dataframe for stools location
 # initialize list of dataframes
-print("Get files for aliquot of stools location:")
+if verbose: print("Get files for aliquot of stools location:")
 
 list_df = []
 for f_stool_loc in lr_files:
 
-    print(">>> Works on '{}' file <<<".format(f_stool_loc))
+    if verbose: print(">>> Works on '{}' file <<<".format(f_stool_loc))
 
     try:
         df_stool_loc = pd.read_csv(f_stool_loc, sep=";", dtype=object)
@@ -112,7 +125,12 @@ for f_stool_loc in lr_files:
 
 df_stools_loc = pd.concat(list_df)
 
-print("Merge all files.")
+print("Nb of unique donorId:")
+print(df_stools_md["donorId"].nunique())
+
+exit()
+
+if verbose: print("Merge all files.")
 
 df_stools = pd.merge(df_stools_md, df_stools_loc, on=["barcodeId"])
 df_final = pd.merge(df_stools, df_freez, on=["Box"])
@@ -132,5 +150,5 @@ df_final.rename(columns={"aliquotId": "AliquotID",
                 inplace = True)
 
 # write final result in CSV file format
-print("Write results in file '{}'".format(o_samples))
+if verbose: print("Write results in file '{}'".format(o_samples))
 df_final.to_csv(o_samples, index=False, header=True)

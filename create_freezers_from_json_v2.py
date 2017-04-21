@@ -18,12 +18,12 @@ try:
     with open(f_freezer, "r") as infile:
         freezers = json.load(infile)
 except IOError:
-    print "Input file " + f_freezer + " does not exist"
+    print("Input file '{}' does not exist".format(f_freezer))
     exit(1)
 try:
     outfile = open(o_freezer, "w")
 except IOError:
-    print "Output file " + o_freezer + " can't be writte"
+    print("Output file '{}' can't be writte".format(o_freezer))
     exit(1)
 
 header = "Freezer,Freezer_Descr,"
@@ -49,8 +49,9 @@ for freezer in freezers["freezers"]:
                         for boxnum in range(box["first"], box["last"] + 1):
                             """
                             Columns order:
-                            Freezer,Freezer_Descr,Level1,Level1_Descr,Level2,Level2_Descr,Level3,
-                            Level3_Descr,Box,Box_Descr,BoxType
+                            Freezer,Freezer_Descr,Level1,Level1_Descr,Level2,
+                            Level2_Descr,Level3,Level3_Descr,Box,Box_Descr,
+                            BoxType
                             """
                             l_freez = freezer["name"].split("_")
                             l_shelf = shelf.split()
@@ -176,7 +177,11 @@ for freezer in freezers["freezers"]:
                             l_shelf = l_shelf.replace("Shelf", "Shelf ")
                             oo = str(oo)
                             if "Stools DNA" in compartment:
-                                box = "BOX"+oo
+                                # box = "Box " + oo + "/18"
+                                if len(oo) < 2:
+                                    box = "Box0"+oo
+                                else:
+                                    box = "Box"+oo
                             else:
                                 box = o["description"]
                             box_descr = o["description"][:-1] + ", Box "+oo+"\""
@@ -235,6 +240,7 @@ for freezer in freezers["freezers"]:
                         else:
                             nbbox = oo
                         rack = "MIC_Feces_Box"+nbbox
+                        # rack = "Box "+oo
                         rack += compartment.replace("Stool Samples Aliquot ", "_")
                         if "Excluded" in o["description"]:
                             rack = o["name"]
