@@ -64,8 +64,10 @@ print("{} unique DonorId".format(df_database["DonorId"].nunique()))
 
 common_cols = ["Id", "DonorId", "VisitId", "AliquotId", "AliquotingDate", \
                 "Comments"]
-
+#df_database = df_database.loc[df_database["AliquotId"] != "1"].copy()
 df_source = df_database[common_cols].copy()
+
+df_source.to_csv(s_samples, header = True, index = False)
 
 df_dna = df_database[common_cols + \
                      ["Aliquot_1_DNA_BC", "Aliquot_1_DNA_Location", \
@@ -106,6 +108,8 @@ df_aliquot1.rename(columns={"Aliquot_1_BC": "Name",
                             "Aliquot_1_Plate_Number": "Box",
                             "Aliquot_1_Plate_Location": "Position"},
                    inplace=True)
+df_aliquot1.loc[:, "Sample Type"] = "Feces Aliquot L"
+df_aliquot1.loc[:, "AliquotName"] = "L"
 df_aliquot2 = df_database[common_cols + \
                           ["Aliquot_2_BC", \
                            "Aliquot_2_Weight", \
@@ -116,6 +120,8 @@ df_aliquot2.rename(columns={"Aliquot_2_BC": "Name",
                             "Aliquot_2_Plate_Number": "Box",
                             "Aliquot_2_Plate_Location": "Position"},
                    inplace=True)
+df_aliquot2.loc[:, "Sample Type"] = "Feces Aliquot R1"
+df_aliquot2.loc[:, "AliquotName"] = "R1"
 df_aliquot3 = df_database[common_cols + \
                           ["Aliquot_3_BC", \
                            "Aliquot_3_Weight", \
@@ -126,6 +132,8 @@ df_aliquot3.rename(columns={"Aliquot_3_BC": "Name",
                             "Aliquot_3_Plate_Number": "Box",
                             "Aliquot_3_Plate_Location": "Position"},
                    inplace=True)
+df_aliquot3.loc[:, "Sample Type"] = "Feces Aliquot R2"
+df_aliquot3.loc[:, "AliquotName"] = "R2"
 df_aliquot4 = df_database[common_cols + \
                           ["Aliquot_4_BC", \
                            "Aliquot_4_Weight", \
@@ -136,6 +144,8 @@ df_aliquot4.rename(columns={"Aliquot_4_BC": "Name",
                             "Aliquot_4_Plate_Number": "Box",
                             "Aliquot_4_Plate_Location": "Position"},
                    inplace=True)
+df_aliquot4.loc[:, "Sample Type"] = "Feces Aliquot R3"
+df_aliquot4.loc[:, "AliquotName"] = "R3"
 df_aliquots = pd.concat([df_aliquot1, df_aliquot2, df_aliquot3, df_aliquot4])
 df_aliquots.rename(columns={"DonorId": "DonorID",
                             "AliquotId": "AliquotID",
@@ -144,7 +154,7 @@ df_aliquots.rename(columns={"DonorId": "DonorID",
                    inplace=True)
 
 df_freez_aliquot = pd.merge(df_aliquots, df_freez, on="Box")
-df_freez_aliquot["Sample Type"] = "FECES"
+#df_freez_aliquot["Sample Type"] = "FECES"
 
 df_freez_aliquot["number"] = df_freez_aliquot["Position"].str.\
                                                           replace(r'[A-Z]([0-9]{2})', \
@@ -155,6 +165,15 @@ df_freez_aliquot["letter"] = df_freez_aliquot["Position"].str.\
 df_freez_aliquot["Position"] = df_freez_aliquot["letter"] + " / " + \
                                df_freez_aliquot["number"]
 del df_freez_aliquot["letter"], df_freez_aliquot["number"]
+df_freez_aliquot.loc[:, "BOX_BARCODE"] = df_freez_aliquot["Box"]
+df_freez_aliquot.loc[:, "BoxBarcode"] = df_freez_aliquot["Box"]
+df_freez_aliquot.loc[:, "FreezerBarcode"] = df_freez_aliquot["Freezer"]
+df_freez_aliquot.loc[:, "ShelfBarcode"] = df_freez_aliquot["Level1"]
+df_freez_aliquot.loc[:, "RackBarcode"] = df_freez_aliquot["Level2"]
+df_freez_aliquot.loc[:, "Sample Source"] = df_freez_aliquot["DonorID"]
+df_freez_aliquot.loc[:, "Description"] = "Donor "+df_freez_aliquot["DonorID"]+\
+                                         ", Visit "+df_freez_aliquot["VisitID"]+\
+                                         ", Aliquot "+df_freez_aliquot["AliquotName"]
 
 if verbose:
     print("Writing {} lines in file {}".format(len(df_freez_aliquot), \

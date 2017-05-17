@@ -212,7 +212,7 @@ for freezer in freezers["freezers"]:
                             else:
                                 box = o["description"]
                             box_descr = o["description"][:-1] + ", Box "+oo+"\""
-                            string = freezer["name"] + ",Freezer"+str(l_freez[2])+ \
+                            string = freezer["name"] + ",Freezer "+str(l_freez[2])+ \
                                      "," + shelf + "," + str(l_shelf) + "," + \
                                      compartment + "," + compartment + "," + \
                                      o['name'] + ",\"" + compartment + ", " + \
