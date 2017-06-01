@@ -128,13 +128,6 @@ for freezer in freezers["freezers"]:
                                         ","+str_box+"," + rack["boxtype"]
                             outfile.write(string + "\n")
 
-            # if "Aliquot L" in compartment or "Aliquot R" in compartment:
-            #     for a in freezer["racks"][shelf][c]["samples aliquot"]:
-            #         for aa in range(a["first"], a["last"] + 1):
-            #             string = freezer["name"] + "," + shelf + ",," + a['name'] + "," \
-            #                           + compartment + ",,,box " + str(aa) + "," + a["boxtype"]
-            #             outfile.write(string + "\n")
-            #
             if "Trizol" in compartment:
                 for t in freezer["racks"][shelf][c]["trizol"]:
                     for tt in range(t["compartments"]["boxes"]):
@@ -154,14 +147,6 @@ for freezer in freezers["freezers"]:
                                  "Box " + tt + "," + box_descr + "," + t["compartments"]["boxtype"]
                         outfile.write(string + "\n")
 
-            # if "DNA" in compartment:
-            #     for d in freezer["racks"][shelf][c]["stools DNA"]:
-            #         for dd in range(d["compartments"]["boxes"]):
-            #             dd = str(dd + 1)
-            #             string = freezer["name"] + "," + shelf + ",," + d['name'] + "," \
-            #                           + compartment + ",,,box " + dd + "," + d["compartments"]["boxtype"]
-            #             outfile.write(string + "\n")
-
             if "Stool Samples Source Tubes" in compartment or "Stools DNA" in compartment:
                 if "Stools DNA" in compartment:
                     for o in freezer["racks"][shelf][c]["stools DNA"]:
@@ -177,7 +162,6 @@ for freezer in freezers["freezers"]:
                             l_shelf = l_shelf.replace("Shelf", "Shelf ")
                             oo = str(oo)
                             if "Stools DNA" in compartment:
-                                # box = "Box " + oo + "/18"
                                 if len(oo) < 2:
                                     box = "Box0"+oo
                                 else:
@@ -197,7 +181,6 @@ for freezer in freezers["freezers"]:
                 else:
                     for o in freezer["racks"][shelf][c]["stool source"]:
                         for oo in range(o["compartments"]["boxes"]):
-                            # pprint.pprint(o)
                             """
                             Columns order:
                             Freezer,Freezer_Descr,Level1,Level1_Descr,Level2,
@@ -207,10 +190,7 @@ for freezer in freezers["freezers"]:
                             l_shelf = shelf.split()[2:].pop()
                             l_shelf = l_shelf.replace("Shelf", "Shelf ")
                             oo = str(oo+1)
-                            if "Stools DNA" in compartment:
-                                box = "BOX"+oo
-                            else:
-                                box = o["description"]
+                            box = "BOX"+oo
                             box_descr = o["description"][:-1] + ", Box "+oo+"\""
                             string = freezer["name"] + ",Freezer "+str(l_freez[2])+ \
                                      "," + shelf + "," + str(l_shelf) + "," + \
@@ -240,10 +220,7 @@ for freezer in freezers["freezers"]:
                         else:
                             nbbox = oo
                         rack = "MIC_Feces_Box"+nbbox
-                        # rack = "Box "+oo
                         rack += compartment.replace("Stool Samples Aliquot ", "_")
-                        if "Excluded" in o["description"]:
-                            rack = o["name"]
                         box_descr = o["description"][:-1] + ", Box "+oo+"\""
                         string = freezer["name"] + ",Freezer "+str(l_freez[2])+ \
                                  "," + shelf + "," + str(l_shelf) + "," + \
