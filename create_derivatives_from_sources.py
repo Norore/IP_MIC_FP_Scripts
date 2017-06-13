@@ -6,8 +6,202 @@ import os
 import glob
 from MI_FP_common import *
 
-rfidlist = ['24690', '24665']
-donorslist = ['337', '362']
+'''
+
+Expected file formats put in arguments
+
+--input_file, file from FreezerPro database, with fields:
+     1. UID
+     2. Name
+     3. Description
+     4. Sample Type
+     5. Vials
+     6. Volume
+     7. Sample Source
+     8. Owner
+     9. Created At
+    10. Expiration
+    11. AliquotID
+    12. VisitID
+    13. StimulusID
+    14. StimulusName
+    15. BatchID
+    16. DonorID
+    17. ThawCycle
+    18. CreationDate
+    19. UpdateDate
+    20. FreezerBarcode
+    21. ShelfBarcode
+    22. RackBarcode
+    23. DrawerBarcode
+    24. BoxBarcode
+    25. RFID
+    26. BARCODE
+    27. Freezer
+    28. Level1
+    29. Level2
+    30. Level3
+    31. Level4
+    32. Level5
+    33. Box
+    34. Position
+
+--directory, directory with Excel files that contains aliquot data to use,
+in 3 sheets (1 sheet per box), with fields:
+     1. AliquotingDate
+     2. SrcBox_BoxID
+     3. SrcBox_LabExID
+     4. SrcBox_TubeScan
+     5. Well VisionMate
+     6. Well Expected
+     7. Al1Box_BoxID
+     8. Al1Box_LabExID
+     9. Al1Box_TubeCtrl
+    10. Al1Box_TubeScan
+    11. Well VisionMate
+    12. Well Expected
+    13. Al2Box_BoxID
+    14. Al2Box_TubeCtrl
+    15. Al2Box_TubeScan
+    16. Well VisionMate
+    17. Well Expected
+
+--remove_tubes, file of excluded tubes, with fields:
+     1. BarcodeId_Source
+     2. Date_Users
+     3. SrcTF_Barcode
+     4. SrcBox_Barcode
+     5. SrcVisionMate_Well
+     6. SrcExpected_Well
+     7. F1TF_Barcode
+     8. F1Box_Barcode
+     9. BarcodeId_F1
+    10. F1VisionMate_Well
+    11. F1Expected_Well
+    12. F2TF_Barcode
+    13. BarcodeId_F2
+    14. F2VisionMate_Well
+    15. F2Expected_Well
+    16. DonorId
+    17. VisitId
+    18. BatchId
+    19. Type
+    20. StimulusId
+    21. AliquotId
+
+--change_tubes, file of tubes for replace (tube from the wrong StimulusID), with
+fields:
+    1. BarcodeId_Source
+    2. Date_Users
+    3. SrcTF_Barcode
+    4. SrcBox_Barcode
+    5. SrcVisionMate_Well
+    6. SrcExpected_Well
+    7. F1TF_Barcode
+    8. F1Box_Barcode
+    9. BarcodeId_F1
+    10. F1VisionMate_Well
+    11. F1Expected_Well
+    12. F2TF_Barcode
+    13. BarcodeId_F2
+    14. F2VisionMate_Well
+    15. F2Expected_Well
+    16. DonorId
+    17. VisitId
+    18. BatchId
+    19. Type
+    20. StimulusId
+    21. AliquotId
+
+--replace_tubes, file of tubes for replace (tube from the wrong barcode), with
+fields:
+    1. Position
+    2. NewBarcode
+    3. OldBarcode
+
+--add_tubes, file of tubes to add, need to be in same format as run files
+from argument --directory, only one sheet, with fields:
+     1. SrcBox_LabExID
+     2. SrcBox_TubeScan
+     3. Well VisionMate
+     4. Well Expected
+     5. Al1Box_BoxID
+     6. Al1Box_LabExID
+     7. Al1Box_TubeCtrl
+     8. Al1Box_TubeScan
+     9. Well VisionMate
+    10. Well Expected
+    11. Al2Box_BoxID
+    12. Al2Box_TubeCtrl
+    13. Al2Box_TubeScan
+    14. Well VisionMate
+    15. Well Expected
+
+--freezers, file with location of each box of aliquots in freezers, from
+FreezerPro, with fields:
+    1. Box
+    2. Freezer
+    3. Freezer_Descr
+    4. Level1
+    5. Level1_Descr
+    6. Level2
+    7. Level2_Descr
+    8. Level3
+    9. Level3_Descr
+
+Expected file formats output in arguments
+
+--output_file, output file with aliquot samples data in CSV format for
+FreezerPro import, with fields:
+     1. ParentID
+     2. Name
+     3. BARCODE
+     4. Position
+     5. Volume
+     6. Freezer
+     7. Freezer_Descr
+     8. Level1
+     9. Level1_Descr
+    10. Level2
+    11. Level2_Descr
+    12. Level3
+    13. Level3_Descr
+    14. BoxType
+    15. Box
+    16. Box_Descr
+    17. ThermoBoxBarcode
+    18. BOX_BARCODE
+    19. CreationDate
+    20. UpdateDate
+    21. AliquotID
+    22. DonorID
+    23. StimulusID
+    24. StimulusName
+    25. VisitID
+    26. ThawCycle
+    27. Sample Source
+    28. Description
+    29. BatchID
+    30. Sample Type
+    31. ShelfBarcode
+    32. RackBarcode
+    33. DrawerBarcode
+
+--update_file, file with original samples data in CSV format for FreezerPro
+original samples update, with fields:
+    1. RFID
+    2. Volume
+    3. UpdateDate
+    4. Position
+    5. DonorID
+
+--moved_file, file with original samples data in CSV format for FreezerPro
+original samples to move, with fields:
+    1. UID
+    2. BOX_BARCODE
+    3. CONTAINER_BARCODE
+
+'''
 
 '''
 Initialize arguments
@@ -77,34 +271,34 @@ if args['remove_tubes']:
         dic_etubes = pd.read_excel(args['remove_tubes'], sheetname=None)
         df_etubes = pd.concat([dic_etubes[df] for df in dic_etubes.keys()])
     except IOError:
-        print "File '" + args['remove_tubes'] + "' does not exist"
+        print("File '{}' does not exist.".format(args['remove_tubes']))
 
 if args['change_tubes']:
     try:
         dic_ctubes = pd.read_excel(args['change_tubes'], sheetname=None)
         df_ctubes = pd.concat([dic_ctubes[df] for df in dic_ctubes.keys()])
     except IOError:
-        print "File '" + args['change_tubes'] + "' does not exist"
+        print("File '{}' does not exist.".format(args['change_tubes']))
 
 if args['replace_tubes']:
     try:
         dic_rtubes = pd.read_excel(args['replace_tubes'], sheetname=None)
         df_rtubes = pd.concat([dic_rtubes[df] for df in dic_rtubes.keys()])
     except IOError:
-        print "File '" + args['replace_tubes'] + "' does not exist"
+        print("File '{}' does not exist.".format(args['replace_tubes']))
 
 # Read Freezer file input
 try:
     df_input = pd.read_csv(f_input, dtype=object)
 except IOError:
-    print "File '" + f_input + "' does not exist"
+    print("File '{}' does not exist.".format(f_input))
     exit()
 
 # Read box location in freezers file input
 try:
     df_freez = pd.read_csv(f_freez, dtype=object, sep=";")
 except IOError:
-    print "File '" + f_freez + "' does not exist"
+    print("File '{}' does not exist.".format(f_freez))
     exit()
 
 # Read Aliquot file input
@@ -119,7 +313,7 @@ try:
         l_files.remove(f)
     l_errors = glob.glob(fic_dir.replace('\\', ''))
 except IOError:
-    print "Directory '" + d_dir + "' does not exist"
+    print("Directory '{}' does not exist.".format(d_dir))
     exit()
 
 
@@ -139,15 +333,15 @@ cols_to_cplt = ["SrcBox_BoxID", "SrcBox_LabExID",
                 "Al1Box_BoxID", "Al1Box_LabExID",
                 "Al2Box_BoxID", "AliquotingDate"]
 
-print("%d aliquot files to read" % len(l_files))
+print("{} aliquot files to read.".format(len(l_files)))
 
 for f_aliquot in l_files:
-    print ">>> Works on '"+f_aliquot+"' file <<<"
+    print(">>> Works on '{}' file. <<<".format(f_aliquot))
     try:
         # take all sheets
         dic_aliquots = pd.read_excel(f_aliquot, sheetname = None)
     except IOError:
-        print "File '" + f_aliquot + "' does not exist"
+        print("File '{}' does not exist.".format(f_aliquot))
 
     df_aliquot = pd.concat([complete_columns(dic_aliquots[df], cols_to_cplt) \
                             for df in dic_aliquots.keys()])
@@ -157,8 +351,8 @@ for f_aliquot in l_files:
 try:
     df_aliquot = df_dtypes_object(pd.concat(list_df))
 except ValueError:
-    print "DataFrame is empty"
-    print "Worked on dir " + d_dir
+    print("DataFrame is empty.")
+    print("Worked on dir {}".format(d_dir))
 
 '''
     For each file in l_errors, generate dataframe of corrected tube barcodes
@@ -167,10 +361,10 @@ except ValueError:
 # initialize list of dataframes
 list_df = []
 
-print("%d error files to read" % len(l_errors))
+print("{} error files to read.".format(len(l_errors)))
 
 for f_error in l_errors:
-    print ">>> Works on '"+f_error+"' file <<<"
+    print(">>> Works on '{}' file. <<<".format(f_error))
     try:
         # take all sheets
         dic_errors = pd.read_excel(f_error, sheetname = None, \
@@ -180,7 +374,7 @@ for f_error in l_errors:
                                         "Well VisionMate.2": lambda x: str(x)
                                    })
     except IOError:
-        print "File '" + f_error + "' does not exist"
+        print("File '{}' does not exist.".format(f_error))
 
     df_errors = pd.concat([dic_errors[df] for df in dic_errors.keys()])
     df_errors["File"] = f_error
@@ -190,8 +384,8 @@ try:
     df_errors = df_dtypes_object(pd.concat(list_df))
     df_errors = df_errors.loc[df_errors["Well VisionMate"].notnull()]
 except ValueError:
-    print "DataFrame is empty"
-    print "Worked on dir " + d_dir
+    print("DataFrame is empty.")
+    print("Worked on dir {}".format(d_dir))
 
 # remove control columns that are not representative of data scanned
 del df_aliquot["Well Expected.2"], df_aliquot["Well Expected.1"], \
@@ -410,12 +604,9 @@ if 'rm_stimuli' in locals():
 Merge Aliquot Fraction 1 with Freezer location
 """
 
-print("Nb tubes in Aliquot 1:")
-print(len(df_aliquot1))
 del df_aliquot1["BoxBarcode"]
 df_al1_fr = pd.merge(df_input, df_aliquot1, on="Name")
-print("Nb tubes after first merge:")
-print(len(df_al1_fr))
+
 df_al1_fr.loc[:, "Sample Type"] = "Fraction1"
 df_al1_fr.loc[:, "Volume"] = 100.0
 del df_al1_fr["SrcBox_BoxID"], df_al1_fr["BoxBarcode"], df_al1_fr["Name"]
@@ -431,12 +622,9 @@ df_al1_fr = pd.merge(df_freez, df_al1_fr, on="BoxBarcode")
 Merge Aliquot Fraction 2 with Freezer location
 """
 
-print("Nb tubes in Aliquot 2:")
-print(len(df_aliquot2))
 del df_aliquot2["BoxBarcode"]
 df_al2_fr = pd.merge(df_input, df_aliquot2, on="Name")
-print("Nb tubes after first merge:")
-print(len(df_al2_fr))
+
 df_al2_fr.loc[:, "Sample Type"] = "Fraction2"
 df_al2_fr.loc[:, "Volume"] = 100.0
 del df_al2_fr["SrcBox_BoxID"], df_al2_fr["BoxBarcode"], df_al2_fr["Name"]
@@ -567,7 +755,6 @@ if 'df_ctubes' in locals():
     df_al_fr = pd.concat([df_al_fr, df_al1_cplt])
     df_al_fr = df_al_fr[~(df_al_fr["Name"].isin(to_remove1))]
 
-
     """
     Aliquot Fraction 2, wrong tubes to replace
     """
@@ -633,9 +820,6 @@ if 'df_ctubes' in locals():
     df_al_fr = pd.concat([df_al_fr, df_al2_cplt])
     df_al_fr = df_al_fr[~(df_al_fr["Name"].isin(to_remove2))]
 
-    print("Nb tubes after replacing wrong aliquot tubes:")
-    print(len(df_al_fr))
-
     del df_al_fr["Position"]
 
 df_al_fr.rename(columns={"TubeWell": "Position"}, inplace=True)
@@ -660,7 +844,7 @@ if 'df_rm_al_fr' in locals():
     df_rm_al_fr.drop_duplicates(inplace=True)
     df_rm_al_fr.to_csv(m_samples, index = False, header = True)
 
-    print("Save %d lines in %s" % (len(df_rm_al_fr), m_samples))
+    print("Save {} lines in {}".format(len(df_rm_al_fr), m_samples))
 
 on_cols = ["ParentID", "Volume", "UpdateDate", "Position", \
            "DonorID"]
@@ -668,5 +852,3 @@ df_update = df_update[on_cols]
 df_update.rename(columns={"ParentID": "RFID"}, inplace=True)
 df_update.drop_duplicates(inplace=True)
 df_update.to_csv(u_samples, index = False, header = True)
-
-print("Save %d lines in %s" % (len(df_update), u_samples))

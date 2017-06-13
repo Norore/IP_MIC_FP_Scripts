@@ -14,6 +14,9 @@ parser.add_argument('-d', '--database', required=True,
 parser.add_argument('-l', '--location', required=True,
                     help="""File that contains location of each tubes in each
                          box for stools source samples""")
+parser.add_argument('-o', '--output', required=True,
+                    help="""Output file name of sources vials that will be
+                         generate in CSV format for FreezerPro""")
 parser.add_argument('-v', '--verbose', required=False,
                     help="""If set, will display text of each kind of step.
                     Accepted values:
@@ -23,9 +26,6 @@ parser.add_argument('-v', '--verbose', required=False,
                         - Y
                         - 1
                     """)
-parser.add_argument('-o', '--output', required=True,
-                    help="""Output file name of sources vials that will be
-                         generate in CSV format for FreezerPro""")
 args = vars(parser.parse_args())
 
 f_freezer = args['freezer']
@@ -34,32 +34,51 @@ f_location = args['location']
 s_samples = args['output']
 verbose = args['verbose']
 
-if verbose in ["True", "T", "Yes", "Y", "1"]:
+if verbose in ["True", "T", "Yes", "Y", 1]:
     verbose = True
 else:
     verbose = False
 
 try:
     df_freez = pd.read_csv(f_freezer, dtype=object)
+    if verbose:
+        print("Read file {} of Freezer hierarchy:".format(f_freezer))
+        print("> Extracted {} lines and {} columns.".format(df_freez.shape[0], \
+                                                            df_freez.shape[1]))
 except IOError:
     print("File '{}' does not exist".format(f_freezer))
     exit()
 
 try:
     df_database = pd.read_csv(f_database, sep="\t", dtype=object)
+    if verbose:
+        print("Read data file {} with info about source tubes and aliquots".format(f_database))
+        print("> Extracted {} lines and {} columns.".format(df_database.shape[0], \
+                                                          df_database.shape[1]))
 except IOError:
     print("File '{}' does not exist".format(f_database))
     exit()
 
 try:
     df_location = pd.read_csv(f_location, dtype=object)
+    if verbose:
+        print("Read file {} with tubes location:".format(f_location))
+        print("> Extracted {} lines and {} columns.".format(df_location.shape[0], \
+                                                          df_location.shape[1]))
 except IOError:
-    print("File '{}' does not exist".format(f_database))
+    print("File '{}' does not exist".format(f_location))
     exit()
+
+if verbose:
+    print("...")
+    print("Process sources...")
 
 common_cols = ["Id", "DonorId", "VisitId", "AliquotId", "AliquotingDate", \
                 "Comments"]
 df_source = df_database[common_cols].copy()
+if verbose:
+    print("Extracted {} columns from {}:".format(len(common_cols), f_database))
+    print("\n".join(["+ {}".format(c) for c in common_cols]))
 df_source.rename(columns={"Id": "BARCODE",
                           "DonorId": "DonorID",
                           "VisitId": "VisitID",
@@ -73,12 +92,29 @@ df_source.loc[((df_source["AliquotID"] == "1") & (df_source["VisitID"] == "2")),
 df_source.loc[((df_source["AliquotID"] == "2") & (df_source["VisitID"] == "2")),
             "CapColor"] = "White"
 
+if verbose:
+    print("...")
+    print("Process sources location...")
+
 df_src_loc = pd.merge(df_source, df_location, on="BARCODE")
+
+if verbose:
+    print("> Merged files {} and {}, using column BARCODE.".format(f_database, \
+                                                                 f_location))
+    print("> Result of merge contains {} lines for {} columns.".format(df_src_loc.shape[0], \
+                                                                     df_src_loc.shape[1]))
 del df_src_loc["index"]
+
+if verbose:
+    print("...")
+    print("Process FreezerPro formating...")
 
 df_src_frz_loc = pd.merge(df_src_loc, df_freez, \
                             on=["Level1", "Level3", "Box_Descr"])
-
+if verbose:
+    print("> Merged sources data and file {}, using columns Level1, Level2 and Level3.".format(f_freezer))
+    print("> Result of merge contains {} lines for {} columns.".format(df_src_frz_loc.shape[0], \
+                                                                     df_src_frz_loc.shape[1]))
 df_src_frz_loc.loc[:, "BOX_BARCODE"] = df_src_frz_loc["BOX_BARCODE"].str.\
                                        replace(r"_5mL", r"_5ml")
 df_src_frz_loc.loc[:, "Box"] = df_src_frz_loc["BOX_BARCODE"]
@@ -101,22 +137,17 @@ df_src_frz_loc.loc[:, "Sample Source"] = df_src_frz_loc["DonorID"]
 df_src_frz_loc.loc[:, "Description"] = "\"Donor " + df_src_frz_loc["DonorID"] + \
                                        ", Visit " + \
                                        df_src_frz_loc["VisitID"] + \
-                                       ", Aliquot" + \
+                                       ", Aliquot " + \
                                        df_src_frz_loc["AliquotID"] + "\""
+df_src_frz_loc.loc[:, "Level2"] = df_src_frz_loc["Level3"]
+df_src_frz_loc.loc[:, "Level2_Descr"] = df_src_frz_loc["Level3_Descr"]
+del df_src_frz_loc["Level3"], df_src_frz_loc["Level3_Descr"], \
+    df_src_frz_loc["CapColor"]
 df_src_frz_loc.loc[:, "FreezerBarcode"] = df_src_frz_loc["Freezer"]
 df_src_frz_loc.loc[:, "ShelfBarcode"] = df_src_frz_loc["Level1"]
 df_src_frz_loc.loc[:, "RackBarcode"] = df_src_frz_loc["Level2"]
-df_src_frz_loc.loc[:, "DrawerBarcode"] = df_src_frz_loc["Level3"]
-del df_src_frz_loc["CapColor"]
 
-print("df_src_frz_loc.head()")
-print(df_src_frz_loc.head())
-print(df_src_frz_loc.shape)
-print("df_src_frz_loc.loc[0]")
-print(df_src_frz_loc.loc[0])
-# print("df_src_frz_loc.loc[845]")
-# print(df_src_frz_loc.loc[845])
-# print("df_src_frz_loc.loc[879]")
-# print(df_src_frz_loc.loc[879])
-
-# df_source.to_csv(s_samples, header = True, index = False)
+df_src_frz_loc.to_csv(s_samples, header = True, index = False)
+if verbose:
+    print("> Final output contains {} lines for {} columns.".format(df_src_frz_loc.shape[0], \
+                                                                      df_src_frz_loc.shape[1]))
