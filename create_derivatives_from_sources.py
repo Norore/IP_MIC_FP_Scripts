@@ -1,4 +1,211 @@
 #!/usr/bin/env python
+'''
+# Generate aliquot samples for FreezerPro from original samples file
+
+## Objective
+
+User may want to create aliquots, or derivatives, from samples in freezers. It
+will be necessary to update samples in FreezerPro, create derivatives, and, may
+be, to remove or move samples.
+
+## Warning
+
+For input_file parameter, user may have download a full report from its samples.
+
+## Expected file formats put in arguments
+
+--input_file, file from FreezerPro database, with fields:
+     1. UID: unique identifier, defined by FreezerPro
+     2. Name: tube name
+     3. Description: tube description
+     4. Sample Type: type of sample
+     5. Vials: number of vials associated to the tube
+     6. Volume: sample volume
+     7. Sample Source: source sample, by default, donor in cohort
+     8. Owner: sample owner
+     9. Created At: creation date, FreezerPro
+    10. Expiration: expiration date, FreezerPro
+    11. AliquotID: Aliquot ID
+    12. VisitID: Visit ID
+    13. StimulusID: Stimulus ID
+    14. StimulusName: Stimulus Name
+    15. BatchID: Batch ID
+    16. DonorID: Donor ID
+    17. ThawCycle: number of thaw cycle, FreezerPro
+    18. CreationDate: sample creation date
+    19. UpdateDate: sample update date
+    20. FreezerBarcode: freezer barcode
+    21. ShelfBarcode: shelf barcode
+    22. RackBarcode: rack barcode
+    23. DrawerBarcode: drawer barcode
+    24. BoxBarcode: box barcode
+    25. RFID: RFID, defined by FreezerPro
+    26. BARCODE: tube barcode, could be set, if not, defined by FreezerPro
+    27. Freezer: freezer name
+    28. Level1: first level name (Shelf)
+    29. Level2: second level name (Rack)
+    30. Level3: third level name (Drawer)
+    31. Level4: empty
+    32. Level5: empty
+    33. Box: box name
+    34. Position: tube position in box
+
+--directory, directory with Excel files that contains aliquot data to use,
+in 3 sheets (1 sheet per box), with fields:
+     1. AliquotingDate: aliquoting date
+     2. SrcBox_BoxID: source box barcode, provider format
+     3. SrcBox_LabExID: source box barcode, LabExMI format
+     4. SrcBox_TubeScan: source tube barcode
+     5. Well VisionMate: source tube position in box
+     6. Well Expected: source tube position expected in box
+     7. Al1Box_BoxID: fraction 1 box barcode, provider format
+     8. Al1Box_LabExID: fraction 1 box barcode, LabExMI format
+     9. Al1Box_TubeCtrl: fraction 1 tube control barcode
+    10. Al1Box_TubeScan: fraction 1 tube barcode
+    11. Well VisionMate: fraction 1 tube position in box
+    12. Well Expected: fraction 1 tube position expected in box
+    13. Al2Box_BoxID: fraction 2 box barcode, provider format
+    14. Al2Box_TubeCtrl: fraction 2 tube control barcode
+    15. Al2Box_TubeScan: fraction 2 tube barcode
+    16. Well VisionMate: fraction 2 tube position in box
+    17. Well Expected: fraction 2 tube position expected in box
+
+--remove_tubes, file of excluded tubes, with fields:
+     1. BarcodeId_Source: source tube barcode
+     2. Date_Users: 20160826_R1_BCCP
+     3. SrcTF_Barcode: source box barcode, Thermo format
+     4. SrcBox_Barcode: source box barcode, LabExMI format
+     5. SrcVisionMate_Well: source tube position in box
+     6. SrcExpected_Well: source tube position expected in box
+     7. F1TF_Barcode: fraction 1 box barcode, Thermo format
+     8. F1Box_Barcode: fraction 1 box barcode, LabExMI format
+     9. BarcodeId_F1: fraction 1 tube barcode
+    10. F1VisionMate_Well: fraction 1 tube position in box
+    11. F1Expected_Well: fraction 1 tube position expected in box
+    12. F2TF_Barcode: fraction 2 box barcode, Thermo format
+    13. BarcodeId_F2: fraction 2 tube barcode
+    14. F2VisionMate_Well: fraction 2 tube position in box
+    15. F2Expected_Well: fraction 2 tube position expected in box
+    16. DonorId: donor ID
+    17. VisitId: visit ID
+    18. BatchId: batch ID
+    19. Type: sample type
+    20. StimulusId: stimulus ID
+    21. AliquotId: aliquot ID
+
+--change_tubes, file of tubes to replace (tube from the wrong StimulusID), with
+fields:
+    1. BarcodeId_Source: source tube barcode
+    2. Date_Users: 20160826_R1_BCCP
+    3. SrcTF_Barcode: source box barcode, Thermo format
+    4. SrcBox_Barcode: source box barcode, LabExMI format
+    5. SrcVisionMate_Well: source tube position in box
+    6. SrcExpected_Well: source tube position expected in box
+    7. F1TF_Barcode: fraction 1 box barcode, Thermo format
+    8. F1Box_Barcode: fraction 1 box barcode, LabExMI format
+    9. BarcodeId_F1: fraction 1 tube barcode
+   10. F1VisionMate_Well: fraction 1 tube position in box
+   11. F1Expected_Well: fraction 1 tube position expected in box
+   12. F2TF_Barcode: fraction 2 box barcode, Thermo format
+   13. BarcodeId_F2: fraction 2 tube barcode
+   14. F2VisionMate_Well: fraction 2 tube position in box
+   15. F2Expected_Well: fraction 2 tube position expected in box
+   16. DonorId: donor ID
+   17. VisitId: visit ID
+   18. BatchId: batch ID
+   19. Type: sample type
+   20. StimulusId: stimulus ID
+   21. AliquotId: aliquot ID
+
+--replace_tubes, file of tubes for replace (tube from the wrong barcode), with
+fields:
+    1. Position: tube position
+    2. NewBarcode: new tube barcode
+    3. OldBarcode: previous tube barcode
+
+--add_tubes, file of tubes to add, need to be in same format as run files
+from argument --directory, only one sheet, with fields:
+     1. SrcBox_LabExID: source box barcode, LabExMI format
+     2. SrcBox_TubeScan: source tube barcode
+     3. Well VisionMate: source tube position in box
+     4. Well Expected: source tube position expected in box
+     5. Al1Box_BoxID: fraction 1 box barcode, Thermo format
+     6. Al1Box_LabExID: fraction 1 box barcode, LabExMI format
+     7. Al1Box_TubeCtrl: fraction 1 control tube barcode
+     8. Al1Box_TubeScan: fraction 1 tube barcode
+     9. Well VisionMate: fraction 1 tube position in box
+    10. Well Expected: fraction 1 tube position expected in box
+    11. Al2Box_BoxID: fraction 2 box barcode, Thermo format
+    12. Al2Box_TubeCtrl: fraction 2 control tube barcode
+    13. Al2Box_TubeScan: fraction 2 tube barcode
+    14. Well VisionMate: fraction 2 tube position in box
+    15. Well Expected: fraction 2 tube position expected in box
+
+--freezers, file with location of each box of fractions in freezers, from
+FreezerPro, with fields:
+    1. Box: box name in freezer
+    2. Freezer: freezer name
+    3. Freezer_Descr: freezer description
+    4. Level1: level 1 name (Shelf)
+    5. Level1_Descr: level 1 description
+    6. Level2: level 2 name (Rack)
+    7. Level2_Descr: level 2 description
+    8. Level3: level 3 name (Drawer)
+    9. Level3_Descr: level 3 description
+
+Expected file formats output in arguments
+
+--output_file, output file with aliquot samples data in CSV format for
+FreezerPro import, with fields:
+     1. ParentID: parent unique identifier, defined by FreezerPro
+     2. Name: tube name
+     3. BARCODE: tube barcode
+     4. Position: tube position in box
+     5. Volume: sample volume
+     6. Freezer: freezer name
+     7. Freezer_Descr: freezer description
+     8. Level1: level 1 name (Shelf)
+     9. Level1_Descr: level 1 description
+    10. Level2: level 2 name (Rack)
+    11. Level2_Descr: level 2 description
+    12. Level3: level 3 name(Drawer)
+    13. Level3_Descr: level 3 description
+    14. BoxType: type of box
+    15. Box: box name
+    16. Box_Descr: box description
+    17. ThermoBoxBarcode: box barcode from Thermo
+    18. BOX_BARCODE: box barcode
+    19. CreationDate: sample creation date
+    20. UpdateDate: sample update date
+    21. AliquotID: aliquot ID
+    22. DonorID: donor ID
+    23. StimulusID: stimulus ID
+    24. StimulusName: stimulus name
+    25. VisitID: visit ID
+    26. ThawCycle: number of thaw cycle
+    27. Sample Source: sample source, by default, donor in cohort
+    28. Description: tube description
+    29. BatchID: batch ID
+    30. Sample Type: sample type
+    31. ShelfBarcode: shelf barcode
+    32. RackBarcode: rack barcode
+    33. DrawerBarcode: drawer barcode
+
+--update_file, file with original samples data in CSV format for FreezerPro
+original samples update, with fields:
+    1. RFID: RFID of source tube to update in FreezerPro
+    2. Volume: volume
+    3. UpdateDate: update date
+    4. Position: position
+    5. DonorID: donor ID
+
+--moved_file, file with original samples data in CSV format for FreezerPro
+original samples to move, with fields:
+    1. UID: unique identifier defined by FreezerPro
+    2. BOX_BARCODE: box barcode
+    3. CONTAINER_BARCODE: container barcode
+'''
+
 import pandas as pd
 import argparse
 import re
@@ -7,208 +214,10 @@ import glob
 from MI_FP_common import *
 
 '''
-
-Expected file formats put in arguments
-
---input_file, file from FreezerPro database, with fields:
-     1. UID
-     2. Name
-     3. Description
-     4. Sample Type
-     5. Vials
-     6. Volume
-     7. Sample Source
-     8. Owner
-     9. Created At
-    10. Expiration
-    11. AliquotID
-    12. VisitID
-    13. StimulusID
-    14. StimulusName
-    15. BatchID
-    16. DonorID
-    17. ThawCycle
-    18. CreationDate
-    19. UpdateDate
-    20. FreezerBarcode
-    21. ShelfBarcode
-    22. RackBarcode
-    23. DrawerBarcode
-    24. BoxBarcode
-    25. RFID
-    26. BARCODE
-    27. Freezer
-    28. Level1
-    29. Level2
-    30. Level3
-    31. Level4
-    32. Level5
-    33. Box
-    34. Position
-
---directory, directory with Excel files that contains aliquot data to use,
-in 3 sheets (1 sheet per box), with fields:
-     1. AliquotingDate
-     2. SrcBox_BoxID
-     3. SrcBox_LabExID
-     4. SrcBox_TubeScan
-     5. Well VisionMate
-     6. Well Expected
-     7. Al1Box_BoxID
-     8. Al1Box_LabExID
-     9. Al1Box_TubeCtrl
-    10. Al1Box_TubeScan
-    11. Well VisionMate
-    12. Well Expected
-    13. Al2Box_BoxID
-    14. Al2Box_TubeCtrl
-    15. Al2Box_TubeScan
-    16. Well VisionMate
-    17. Well Expected
-
---remove_tubes, file of excluded tubes, with fields:
-     1. BarcodeId_Source
-     2. Date_Users
-     3. SrcTF_Barcode
-     4. SrcBox_Barcode
-     5. SrcVisionMate_Well
-     6. SrcExpected_Well
-     7. F1TF_Barcode
-     8. F1Box_Barcode
-     9. BarcodeId_F1
-    10. F1VisionMate_Well
-    11. F1Expected_Well
-    12. F2TF_Barcode
-    13. BarcodeId_F2
-    14. F2VisionMate_Well
-    15. F2Expected_Well
-    16. DonorId
-    17. VisitId
-    18. BatchId
-    19. Type
-    20. StimulusId
-    21. AliquotId
-
---change_tubes, file of tubes for replace (tube from the wrong StimulusID), with
-fields:
-    1. BarcodeId_Source
-    2. Date_Users
-    3. SrcTF_Barcode
-    4. SrcBox_Barcode
-    5. SrcVisionMate_Well
-    6. SrcExpected_Well
-    7. F1TF_Barcode
-    8. F1Box_Barcode
-    9. BarcodeId_F1
-    10. F1VisionMate_Well
-    11. F1Expected_Well
-    12. F2TF_Barcode
-    13. BarcodeId_F2
-    14. F2VisionMate_Well
-    15. F2Expected_Well
-    16. DonorId
-    17. VisitId
-    18. BatchId
-    19. Type
-    20. StimulusId
-    21. AliquotId
-
---replace_tubes, file of tubes for replace (tube from the wrong barcode), with
-fields:
-    1. Position
-    2. NewBarcode
-    3. OldBarcode
-
---add_tubes, file of tubes to add, need to be in same format as run files
-from argument --directory, only one sheet, with fields:
-     1. SrcBox_LabExID
-     2. SrcBox_TubeScan
-     3. Well VisionMate
-     4. Well Expected
-     5. Al1Box_BoxID
-     6. Al1Box_LabExID
-     7. Al1Box_TubeCtrl
-     8. Al1Box_TubeScan
-     9. Well VisionMate
-    10. Well Expected
-    11. Al2Box_BoxID
-    12. Al2Box_TubeCtrl
-    13. Al2Box_TubeScan
-    14. Well VisionMate
-    15. Well Expected
-
---freezers, file with location of each box of aliquots in freezers, from
-FreezerPro, with fields:
-    1. Box
-    2. Freezer
-    3. Freezer_Descr
-    4. Level1
-    5. Level1_Descr
-    6. Level2
-    7. Level2_Descr
-    8. Level3
-    9. Level3_Descr
-
-Expected file formats output in arguments
-
---output_file, output file with aliquot samples data in CSV format for
-FreezerPro import, with fields:
-     1. ParentID
-     2. Name
-     3. BARCODE
-     4. Position
-     5. Volume
-     6. Freezer
-     7. Freezer_Descr
-     8. Level1
-     9. Level1_Descr
-    10. Level2
-    11. Level2_Descr
-    12. Level3
-    13. Level3_Descr
-    14. BoxType
-    15. Box
-    16. Box_Descr
-    17. ThermoBoxBarcode
-    18. BOX_BARCODE
-    19. CreationDate
-    20. UpdateDate
-    21. AliquotID
-    22. DonorID
-    23. StimulusID
-    24. StimulusName
-    25. VisitID
-    26. ThawCycle
-    27. Sample Source
-    28. Description
-    29. BatchID
-    30. Sample Type
-    31. ShelfBarcode
-    32. RackBarcode
-    33. DrawerBarcode
-
---update_file, file with original samples data in CSV format for FreezerPro
-original samples update, with fields:
-    1. RFID
-    2. Volume
-    3. UpdateDate
-    4. Position
-    5. DonorID
-
---moved_file, file with original samples data in CSV format for FreezerPro
-original samples to move, with fields:
-    1. UID
-    2. BOX_BARCODE
-    3. CONTAINER_BARCODE
-
-'''
-
-'''
 Initialize arguments
 '''
 
-parser = argparse.ArgumentParser(description="""Generate aliquot samples
-                    for FreezerPro from original samples file""")
+parser = argparse.ArgumentParser(description=print(__doc__))
 # Freezer file input
 parser.add_argument('-i', '--input_file', required=True,
                     help="""Input file with original samples data in CSV format
