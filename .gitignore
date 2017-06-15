@@ -6,6 +6,9 @@
 notebooks/
 AnalyzeDataToImport/
 
+# Ignore all notebooks
+notebooks/*
+
 # Ignore compiled files
 *.pyc
 
