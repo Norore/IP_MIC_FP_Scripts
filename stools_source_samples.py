@@ -66,7 +66,7 @@ format for FreezerPro, with fields:
      7. Level1: level 1 name (Shelf)
      8. Box_Descr: box description
      9. Position: tube position in box
-    10. BOX_BARCODE: box barcode (FreezerPro field)
+    10. BOX_BARCODE: box barcode (FreezerPro field?)
     11. Freezer: freezer name
     12. Freezer_Descr: freezer description
     13. Level1_Descr: level 1 description

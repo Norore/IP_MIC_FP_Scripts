@@ -174,7 +174,7 @@ FreezerPro import, with fields:
     15. Box: box name
     16. Box_Descr: box description
     17. ThermoBoxBarcode: box barcode from Thermo
-    18. BOX_BARCODE: box barcode (FreezerPro field)
+    18. BOX_BARCODE: box barcode (FreezerPro field?)
     19. CreationDate: sample creation date
     20. UpdateDate: sample update date
     21. AliquotID: aliquot ID

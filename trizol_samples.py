@@ -108,7 +108,7 @@ pellet data, with fields:
     20. VisitID: visit ID
     21. BatchID: batch ID
     22. Name: tube name
-    23. BARCODE: tube barcode (FreezerPro field)
+    23. BARCODE: tube barcode (FreezerPro field?)
     24. Volume: sample volume
     25. DonorIDscanned: tube barcode
     26. ExtractionName: extraction name from stimulation experiment
