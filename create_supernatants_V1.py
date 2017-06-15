@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 """
-# Supernatant Visit 1 creation
+# TruCulture Supernatant Visit 1 creation
 
 ## Objective
 
