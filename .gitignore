@@ -8,3 +8,6 @@ AnalyzeDataToImport/
 
 # Ignore compiled files
 *.pyc
+
+# Ignore dotfiles
+.*
