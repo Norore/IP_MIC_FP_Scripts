@@ -174,7 +174,7 @@ FreezerPro import, with fields:
     15. Box: box name
     16. Box_Descr: box description
     17. ThermoBoxBarcode: box barcode from Thermo
-    18. BOX_BARCODE: box barcode
+    18. BOX_BARCODE: box barcode (FreezerPro field)
     19. CreationDate: sample creation date
     20. UpdateDate: sample update date
     21. AliquotID: aliquot ID
@@ -186,7 +186,7 @@ FreezerPro import, with fields:
     27. Sample Source: sample source, by default, donor in cohort
     28. Description: tube description
     29. BatchID: batch ID
-    30. Sample Type: sample type
+    30. Sample Type: sample type (depends of source used)
     31. ShelfBarcode: shelf barcode (in user-defined fields for the sample type)
     32. RackBarcode: rack barcode (in user-defined fields for the sample type)
     33. DrawerBarcode: drawer barcode (in user-defined fields for the sample type)
