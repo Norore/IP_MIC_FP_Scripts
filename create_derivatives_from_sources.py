@@ -153,7 +153,7 @@ FreezerPro, with fields:
     8. Level3: level 3 name (Drawer)
     9. Level3_Descr: level 3 description
 
-Expected file formats output in arguments
+## Expected file formats output in arguments
 
 --output_file, output file with aliquot samples data in CSV format for
 FreezerPro import, with fields:
@@ -187,9 +187,9 @@ FreezerPro import, with fields:
     28. Description: tube description
     29. BatchID: batch ID
     30. Sample Type: sample type
-    31. ShelfBarcode: shelf barcode
-    32. RackBarcode: rack barcode
-    33. DrawerBarcode: drawer barcode
+    31. ShelfBarcode: shelf barcode (in user-defined fields for the sample type)
+    32. RackBarcode: rack barcode (in user-defined fields for the sample type)
+    33. DrawerBarcode: drawer barcode (in user-defined fields for the sample type)
 
 --update_file, file with original samples data in CSV format for FreezerPro
 original samples update, with fields:
@@ -202,8 +202,8 @@ original samples update, with fields:
 --moved_file, file with original samples data in CSV format for FreezerPro
 original samples to move, with fields:
     1. UID: unique identifier defined by FreezerPro
-    2. BOX_BARCODE: box barcode
-    3. CONTAINER_BARCODE: container barcode
+    2. BOX_BARCODE: box barcode (FreezerPro field)
+    3. CONTAINER_BARCODE: container barcode (FreezerPro field)
 '''
 
 import pandas as pd

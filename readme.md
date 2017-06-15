@@ -13,7 +13,6 @@ Contains script to prepare Excel data file for FreezerPro importations.
 
 * __create_aliquots_from_sources.py__: generates aliquot samples for FreezerPro from original samples file
 * __create_derivatives_from_sources.py__: generates derivatives (fractions) of samples for FreezerPro from original samples file
-* __create_freezers_from_json_v2.py__: generates the freezers file in CSV format for FreezerPro from a JSON file format -- **Up-to-date**
 * __create_freezers_from_json.py__: generates the freezers file in CSV format for FreezerPro from a JSON file format -- **Withdraw**
 * __create_supernatants_V1.py__: creates file for Supernatant data in our Freezers, for Visit 1 -- need to be update
 * __create_supernatants_V2.py__: creates file for Supernatant data in our Freezers, for Visit 2 -- need to be update
@@ -21,7 +20,6 @@ Contains script to prepare Excel data file for FreezerPro importations.
 * __stools_samples.py__: generates stools samples aliquots for FreezerPro from a directory with CSV files.
 * __stimuli_samples_tmp.py__: generates supernatants samples for FreezerPro from an Excel file. Call *_tmp* because the boxes are not yet mapped
 * __stools_aliquot_samples.py__:
-* __stools_samples_labkey.py__:
 * __supernatants_samples.py__: generates supernatants samples for FreezerPro from a CSV file create from the samples LabKey table.
 * __trizol_samples.py__: generates trizol pellet samples for FreezerPro from an Excel file
 

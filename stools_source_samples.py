@@ -44,7 +44,7 @@ fields:
     25. Aliquot_4_Plate_Location: stool aliquot R3 tube position in box
     26. Aliquot_4_Plate_Number: stool aliquot R3 box barcode
 
---location, ile that contains location of each tubes in each box for stools
+--location, file that contains location of each tubes in each box for stools
 source samples, with fields:
     1. Level1: level 1 name (Shelf)
     2. Level3: level 3 name (Rack)
@@ -54,6 +54,9 @@ source samples, with fields:
     6. BOX_BARCODE: box barcode
 
 ## Expected file formats output in arguments
+
+--output, output file name of sources vials that will be generate in CSV
+format for FreezerPro, with fields:
      1. BARCODE: tube barcode
      2. DonorID: donor ID
      3. VisitID: visit ID
@@ -63,20 +66,21 @@ source samples, with fields:
      7. Level1: level 1 name (Shelf)
      8. Box_Descr: box description
      9. Position: tube position in box
-    10. BOX_BARCODE: box barcode
+    10. BOX_BARCODE: box barcode (FreezerPro field)
     11. Freezer: freezer name
     12. Freezer_Descr: freezer description
     13. Level1_Descr: level 1 description
     14. Level2: level 2 name (Rack)
     15. Level2_Descr: level 2 description
     16. Box: box name
-    17. BoxType: box type
-    18. Sample Type: sample type
+    17. BoxType: box type (48 (12 x 8) Stool Well Plate)
+    18. Sample Type: sample type (Stool Source White/Green Cap)
     19. Sample Source: sample source
     20. Description: tube description
-    21. FreezerBarcode: freezer barcode
-    22. ShelfBarcode: shelf barcode
-    23. RackBarcode: rack barcode
+    21. FreezerBarcode: freezer barcode (in user-defined fields for the sample type)
+    22. ShelfBarcode: shelf barcode (in user-defined fields for the sample type)
+    23. RackBarcode: rack barcode (in user-defined fields for the sample type)
+    24. BoxBarcode: rack barcode (in user-defined fields for the sample type)
 
 """
 
@@ -194,8 +198,9 @@ if verbose:
     print("> Merged sources data and file {}, using columns Level1, Level2 and Level3.".format(f_freezer))
     print("> Result of merge contains {} lines for {} columns.".format(df_src_frz_loc.shape[0], \
                                                                      df_src_frz_loc.shape[1]))
-df_src_frz_loc.loc[:, "BOX_BARCODE"] = df_src_frz_loc["BOX_BARCODE"].str.\
-                                       replace(r"_5mL", r"_5ml")
+# Some barcode were added by hand, so they may have "mL" instead of "ml"
+# df_src_frz_loc.loc[:, "BOX_BARCODE"] = df_src_frz_loc["BOX_BARCODE"].str.\
+#                                        replace(r"_5mL", r"_5ml")
 df_src_frz_loc.loc[:, "Box"] = df_src_frz_loc["BOX_BARCODE"]
 df_src_frz_loc.loc[:, "Box_Descr"] = df_src_frz_loc["BOX_BARCODE"].str.\
                                      replace(r"MIC_Feces_(Box)([0-9]{2})_5ml", \
@@ -225,6 +230,7 @@ del df_src_frz_loc["Level3"], df_src_frz_loc["Level3_Descr"], \
 df_src_frz_loc.loc[:, "FreezerBarcode"] = df_src_frz_loc["Freezer"]
 df_src_frz_loc.loc[:, "ShelfBarcode"] = df_src_frz_loc["Level1"]
 df_src_frz_loc.loc[:, "RackBarcode"] = df_src_frz_loc["Level2"]
+df_src_frz_loc.loc[:, "BoxBarcode"] = df_src_frz_loc["BOX_BARCODE"]
 
 df_src_frz_loc.to_csv(s_samples, header = True, index = False)
 if verbose:
