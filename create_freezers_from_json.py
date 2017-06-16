@@ -9,7 +9,7 @@ script will create freezer hierarchy from JSON files.
 
 # File input format
 
-File input will depends of the type of samples to implement
+File input (-f|--freezer) will depends of the type of samples to implement.
 
 ### TruCulture Trizol pellet
 
@@ -234,6 +234,8 @@ Here is an example of JSON format for boxes of Stool DNA boxes:
 
 ## File output format
 
+-o|--output, output file name of freezer(s) that will be generate in CSV format
+for FreezerPro, with fields:
      1. Freezer: freezer name
      2. Freezer_Descr: freezer descript
      3. Level1: level 1 name (Shelf)

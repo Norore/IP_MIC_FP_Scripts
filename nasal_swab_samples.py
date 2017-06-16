@@ -1,4 +1,12 @@
 #!/usr/bin/env python
+"""
+# Nasal Swab creation
+
+## About
+
+This script is a draft, it will probably be withdraw later
+
+"""
 import pandas as pd
 import numpy as np
 import argparse

@@ -91,7 +91,7 @@ Supernatant Visit 1 output to implement in FreezerPro
     28. ShelfBarcode: shelf barcode (in user-defined field)
     29. RackBarcode: rack barcode (in user-defined field)
     30. DrawerBarcode: drawer barcode (in user-defined field)
-    31. BOX_BARCODE: box barcode (FreezerPro field?)
+    31. BOX_BARCODE: box barcode (FreezerPro field)
     32. BoxBarcode: box barcode (in user-defined field)
 """
 

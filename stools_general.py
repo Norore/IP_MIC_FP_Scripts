@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 """
-
-# Stoolk general
+# Stool general
 
 ## Objective
 
@@ -15,7 +14,7 @@ scripts:
 
 ## Expected file formats put in arguments
 
---frezer, file with freezer data in CSV format for FreezerPro, with fields:
+-f|--frezer, file with freezer data in CSV format for FreezerPro, with fields:
     1. Box: box name in freezer
     2. Freezer: freezer name
     3. Freezer_Descr: freezer description
@@ -26,7 +25,7 @@ scripts:
     8. Level3: level 3 name (Drawer)
     9. Level3_Descr: level 3 description
 
---database, file that contains data from database for all stools data, with
+-d|--database, file that contains data from database for all stools data, with
 fields:
      1. Id: stool source tube barcode
      2. DonorId: donor ID
@@ -57,7 +56,7 @@ fields:
 
 ## Expected file format output in arguments
 
---aliquots, output file name of aliquots vials that will be generate in CSV
+-a|--aliquots, output file name of aliquots vials that will be generate in CSV
 format for FreezerPro, with fiels:
      1. SourceID: stool source barcode
      2. DonorID: donor ID
@@ -88,7 +87,7 @@ format for FreezerPro, with fiels:
     27. Sample Source: sample source, donor ID in cohort
     28. Description: tube description
 
---dna, output file name of dna vials that will be generate in CSV format for
+-d|--dna, output file name of dna vials that will be generate in CSV format for
 FreezerPro, with fields:
      1. SourceID: stool source barcode
      2. DonorID: donor ID
@@ -119,7 +118,7 @@ FreezerPro, with fields:
     27. Sample Source: sample source, donor ID in cohort
     28. Description: tube description
 
---sources, output file name of sources vials that will be generate in CSV
+-s|--sources, output file name of sources vials that will be generate in CSV
 format for FreezerPro, with fields:
     1. Id: tube barcode
     2. DonorId: donor ID

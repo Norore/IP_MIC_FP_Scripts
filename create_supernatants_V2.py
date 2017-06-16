@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 """
-
 # TruCulture Supernatant Visit 2 creation
 
 ## Objective
@@ -111,9 +110,8 @@ Supernatant Visit 2 output to implement in FreezerPro
     28. ShelfBarcode: shelf barcode (in user-defined field)
     29. RackBarcode: rack barcode (in user-defined field)
     30. DrawerBarcode: drawer barcode (in user-defined field)
-    31. BOX_BARCODE: box barcode (FreezerPro field?)
+    31. BOX_BARCODE: box barcode (FreezerPro field)
     32. BoxBarcode: box barcode (in user-defined field)
-
 """
 import pandas as pd
 df_v2 = pd.read_csv("/Volumes/LabExMI/Users/Nolwenn/FreezerPro/DataToPrepare/list_of_donors_visit2.csv")

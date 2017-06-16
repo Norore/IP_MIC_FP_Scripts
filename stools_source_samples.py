@@ -1,10 +1,15 @@
 #!/usr/bin/env python
 """
+# Stool Source creation
+
 ## Objective
+
+Generate stools source samples for FreezerPro from data Excel file provided by
+Stanislas and stool source samples mapping.
 
 ## Expected file formats put in arguments
 
---frezer, file with freezer data in CSV format for FreezerPro, with fields:
+-f|--frezer, file with freezer data in CSV format for FreezerPro, with fields:
     1. Box: box name in freezer
     2. Freezer: freezer name
     3. Freezer_Descr: freezer description
@@ -15,7 +20,7 @@
     8. Level3: level 3 name (Drawer)
     9. Level3_Descr: level 3 description
 
---database, file that contains data from database for all stools data, with
+-d|--database, file that contains data from database for all stools data, with
 fields:
      1. Id: stool source tube barcode
      2. DonorId: donor ID
@@ -44,19 +49,19 @@ fields:
     25. Aliquot_4_Plate_Location: stool aliquot R3 tube position in box
     26. Aliquot_4_Plate_Number: stool aliquot R3 box barcode
 
---location, file that contains location of each tubes in each box for stools
+-l|--location, file that contains location of each tubes in each box for stools
 source samples, with fields:
     1. Level1: level 1 name (Shelf)
     2. Level3: level 3 name (Rack)
     3. Box_Descr: box description (Box number)
     4. Position: tube position in box
     5. BARCODE: tube barcode
-    6. BOX_BARCODE: box barcode
+    6. BOX_BARCODE: box barcode (FreezerPro field)
 
 ## Expected file formats output in arguments
 
---output, output file name of sources vials that will be generate in CSV
-format for FreezerPro, with fields:
+-o|--output, output file name of stool source vials that will be generate in
+CSV format for FreezerPro, with fields:
      1. BARCODE: tube barcode
      2. DonorID: donor ID
      3. VisitID: visit ID
@@ -66,7 +71,7 @@ format for FreezerPro, with fields:
      7. Level1: level 1 name (Shelf)
      8. Box_Descr: box description
      9. Position: tube position in box
-    10. BOX_BARCODE: box barcode (FreezerPro field?)
+    10. BOX_BARCODE: box barcode (FreezerPro field)
     11. Freezer: freezer name
     12. Freezer_Descr: freezer description
     13. Level1_Descr: level 1 description

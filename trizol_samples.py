@@ -9,7 +9,7 @@ create a file to implement in FreezerPro for the Trizol Pellet samples.
 
 ## Expected file formats put in arguments
 
---freezer, file with freezer data in CSV format for FreezerPro, with fields:
+-f|--freezer, file with freezer data in CSV format for FreezerPro, with fields:
      1. Freezer: freezer name
      2. Freezer_Descr: freezer description
      3. Level1: level 1 name (Shelf)
@@ -22,7 +22,7 @@ create a file to implement in FreezerPro for the Trizol Pellet samples.
     10. Box_Descr: box description
     11. BoxType: box type (TC_Box_9x9)
 
---truculture, file with truculture pellet data in XLSX format for merge with
+-t|--truculture, file with truculture pellet data in XLSX format for merge with
 freezer data, with fields:
     1. RoomID: room ID where the freezer is located
     2. FreezerID ShelfID: freezer shelf barcode
@@ -31,7 +31,7 @@ freezer data, with fields:
     5. BoxPos: box position in rack
     6. Processed: if not empty, the barcode is already processed and were moved
 
---labkey, file with all the samples stored in LabKey, in CSV format, to use
+-l|--labkey, file with all the samples stored in LabKey, in CSV format, to use
 for merge with Trizol pellet data, with fields:
     1. id: line number
     2. barcodeId: tube barcode
@@ -49,7 +49,7 @@ for merge with Trizol pellet data, with fields:
     14. insertDate: insertion date
     15. updateDate: update date
 
---stimulation, file with all the stimulated data in XLSX format to use for
+-i|--stimulation, file with all the stimulated data in XLSX format to use for
 merge with Trizol pellet data, with fields:
     1. DonorIDscanned: tube barcode
     2. ExtractionName: extraction name
@@ -77,7 +77,7 @@ merge with Trizol pellet data, with fields:
     24. Nanodrop260_280:
     25. Nanodrop260_230:
 
---stimulus, file with all stimuli in CSV format to use for merge with Trizol
+-u|--stimulus, file with all stimuli in CSV format to use for merge with Trizol
 pellet data, with fields:
     1. stimulusId: stimulus ID
     2. name: stimulus name
@@ -86,6 +86,9 @@ pellet data, with fields:
     5. sensor: stimulus sensor
 
 ## Expected file formats output in arguments
+
+-o|--output, output file name of trizol pellet vials that will be generate in
+CSV format for FreezerPro, with fields:
     1. Box: box name
     2. BoxType: box type (TC_Box_9x9)
     3. Box_Descr: box description
@@ -121,7 +124,6 @@ pellet data, with fields:
     33. BOX_BARCODE: box barcode (FreezerPro field)
     34. BoxBarcode: box barcode (in user-defined field)
     35. Sample Source: sample source, donor ID in cohort
-
 """
 import pandas as pd
 import numpy as np
@@ -134,8 +136,7 @@ from MI_FP_common import *
 Initialize arguments
 '''
 
-parser = argparse.ArgumentParser(description="""Generate trizol pellet
-                    samples for FreezerPro from our data Excel file""")
+parser = argparse.ArgumentParser(description=print(__doc__))
 # Freezer file import
 parser.add_argument('-f', '--freezer', required=True,
                     help="File with freezer data in CSV format for FreezerPro")
