@@ -85,8 +85,6 @@ CSV format for FreezerPro, with fields:
     21. FreezerBarcode: freezer barcode (in user-defined fields for the sample type)
     22. ShelfBarcode: shelf barcode (in user-defined fields for the sample type)
     23. RackBarcode: rack barcode (in user-defined fields for the sample type)
-    24. BoxBarcode: rack barcode (in user-defined fields for the sample type)
-
 """
 
 import pandas as pd
@@ -235,7 +233,6 @@ del df_src_frz_loc["Level3"], df_src_frz_loc["Level3_Descr"], \
 df_src_frz_loc.loc[:, "FreezerBarcode"] = df_src_frz_loc["Freezer"]
 df_src_frz_loc.loc[:, "ShelfBarcode"] = df_src_frz_loc["Level1"]
 df_src_frz_loc.loc[:, "RackBarcode"] = df_src_frz_loc["Level2"]
-df_src_frz_loc.loc[:, "BoxBarcode"] = df_src_frz_loc["BOX_BARCODE"]
 
 df_src_frz_loc.to_csv(s_samples, header = True, index = False)
 if verbose:
