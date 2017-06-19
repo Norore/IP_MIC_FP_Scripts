@@ -5,7 +5,6 @@
 ## About
 
 This script is a draft, it will probably be withdraw later
-
 """
 import pandas as pd
 import numpy as np
@@ -78,36 +77,36 @@ verbose = args['verbose']
 try:
     df_freezer = pd.read_csv(f_freezer, dtype=object)
 except IOError:
-    print "File '" + f_freezer + "' does not exist"
+    print("File '{}' does not exist.".format(f_freezer))
     exit()
 
 # Read NasalSwab mapping file
 try:
     df_nasalsw = pd.read_excel(f_nasalsw, n_nssheet)
 except IOError:
-    print "File '" + f_nasalsw + "' does not exist"
+    print("File '{}' does not exist.".format(f_nasalsw))
     exit()
 except:
-    print "Sheet '" + n_nssheet + "' does not exist in file '" + f_nasalsw + "'"
-    print "Error:", sys.exc_info()[0]
+    print("Sheet '{}' does not exist in file '{}'".format(n_nssheet, f_nasalsw))
+    print("Error: {}".format(sys.exc_info()[0]))
     exit()
 
 # Read LabKey file
 try:
     df_labkey = pd.read_csv(f_labkey, dtype=object)
 except IOError:
-    print "File '" + f_labkey + "' does not exist"
+    print("File '{}' does not exist.".format(f_labkey))
     exit()
 
 # Read stimulation file
 try:
     df_nsidate = pd.read_excel(f_nsidate, n_nssdate)
 except IOError:
-    print "File '" + f_nsidate + "' does not exist"
+    print("File '{}' does not exist.".format(f_nsidate))
     exit()
 except:
-    print "Sheet '" + n_nssdate + "' does not exist in file '" + f_nsidate + "'"
-    print "Error:", sys.exc_info()[0]
+    print("Sheet '{}' does not exist in file '{}'".format(n_nssdate, f_nsidate))
+    print("Error: {}".format(sys.exc_info()[0]))
 
 '''
 Defined reusable functions
@@ -204,7 +203,7 @@ df_nswlab = pd.merge(df_labkey,
                      how='inner')
 missing_tubes = list(set(df_nasalsw["barcodeId"]) - set(df_labkey["barcodeId"]))
 if len(missing_tubes) > 0:
-    print(len(missing_tubes), "tubes not found on LabKey data")
+    print("{} tubes not found on LabKey data.".format(len(missing_tubes)))
     if verbose:
         answer = raw_input("Print list of missing tubes?")
     else:

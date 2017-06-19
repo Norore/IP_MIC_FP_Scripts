@@ -126,7 +126,6 @@ format for FreezerPro, with fields:
     4. AliquotId: aliquot ID
     5. AliquotingDate: aliquoting date
     6. Comments: could contains comments about the stool sample
-
 """
 import pandas as pd
 import argparse

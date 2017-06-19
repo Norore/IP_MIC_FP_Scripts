@@ -247,7 +247,6 @@ for FreezerPro, with fields:
      9. Box: box name
     10. Box_Descr: box description
     11. BoxType: box type
-
 """
 
 import json

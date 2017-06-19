@@ -1,18 +1,18 @@
-# Generate aliquot samples for FreezerPro from original samples file
+# TruCulture Supernatant derivatives creation
 
 ## Objective
 
-User may want to create aliquots, or derivatives, from samples in freezers. It
-will be necessary to update samples in FreezerPro, create derivatives, and, may
-be, to remove or move samples.
+User may want to create aliquots, or derivatives, from TruCulture Supernatant
+samples in freezers. It will be necessary to update samples in FreezerPro,
+create derivatives, and, may be, to remove or move samples.
 
 ## Warning
 
-For input_file parameter, user may have download a full report from its samples.
+For `input_file` parameter, user may have download a full report from its samples.
 
 ## Expected file formats put in arguments
 
---input_file, file from FreezerPro database, with fields:
+`-i|--input_file`, file from FreezerPro database, with fields:
 
 1. UID: unique identifier, defined by FreezerPro
 2. Name: tube name
@@ -49,16 +49,17 @@ For input_file parameter, user may have download a full report from its samples.
 33. Box: box name
 34. Position: tube position in box
 
---directory, directory with Excel files that contains aliquot data to use,
-in 3 sheets (1 sheet per box), with fields
-1. AliquotingDate: aliquoting
-2. SrcBox_BoxID: source box barcode, provider
-3. SrcBox_LabExID: source box barcode, LabExMI
-4. SrcBox_TubeScan: source tube
-5. Well VisionMate: source tube position in
-6. Well Expected: source tube position expected in
-7. Al1Box_BoxID: fraction 1 box barcode, provider
-8. Al1Box_LabExID: fraction 1 box barcode, LabExMI
+`-d|--directory`, directory with Excel files that contains aliquot data to use,
+in 3 sheets (1 sheet per box), with fields:
+
+1. AliquotingDate: aliquoting date
+2. SrcBox_BoxID: source box barcode, provider format
+3. SrcBox_LabExID: source box barcode, LabExMI format
+4. SrcBox_TubeScan: source tube barcode
+5. Well VisionMate: source tube position in box
+6. Well Expected: source tube position expected in box
+7. Al1Box_BoxID: fraction 1 box barcode, provider format
+8. Al1Box_LabExID: fraction 1 box barcode, LabExMI format
 9. Al1Box_TubeCtrl: fraction 1 tube control barcode
 10. Al1Box_TubeScan: fraction 1 tube barcode
 11. Well VisionMate: fraction 1 tube position in box
@@ -69,7 +70,8 @@ in 3 sheets (1 sheet per box), with fields
 16. Well VisionMate: fraction 2 tube position in box
 17. Well Expected: fraction 2 tube position expected in box
 
---remove_tubes, file of excluded tubes, with fields:
+`-e|--remove_tubes`, file of excluded tubes, with fields:
+
 1. BarcodeId_Source: source tube barcode
 2. Date_Users: 20160826_R1_BCCP
 3. SrcTF_Barcode: source box barcode, Thermo format
@@ -92,8 +94,9 @@ in 3 sheets (1 sheet per box), with fields
 20. StimulusId: stimulus ID
 21. AliquotId: aliquot ID
 
---change_tubes, file of tubes to replace (tube from the wrong StimulusID), with
+`-c|--change_tubes`, file of tubes to replace (tube from the wrong StimulusID), with
 fields:
+
 1. BarcodeId_Source: source tube barcode
 2. Date_Users: 20160826_R1_BCCP
 3. SrcTF_Barcode: source box barcode, Thermo format
@@ -116,14 +119,16 @@ fields:
 20. StimulusId: stimulus ID
 21. AliquotId: aliquot ID
 
---replace_tubes, file of tubes for replace (tube from the wrong barcode), with
+`-p|--replace_tubes`, file of tubes for replace (tube from the wrong barcode), with
 fields:
+
 1. Position: tube position
 2. NewBarcode: new tube barcode
 3. OldBarcode: previous tube barcode
 
---add_tubes, file of tubes to add, need to be in same format as run files
+`-a|--add_tubes`, file of tubes to add, need to be in same format as run files
 from argument --directory, only one sheet, with fields:
+
 1. SrcBox_LabExID: source box barcode, LabExMI format
 2. SrcBox_TubeScan: source tube barcode
 3. Well VisionMate: source tube position in box
@@ -140,8 +145,9 @@ from argument --directory, only one sheet, with fields:
 14. Well VisionMate: fraction 2 tube position in box
 15. Well Expected: fraction 2 tube position expected in box
 
---freezers, file with location of each box of fractions in freezers, from
+`-f|--freezers`, file with location of each box of fractions in freezers, from
 FreezerPro, with fields:
+
 1. Box: box name in freezer
 2. Freezer: freezer name
 3. Freezer_Descr: freezer description
@@ -152,10 +158,11 @@ FreezerPro, with fields:
 8. Level3: level 3 name (Drawer)
 9. Level3_Descr: level 3 description
 
-Expected file formats output in arguments
+## Expected file formats output in arguments
 
---output_file, output file with aliquot samples data in CSV format for
+`-o|--output_file`, output file with aliquot samples data in CSV format for
 FreezerPro import, with fields:
+
 1. ParentID: parent unique identifier, defined by FreezerPro
 2. Name: tube name
 3. BARCODE: tube barcode
@@ -173,7 +180,7 @@ FreezerPro import, with fields:
 15. Box: box name
 16. Box_Descr: box description
 17. ThermoBoxBarcode: box barcode from Thermo
-18. BOX_BARCODE: box barcode
+18. BOX_BARCODE: box barcode (FreezerPro field)
 19. CreationDate: sample creation date
 20. UpdateDate: sample update date
 21. AliquotID: aliquot ID
@@ -185,32 +192,39 @@ FreezerPro import, with fields:
 27. Sample Source: sample source, by default, donor in cohort
 28. Description: tube description
 29. BatchID: batch ID
-30. Sample Type: sample type
-31. ShelfBarcode: shelf barcode
-32. RackBarcode: rack barcode
-33. DrawerBarcode: drawer barcode
+30. Sample Type: sample type (depends of source used)
+31. ShelfBarcode: shelf barcode (in user-defined fields for the sample type)
+32. RackBarcode: rack barcode (in user-defined fields for the sample type)
+33. DrawerBarcode: drawer barcode (in user-defined fields for the sample type)
 
---update_file, file with original samples data in CSV format for FreezerPro
+`-u|--update_file`, file with original samples data in CSV format for FreezerPro
 original samples update, with fields:
+
 1. RFID: RFID of source tube to update in FreezerPro
 2. Volume: volume
 3. UpdateDate: update date
 4. Position: position
 5. DonorID: donor ID
 
---moved_file, file with original samples data in CSV format for FreezerPro
+`-m|--moved_file`, file with original samples data in CSV format for FreezerPro
 original samples to move, with fields:
+
 1. UID: unique identifier defined by FreezerPro
-2. BOX_BARCODE: box barcode
-3. CONTAINER_BARCODE: container barcode
+2. BOX_BARCODE: box barcode (FreezerPro field)
+3. CONTAINER_BARCODE: container barcode (FreezerPro field)
+
+## How to use
+
+Type `./create_derivatives_from_sources.py -h` to show help:
 
 ```
 usage: create_derivatives_from_sources.py [-h] -i INPUT_FILE -d DIRECTORY
                                           [-r REMOVE_STIMULI]
                                           [-e REMOVE_TUBES] [-c CHANGE_TUBES]
-                                          [-p REPLACE_TUBES] [-a ADD_TUBES] -f
-                                          FREEZERS -o OUTPUT_FILE -u
-                                          UPDATE_FILE -m MOVED_FILE
+                                          [-a ADD_TUBES] -f FREEZERS -o
+                                          OUTPUT_FILE -u UPDATE_FILE
+
+Generate derivatives (fractions) samples for FreezerPro from original samples file
 
 optional arguments:
   -h, --help            show this help message and exit
@@ -240,7 +254,20 @@ optional arguments:
   -u UPDATE_FILE, --update_file UPDATE_FILE
                         File with original samples data in CSV format for
                         FreezerPro original samples update
-  -m MOVED_FILE, --moved_file MOVED_FILE
-                        File with original samples data in CSV format for
-                        FreezerPro original samples to move
+```
+
+**Example:**
+
+```
+./create_derivatives_from_sources.py
+ -i ../FPFilesToUpdate/freezer_1532_all_data_20161207.csv
+ -d /Volumes/LabExMI/SampleManagement/TruCSupernatant_Aliquoting_Summer2016/WorkingSheets/
+ -r 9,31
+ -e ../DataToPrepare/Aliquoting/Excluded_Tubes.xlsx
+ -c ../DataToPrepare/Aliquoting/Error_Tubes.xlsx
+ -a ../DataToPrepare/Aliquoting/Add_Tubes.xlsx
+ -f ../DataToPrepare/Aliquoting/box_location_20161221.csv
+ -o ../DataToImport/Supernatants_Derivatives_F1F2_20170118.csv
+ -u ../DataToImport/Supernatants_Samples_Derivatived_F1F2_20170118.csv
+ -p ../DataToPrepare/Aliquoting/ReplaceSourceBarcode.xlsx
 ```

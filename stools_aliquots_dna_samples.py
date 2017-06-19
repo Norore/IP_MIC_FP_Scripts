@@ -1,16 +1,11 @@
 #!/usr/bin/env python
 """
-# Stool general
+# Stool Aliquots and DNA creation
 
 ## Objective
 
-Generate stools samples for FreezerPro from data Excel file provided by
-Stanislas.
-
-This script is almost out of date, you will probably better use the following
-scripts:
-    * stools_source_samples.py
-    * stools_aliquot_samples.py
+Generate stools Aliquot and DNA samples for FreezerPro from TXT data file
+provided by Stanislas and stool source samples mapping.
 
 ## Expected file formats put in arguments
 
@@ -62,7 +57,7 @@ with fields:
 ## Expected file format output in arguments
 
 -a|--aliquots, output file name of aliquots vials that will be generate in CSV
-format for FreezerPro, with fiels:
+format for FreezerPro, with fields:
      1. SourceID: stool source barcode
      2. DonorID: donor ID
      3. VisitID: visit ID
@@ -122,7 +117,6 @@ FreezerPro, with fields:
     26. RackBarcode: rack barcode (in user-defined fields for the sample type)
     27. Sample Source: sample source, donor ID in cohort
     28. Description: tube description
-
 """
 import pandas as pd
 import argparse
