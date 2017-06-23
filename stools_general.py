@@ -56,6 +56,16 @@ fields:
 
 ## Expected file format output in arguments
 
+`-s|--source`, output file name of sources vials that will be generate in CSV
+format for FreezerPro, with fields:
+
+    1. Id: tube barcode
+    2. DonorId: donor ID
+    3. VisitId: visit ID
+    4. AliquotId: aliquot ID
+    5. AliquotingDate: aliquoting date
+    6. Comments: could contains comments about the stool source sample
+
 -a|--aliquots, output file name of aliquots vials that will be generate in CSV
 format for FreezerPro, with fiels:
      1. SourceID: stool source barcode
