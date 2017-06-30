@@ -52,7 +52,37 @@ fields:
 
 -s|--sources, input file name of sources vials in CSV format provided by FreezerPro,
 with fields:
-    *Need to be defined*
+     1. UID: unique identifier, defined by FreezerPro
+     2. Name: tube name
+     3. Description: tube description
+     4. Sample Type: type of sample
+     5. Vials: number of vials associated to the tube
+     6. Volume: sample volume
+     7. Sample Source: source sample, by default, donor in cohort
+     8. Sample Group: sample group
+     9. Owner: sample owner
+    10. Created At: creation date, FreezerPro
+    11. Expiration: expiration date, FreezerPro
+    12. AliquotingDate: aliquoting date
+    13. Troubles: if tube present a problem or is not expected
+    14. AliquotID: aliquot ID
+    15. Comments: could contains comments about the stool sample
+    16. DonorID: donor ID
+    17. VisitID: visit ID
+    18. RackBarcode: rack barcode
+    19. BoxBarcode: box barcode
+    20. FreezerBarcode: freezer barcode
+    21. ShelfBarcode: shelf barcode
+    22. RFID: RFID, defined by FreezerPro
+    23. BARCODE: tube barcode, could be set, if not, defined by FreezerPro
+    24. Freezer: freezer name
+    25. Level1: first level name (Shelf)
+    26. Level2: second level name (Rack)
+    27. Level3: empty
+    28. Level4: empty
+    29. Level5: empty
+    30. Box: box name
+    31. Position: tube position in box
 
 ## Expected file format output in arguments
 
@@ -86,6 +116,8 @@ format for FreezerPro, with fields:
     26. RackBarcode: rack barcode (in user-defined fields for the sample type)
     27. Sample Source: sample source, donor ID in cohort
     28. Description: tube description
+    29. BARCODE: tube barcode, could be set, if not, defined by FreezerPro
+    30. Troubles: if source tube present a problem or is not expected
 
 -n|--dna, output file name of dna vials that will be generate in CSV format for
 FreezerPro, with fields:
@@ -117,6 +149,8 @@ FreezerPro, with fields:
     26. RackBarcode: rack barcode (in user-defined fields for the sample type)
     27. Sample Source: sample source, donor ID in cohort
     28. Description: tube description
+    29. BARCODE: tube barcode, could be set, if not, defined by FreezerPro
+    30. Troubles: if source tube present a problem or is not expected
 """
 import pandas as pd
 import argparse
@@ -175,17 +209,12 @@ except IOError:
     exit()
 
 try:
-    df_sources = pd.read_csv(f_sources, sep="\t", dtype=object)
+    df_sources = pd.read_csv(f_sources, sep=",", dtype=object)
 except IOError:
     print("File '{}' does not exist".format(f_sources))
     exit()
 
-print("Stools Source Samples")
-print(df_database[["Id", "DonorId", "VisitId", "AliquotId", "AliquotingDate", \
-                   "Comments"]].head())
-print("{} unduplicated Id + DonorId".format(len(df_database[["Id", "DonorId"]].drop_duplicates())))
-print("{} unique Id".format(df_database["Id"].nunique()))
-print("{} unique DonorId".format(df_database["DonorId"].nunique()))
+df_sources = df_sources[["BARCODE", "UID", "Troubles"]]
 
 common_cols = ["Id", "DonorId", "VisitId", "AliquotId", "AliquotingDate", \
                 "Comments"]
@@ -203,7 +232,7 @@ df_dna.rename(columns={"Aliquot_1_DNA_BC": "Name",
                  inplace=True)
 
 df_freez_dna = pd.merge(df_dna, df_freez, on="Box")
-df_freez_dna["Sample Type"] = "FECES_DNA"
+df_freez_dna["Sample Type"] = "Stools DNA"
 df_freez_dna["number"] = df_freez_dna["Position"].str.\
                                                   replace(r'[A-Z]([0-9]{2})', \
                                                   r'\1').astype(int).astype(str)
@@ -227,14 +256,21 @@ df_freez_dna.loc[:, "Description"] = "Donor "+df_freez_dna["DonorID"]+\
     From source vials dataframe, find the BARCODE from Parent source and get
     the UID to generate the field ParentID
 """
+
 df_freez_dna = pd.merge(df_sources, df_freez_dna, on="BARCODE")
 
-del df_freez_dna["BARCODE"]
+df_freez_dna.loc[:, "SourceID"] = df_freez_dna["BARCODE"]
 df_freez_dna.loc[:, "BARCODE"] = df_freez_dna["Name"]
 df_freez_dna.rename(columns={"UID": "ParentID"}, inplace=True)
+df_freez_dna.loc[:, "Box_Descr"] = df_freez_dna["Box_Descr"] + " of " + \
+                                df_freez_dna["Level2_Descr"]
 
 if verbose:
     print("Writing {} lines in file {}".format(len(df_freez_dna), n_samples))
+if verbose:
+    print("File {} generated with {} lines and {} columns".format(n_samples, \
+                                                                  df_freez_dna.shape[0],
+                                                                  df_freez_dna.shape[1]))
 df_freez_dna.to_csv(n_samples, index=False, header=True)
 
 df_aliquot1 = df_database[common_cols + \
@@ -247,7 +283,7 @@ df_aliquot1.rename(columns={"Aliquot_1_BC": "Name",
                             "Aliquot_1_Plate_Number": "Box",
                             "Aliquot_1_Plate_Location": "Position"},
                    inplace=True)
-df_aliquot1.loc[:, "Sample Type"] = "Feces Aliquot L"
+df_aliquot1.loc[:, "Sample Type"] = "Stool Aliquot L"
 df_aliquot1.loc[:, "Fraction"] = "L"
 df_aliquot2 = df_database[common_cols + \
                           ["Aliquot_2_BC", \
@@ -259,7 +295,7 @@ df_aliquot2.rename(columns={"Aliquot_2_BC": "Name",
                             "Aliquot_2_Plate_Number": "Box",
                             "Aliquot_2_Plate_Location": "Position"},
                    inplace=True)
-df_aliquot2.loc[:, "Sample Type"] = "Feces Aliquot R1"
+df_aliquot2.loc[:, "Sample Type"] = "Stool Aliquot R1"
 df_aliquot2.loc[:, "Fraction"] = "R1"
 df_aliquot3 = df_database[common_cols + \
                           ["Aliquot_3_BC", \
@@ -271,7 +307,7 @@ df_aliquot3.rename(columns={"Aliquot_3_BC": "Name",
                             "Aliquot_3_Plate_Number": "Box",
                             "Aliquot_3_Plate_Location": "Position"},
                    inplace=True)
-df_aliquot3.loc[:, "Sample Type"] = "Feces Aliquot R2"
+df_aliquot3.loc[:, "Sample Type"] = "Stool Aliquot R2"
 df_aliquot3.loc[:, "Fraction"] = "R2"
 df_aliquot4 = df_database[common_cols + \
                           ["Aliquot_4_BC", \
@@ -283,7 +319,7 @@ df_aliquot4.rename(columns={"Aliquot_4_BC": "Name",
                             "Aliquot_4_Plate_Number": "Box",
                             "Aliquot_4_Plate_Location": "Position"},
                    inplace=True)
-df_aliquot4.loc[:, "Sample Type"] = "Feces Aliquot R3"
+df_aliquot4.loc[:, "Sample Type"] = "Stool Aliquot R3"
 df_aliquot4.loc[:, "Fraction"] = "R3"
 df_aliquots = pd.concat([df_aliquot1, df_aliquot2, df_aliquot3, df_aliquot4])
 df_aliquots.rename(columns={"DonorId": "DonorID",
@@ -321,15 +357,17 @@ del df_freez_aliquot["letter"], df_freez_aliquot["number"], \
 """
 df_freez_aliquot = pd.merge(df_sources, df_freez_aliquot, on="BARCODE")
 
-del df_freez_aliquot["BARCODE"]
+df_freez_aliquot.loc[:, "SourceID"] = df_freez_aliquot["BARCODE"]
 df_freez_aliquot.loc[:, "BARCODE"] = df_freez_aliquot["Name"]
 df_freez_aliquot.rename(columns={"UID": "ParentID"}, inplace=True)
+df_freez_aliquot.loc[:, "Box_Descr"] = df_freez_aliquot["Box_Descr"] + " of " + \
+                                    df_freez_aliquot["Level2_Descr"]
 
 if verbose:
     print("Writing {} lines in file {}".format(len(df_freez_aliquot), \
                                                 a_samples))
-print(df_freez_aliquot.head())
 if verbose:
     print("File {} generated with {} lines and {} columns".format(a_samples, \
-                                                                  a_samples.shape))
-# df_freez_aliquot.to_csv(a_samples, index=False, header=True)
+                                                                  df_freez_aliquot.shape[0],
+                                                                  df_freez_aliquot.shape[1]))
+df_freez_aliquot.to_csv(a_samples, index=False, header=True)
