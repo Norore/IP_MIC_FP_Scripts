@@ -21,10 +21,14 @@ def complete_columns(dataframe, list_columns):
     def list_index(column):
         list_index = dataframe.loc[dataframe[column].notnull()].index.tolist()
         indexes = []
-        for ind in range(len(list_index)-1):
-            if ind < len(list_index):
-                indexes.append([list_index[ind], list_index[ind+1]-1])
-        indexes.append([list_index[ind+1], dataframe.index.values[-1]])
+        if len(list_index) > 1:
+            for ind in range(0, len(list_index)-1):
+                if ind < len(list_index):
+                    indexes.append([list_index[ind], list_index[ind+1]-1])
+            indexes.append([list_index[ind+1], dataframe.index.values[-1]])
+        else:
+            ind = list_index.pop()
+            return(ind)
         return(indexes)
 
     if isinstance(list_columns, str):
@@ -35,8 +39,11 @@ def complete_columns(dataframe, list_columns):
     else:
         for column in list_columns:
             indexes = list_index(column)
-            for i in indexes:
-                dataframe.loc[i[0]:i[1], column] = dataframe.loc[i[0],:][column]
+            if isinstance(indexes, list) and len(indexes) > 1:
+                for i in indexes:
+                    dataframe.loc[i[0]:i[1], column] = dataframe.loc[i[0],:][column]
+            else:
+                dataframe.loc[:, column] = pd.Series([dataframe.loc[0, column]]*len(dataframe))
     return(dataframe)
 
 excludeddonors = [96, 104, 122, 167, 178, 219, 268, 279, 303, 308, 534, 701]

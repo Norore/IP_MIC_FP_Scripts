@@ -88,69 +88,71 @@ with fields:
 
 -a|--aliquots, output file name of aliquots vials that will be generate in CSV
 format for FreezerPro, with fields:
-     1. SourceID: stool source barcode
-     2. DonorID: donor ID
-     3. VisitID: visit ID
-     4. AliquotID: aliquot ID
-     5. AliquotingDate: aliquoting date
-     6. Comments: could contains comments about the stool source sample
-     7. Name: tube name
-     8. Weight: sample weight
-     9. Position: tube position in box
-    10. Box: box name
-    11. Sample Type: sample type (Feces Aliquot L/R1/R2/R3)
-    12. Freezer: freezer name
-    13. Freezer_Descr: freezer description
-    14. Level1: level 1 name (Shelf)
-    15. Level1_Descr: level 1 description
-    16. Level2: level 2 name (Rack)
-    17. Level2_Descr: level 2 description
-    18. Level3: level 3 name (Drawer)
-    19. Level3_Descr: level 3 description
-    20. Box_Descr: box description
-    21. BoxType: box type (96 (12 x 8) Stool Well Plate)
-    22. BOX_BARCODE: box barcode (FreezerPro field)
-    23. BoxBarcode: box barcode (in user-defined fields for the sample type)
-    24. FreezerBarcode: box barcode (in user-defined fields for the sample type)
-    25. ShelfBarcode: shelf barcode (in user-defined fields for the sample type)
-    26. RackBarcode: rack barcode (in user-defined fields for the sample type)
-    27. Sample Source: sample source, donor ID in cohort
-    28. Description: tube description
-    29. BARCODE: tube barcode, could be set, if not, defined by FreezerPro
-    30. Troubles: if source tube present a problem or is not expected
+     1. BARCODE: tube barcode, could be set, if not, defined by FreezerPro
+     2. ParentID: stool source UID
+     3. Troubles: if source tube present a problem or is not expected
+     4. DonorID: donor ID
+     5. VisitID: visit ID
+     6. AliquotID: aliquot ID
+     7. AliquotingDate: aliquoting date
+     8. Comments: could contains comments about the stool source sample
+     9. Name: tube name
+    10. Weight: sample weight
+    11. Position: tube position in box
+    12. Box: box name
+    13. Sample Type: sample type (Feces Aliquot L/R1/R2/R3)
+    14. Freezer: freezer name
+    15. Freezer_Descr: freezer description
+    16. Level1: level 1 name (Shelf)
+    17. Level1_Descr: level 1 description
+    18. Level2: level 2 name (Rack)
+    19. Level2_Descr: level 2 description
+    20. Level3: level 3 name (Drawer)
+    21. Level3_Descr: level 3 description
+    22. Box_Descr:
+    23. Box_Descr: box description
+    24. BoxType: box type (96 (12 x 8) Stool Well Plate)
+    25. BoxBarcode: box barcode (in user-defined fields for the sample type)
+    26. FreezerBarcode: box barcode (in user-defined fields for the sample type)
+    27. ShelfBarcode: shelf barcode (in user-defined fields for the sample type)
+    28. RackBarcode: rack barcode (in user-defined fields for the sample type)
+    29. Sample Source: sample source, donor ID in cohort
+    30. Description: tube description
+    31. SourceID: stool source donor ID
 
 -n|--dna, output file name of dna vials that will be generate in CSV format for
 FreezerPro, with fields:
-     1. SourceID: stool source barcode
-     2. DonorID: donor ID
-     3. VisitID: visit ID
-     4. AliquotID: aliquot ID
-     5. AliquotingDate: aliquoting date
-     6. Comments: could contains comments about the stool source sample
-     7. Name: tube name
-     8. Position: tube position in box
-     9. Box: box name
-    10. CreationDate: stool DNA sample aliquoting date
-    11. Freezer: freezer name
-    12. Freezer_Descr: freezer description
-    13. Level1: level 1 name (Shelf)
-    14. Level1_Descr: level 1 description
-    15. Level2: level 2 name (Rack)
-    16. Level2_Descr: level 2 description
-    17. Level3: level 3 name (Drawer)
-    18. Level3_Descr: level 3 description
-    19. Box_Descr: box description
-    20. BoxType: box type (96 (12 x 8) Well Plate)
-    21. Sample Type: sample type (FECES_DNA)
-    22. BOX_BARCODE: box barcode (FreezerPro field)
-    23. BoxBarcode: box barcode (in user-defined fields for the sample type)
-    24. FreezerBarcode: freezer barcode (in user-defined fields for the sample type)
-    25. ShelfBarcode: shelf barcode (in user-defined fields for the sample type)
-    26. RackBarcode: rack barcode (in user-defined fields for the sample type)
-    27. Sample Source: sample source, donor ID in cohort
-    28. Description: tube description
-    29. BARCODE: tube barcode, could be set, if not, defined by FreezerPro
-    30. Troubles: if source tube present a problem or is not expected
+     1. BARCODE: tube barcode, could be set, if not, defined by FreezerPro
+     2. ParentID: stool source UID
+     3. Troubles: if source tube present a problem or is not expected
+     4. DonorID: donor ID
+     5. VisitID: visit ID
+     6. AliquotID: aliquot ID
+     7. AliquotingDate: aliquoting date
+     8. Comments: could contains comments about the stool source sample
+     9. Name: tube name
+    10. Position: tube position in box
+    11. Box: box name
+    12. CreationDate: creation date of DNA stool sample
+    13. Freezer: freezer name
+    14. Freezer_Descr: freezer description
+    15. Level1: level 1 name (Shelf)
+    16. Level1_Descr: level 1 description
+    17. Level2: level 2 name (Rack)
+    18. Level2_Descr: level 2 description
+    19. Level3: level 3 name (Drawer)
+    20. Level3_Descr: level 3 description
+    21. Box_Descr: box description
+    22. BoxType: box type (96 (12 x 8) Stool Well Plate)
+    23. Sample Type: sample type (Feces Aliquot L/R1/R2/R3)
+    24. BOX_BARCODE: box barcode (FreezerPro field)
+    25. BoxBarcode: box barcode (in user-defined fields for the sample type)
+    26. FreezerBarcode: box barcode (in user-defined fields for the sample type)
+    27. ShelfBarcode: shelf barcode (in user-defined fields for the sample type)
+    28. RackBarcode: rack barcode (in user-defined fields for the sample type)
+    29. Sample Source: sample source, donor ID in cohort
+    30. Description: tube description
+    31. SourceID: stool source donor ID
 """
 import pandas as pd
 import argparse
