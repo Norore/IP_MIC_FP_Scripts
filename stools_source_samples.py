@@ -85,6 +85,7 @@ CSV format for FreezerPro, with fields:
     21. FreezerBarcode: freezer barcode (in user-defined fields for the sample type)
     22. ShelfBarcode: shelf barcode (in user-defined fields for the sample type)
     23. RackBarcode: rack barcode (in user-defined fields for the sample type)
+    24. Name: tube name
 """
 
 import pandas as pd
@@ -120,7 +121,7 @@ f_location = args['location']
 s_samples = args['output']
 verbose = args['verbose']
 
-if verbose in ["True", "T", "Yes", "Y", 1]:
+if verbose in ["True", "T", "Yes", "Y", "1"]:
     verbose = True
 else:
     verbose = False
@@ -189,7 +190,7 @@ if verbose:
                                                                  f_location))
     print("> Result of merge contains {} lines for {} columns.".format(df_src_loc.shape[0], \
                                                                      df_src_loc.shape[1]))
-del df_src_loc["index"]
+#del df_src_loc["index"]
 
 if verbose:
     print("...")
@@ -233,6 +234,7 @@ del df_src_frz_loc["Level3"], df_src_frz_loc["Level3_Descr"], \
 df_src_frz_loc.loc[:, "FreezerBarcode"] = df_src_frz_loc["Freezer"]
 df_src_frz_loc.loc[:, "ShelfBarcode"] = df_src_frz_loc["Level1"]
 df_src_frz_loc.loc[:, "RackBarcode"] = df_src_frz_loc["Level2"]
+df_src_frz_loc.loc[:, "Name"] = df_src_frz_loc["BARCODE"]
 
 df_src_frz_loc.to_csv(s_samples, header = True, index = False)
 if verbose:

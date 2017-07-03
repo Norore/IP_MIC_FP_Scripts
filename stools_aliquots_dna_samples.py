@@ -109,10 +109,10 @@ format for FreezerPro, with fields:
     19. Level2_Descr: level 2 description
     20. Level3: level 3 name (Drawer)
     21. Level3_Descr: level 3 description
-    22. Box_Descr:
-    23. Box_Descr: box description
-    24. BoxType: box type (96 (12 x 8) Stool Well Plate)
-    25. BoxBarcode: box barcode (in user-defined fields for the sample type)
+    22. Box_Descr: box description
+    23. BoxType: box type (96 (12 x 8) Stool Well Plate)
+    24. BoxBarcode: box barcode (in user-defined fields for the sample type)
+    25. BOX_BARCODE: box barcode (FreezerPro field)
     26. FreezerBarcode: box barcode (in user-defined fields for the sample type)
     27. ShelfBarcode: shelf barcode (in user-defined fields for the sample type)
     28. RackBarcode: rack barcode (in user-defined fields for the sample type)
